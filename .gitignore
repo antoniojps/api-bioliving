@@ -1,0 +1,7 @@
+.DS_Store
+.idea/
+vendor/
+.env
+composer.lock
+src/tests_dev/
+src/config/tests.php
