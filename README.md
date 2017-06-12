@@ -16,7 +16,7 @@ Repositórios para a frontend deste projeto:
 # instalar dependencies com o composer
 composer install
 
-# instalar dependencies com o composer
+# Criar ficheiro .env e inserir variaveis
 touch .env
 
 ```
