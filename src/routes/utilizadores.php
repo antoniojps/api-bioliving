@@ -4,7 +4,7 @@
  * Routes para todos endpoints relativos aos utilizadores:
  * Scopes: admin recebe todas as informações, outros recebem apenas necessárias
  *
- * GET /utilizadores/{pagina}/{resultados}
+ * GET /utilizadores?page=(int)&results=(int)&by=(coluna)&order=(asc||desc)
  * Obter todos os utilizadores
  *
  * GET /utilizadores/{id}
@@ -35,7 +35,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 # Parametros:
 #   *page = pagina de resultados *obrigatorio
 #   results = número de resultados por página
-#     min: 1, max: 10
+#   min: 1, max: 10
 # Exemplo: /api/utilizadores?page=1&results=2
 
 $app->get( '/api/utilizadores', function ( Request $request, Response $response ) {
@@ -47,14 +47,14 @@ $app->get( '/api/utilizadores', function ( Request $request, Response $response 
 
 	$byArr = [
 			'id_utilizadores' => 'id',
-			'nome' => 'nome',
-			'apelido' => 'apelido',
-			'genero' => 'genero',
-			'dataNascimento' => 'data_nascimento',
-			'dataRegisto' => 'data_registo_user',
-			'email' => 'email',
-			'ativo' => 'ativo',
-			'morada' => 'morada'
+			'nome'            => 'nome',
+			'apelido'         => 'apelido',
+			'genero'          => 'genero',
+			'dataNascimento'  => 'data_nascimento',
+			'dataRegisto'     => 'data_registo_user',
+			'email'           => 'email',
+			'ativo'           => 'ativo',
+			'morada'          => 'morada'
 	]; // Valores para ordernar por, fizemos uma array para simplificar queries
 
 	$maxResults    = 10; // maximo de resultados por pagina
@@ -69,7 +69,7 @@ $app->get( '/api/utilizadores', function ( Request $request, Response $response 
 	$results = isset( $parametros['results'] ) ? (int) $parametros['results'] : $maxResults;
 	$by      = isset( $parametros['by'] ) ? $parametros['by'] : $byDefault;
 
-	if ( $page > 0  && $results > 0) {
+	if ( $page > 0 && $results > 0 ) {
 		// definir numero de resultados
 		// caso request tenha parametros superiores ao maximo permitido entao repor com maximo permitido e vice-versa
 		$results = $results > $maxResults ? $maxResults : $results;
@@ -92,7 +92,7 @@ $app->get( '/api/utilizadores', function ( Request $request, Response $response 
 			$stmt->bindValue( ':limit', (int) $limitNumber, PDO::PARAM_INT );
 			$stmt->bindValue( ':results', (int) $results, PDO::PARAM_INT );
 			$stmt->execute();
-			$db = null;
+			$db    = null;
 			$dados = $stmt->fetchAll( PDO::FETCH_ASSOC );
 
 			// remover nulls e strings vazias
@@ -128,7 +128,7 @@ $app->get( '/api/utilizadores', function ( Request $request, Response $response 
 
 
 		} catch ( PDOException $err ) {
-			$status =  503 ; // Service unavailable
+			$status   = 503; // Service unavailable
 			$errorMsg = [
 					"error" => [
 							"status" => $err->getCode(),
@@ -141,7 +141,7 @@ $app->get( '/api/utilizadores', function ( Request $request, Response $response 
 		}
 
 	} else {
-		$status = 422; // Unprocessable Entity
+		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
 				"error" => [
 						"status" => "$status",
@@ -149,6 +149,7 @@ $app->get( '/api/utilizadores', function ( Request $request, Response $response 
 
 				]
 		];
+
 		return $response
 				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
