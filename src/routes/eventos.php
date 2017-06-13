@@ -648,12 +648,17 @@ $app->get('/api/eventos/{id}/extras', function (Request $request, Response $resp
 
 
 //////////// Obter tags de um evento ////////////
+# Parametros:
+#   *page = pagina de resultados *obrigatorio
+#   results = número de resultados por página
+#   min: 1, max: 10
+#   Exemplo: /api/eventos/2/tags?page=1&results=2&by=id&order=ASC
 $app->get('/api/eventos/{id}/tags', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
 
     $byArr = [
-        'id' => 'colaboradores_id_colaboradores',
-        'nome' => 'nome'
+        'id' => 'id_tags',
+        'nome' => 'tag_nome'
 
     ]; // Valores para ordernar por, fizemos uma array para simplificar queries
 
@@ -661,7 +666,7 @@ $app->get('/api/eventos/{id}/tags', function (Request $request, Response $respon
     //valores default
     $maxResults = 3; // maximo de resultados por pagina
     $minResults = 1; // minimo de resultados por pagina
-    $byDefault = 'id'; // order by predefinido
+    $byDefault = 'nome'; // order by predefinido
     $paginaDefault = 1; // pagina predefenida
     $orderDefault = "DESC"; //ordenação predefenida
 
@@ -688,12 +693,10 @@ $app->get('/api/eventos/{id}/tags', function (Request $request, Response $respon
 
         //Apenas informações básicas dos inscritos para por exemplo cards, e ao clicar na card o utilizador pode ser reencaminhado para o masterdetail do utlizador da card
         if ($order == $orderDefault) {
-            $sql = "SELECT participantes_colaboradores.*,`nome`,`descricao`,`image_src` FROM `participantes_colaboradores` INNER JOIN colaboradores ON participantes_colaboradores.`colaboradores_id_colaboradores`= colaboradores.id_colaboradores WHERE `eventos_id_eventos` = :id ORDER BY $passar DESC LIMIT :limit , :results";
+            $sql = "SELECT tag_nome FROM `tags` INNER JOIN eventos_has_tags ON eventos_has_tags.`tags_id_tags` = tags.id_tags where eventos_has_tags.eventos_id_eventos=:id ORDER BY $passar DESC LIMIT :limit , :results";
         } else {
-            $sql = "SELECT participantes_colaboradores.*,`nome`,`descricao`,`image_src` FROM `participantes_colaboradores` INNER JOIN colaboradores ON participantes_colaboradores.`colaboradores_id_colaboradores`= colaboradores.id_colaboradores WHERE `eventos_id_eventos` = :id ORDER BY $passar  LIMIT :limit , :results";
-
+            $sql = "SELECT tag_nome FROM `tags` INNER JOIN eventos_has_tags ON eventos_has_tags.`tags_id_tags` = tags.id_tags where eventos_has_tags.eventos_id_eventos=:id ORDER BY $passar LIMIT :limit , :results";
         }
-
 
         try {
             $status = 200; // OK
@@ -722,7 +725,7 @@ $app->get('/api/eventos/{id}/tags', function (Request $request, Response $respon
             $dadosLength = (int)sizeof($dados);
 
             if ($dadosLength === 0) {
-                $dados = ["error" => 'página inexistentes'];
+                $dados = ["error" => 'pagina/tags inexistentes'];
                 $status = 404; // Page not found
             } else if ($dadosLength < $results) {
                 $dadosExtra = ['info' => 'final dos resultados'];
