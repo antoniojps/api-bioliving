@@ -17,7 +17,7 @@
  * Obter colaboradores de um evento
  *
  * GET /eventos/{id}/eventosInfos
- * Obter colaboradores de um evento
+ * Obter extras de um evento
  *
  * GET /eventos/{id}/tags
  * Obter tags de um evento
@@ -245,6 +245,7 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
     }
 });
 
+
 //////////// Obter todos os eventos ////////////
 # Parametros:
 #   *page = pagina de resultados *obrigatorio
@@ -256,13 +257,9 @@ $app->get('/api/eventos/{id}/utilizadores', function (Request $request, Response
 
     $byArr = [
         'id' => 'id_utilizadores',
-        'nome' => 'nome_evento',
-        'dataRegisto' => 'data_registo_evento',
-        'dataEvento' => 'data_evento',
-        'dataFim' => 'data_fim',
-        'ativo' => 'ativo',
-        'tipoEvento' => 'nome_tipo_evento',
-        'local' => 'nome'
+        'nome' => 'nome',
+        'nomeEstatuto' => 'nome_estatuto'
+
     ]; // Valores para ordernar por, fizemos uma array para simplificar queries
 
 
@@ -382,3 +379,144 @@ $app->get('/api/eventos/{id}/utilizadores', function (Request $request, Response
 
 });
 
+
+//////////// Obter colaboradores de um evento ////////////
+# Parametros:
+#   *page = pagina de resultados *obrigatorio
+#   results = número de resultados por página
+#   min: 1, max: 10
+#   Exemplo: /api/eventos/2/colaboradores?page=1&results=2&by=id&order=AS
+#   SELECT participantes_colaboradores.*,`nome`,`descricao`,`image_src` FROM `participantes_colaboradores` INNER JOIN colaboradores ON participantes_colaboradores.`colaboradores_id_colaboradores`= colaboradores.id_colaboradores WHERE `eventos_id_eventos` = 3
+$app->get('/api/eventos/{id}/colaboradores', function (Request $request, Response $response){
+    $id = (int)$request->getAttribute('id'); // ir buscar id
+
+    $byArr = [
+        'id' => 'colaboradores_id_colaboradores',
+        'nome' => 'nome'
+
+    ]; // Valores para ordernar por, fizemos uma array para simplificar queries
+
+
+    //valores default
+    $maxResults = 3; // maximo de resultados por pagina
+    $minResults = 1; // minimo de resultados por pagina
+    $byDefault = 'id'; // order by predefinido
+    $paginaDefault = 1; // pagina predefenida
+    $orderDefault = "DESC"; //ordenação predefenida
+
+
+    $parametros = $request->getQueryParams(); // obter parametros do querystring
+    $page = isset($parametros['page']) ? (int)$parametros['page'] : $paginaDefault;
+    $results = isset($parametros['results']) ? (int)$parametros['results'] : $maxResults;
+    $by = isset($parametros['by']) ? $parametros['by'] : $byDefault;
+    $order = isset($parametros['order']) ? $parametros['order'] : $orderDefault;
+
+
+    if (is_int($id) && $id > 0 && $page > 0 && $results > 0) {
+
+        //caso request tenha parametros superiores ao numero máximo permitido então repor com o valor maximo permitido e vice-versa
+        $results = $results > $maxResults ? $maxResults : $results; //se o querystring results for maior que o valor maximo definido passa a ser esse valor maximo definido
+        $results = $results < $minResults ? $minResults : $results; //se o querystring results for menor que o valor minimo definido passa a ser esse valor minimo definido
+        //caso tenha parametros diferentes de "ASC" ou "DESC" então repor com o predefinido
+        $order = $order == "ASC" || $order == "DESC" ? $order : $orderDefault;
+        //order by se existe como key no array, caso nao repor com o predefenido
+        $by = array_key_exists($by, $byArr) ? $by : $byDefault;
+        //A partir de quando seleciona resultados
+        $limitNumber = ($page - 1) * $results;
+        $passar = $byArr[$by];
+
+        //Apenas informações básicas dos inscritos para por exemplo cards, e ao clicar na card o utilizador pode ser reencaminhado para o masterdetail do utlizador da card
+        if ($order == $orderDefault) {
+            $sql = "SELECT participantes_colaboradores.*,`nome`,`descricao`,`image_src` FROM `participantes_colaboradores` INNER JOIN colaboradores ON participantes_colaboradores.`colaboradores_id_colaboradores`= colaboradores.id_colaboradores WHERE `eventos_id_eventos` = :id ORDER BY $passar DESC LIMIT :limit , :results";
+        } else {
+            $sql = "SELECT participantes_colaboradores.*,`nome`,`descricao`,`image_src` FROM `participantes_colaboradores` INNER JOIN colaboradores ON participantes_colaboradores.`colaboradores_id_colaboradores`= colaboradores.id_colaboradores WHERE `eventos_id_eventos` = :id ORDER BY $passar  LIMIT :limit , :results";
+
+        }
+
+
+        try {
+            $status = 200; // OK
+
+            // iniciar ligação à base de dados
+            $db = new Db();
+
+            // conectar
+            $db = $db->connect();
+            $stmt = $db->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', (int)$limitNumber, PDO::PARAM_INT);
+            $stmt->bindValue(':results', (int)$results, PDO::PARAM_INT);
+            $stmt->execute();
+            $db = null;
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // remover nulls e strings vazias
+            $dados = array_filter(array_map(function ($evento) {
+                return $evento = array_filter($evento, function ($coluna) {
+                    return $coluna !== null && $coluna !== '';
+                });
+            }, $dados));
+
+
+            $dadosLength = (int)sizeof($dados);
+
+            if ($dadosLength === 0) {
+                $dados = ["error" => 'página inexistentes'];
+                $status = 404; // Page not found
+            } else if ($dadosLength  < $results ) {
+                $dadosExtra = ['info' => 'final dos resultados'];
+                array_push($dados, $dadosExtra);
+            } else {
+                $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+                $dadosExtra = ['proxPagina' => "$nextPageUrl?page=" . ++$page . "&results=$results"];
+                array_push($dados, $dadosExtra);
+            }
+
+            $responseData = [
+                'status' => "$status",
+                'data' => [
+                    $dados
+                ]
+            ];
+
+            return $response
+                ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+        } catch (PDOException $err) {
+            $status = 503; // Service unavailable
+            $errorMsg = [
+                "error" => [
+                    "status" => $err->getCode(),
+                    "text" => $err->getMessage()
+                ]
+            ];
+
+            return $response
+                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+        }
+    } else {
+        $status = 422; // Unprocessable Entity
+        $errorMsg = [
+            "error" => [
+                "status" => "$status",
+                "text" => 'Parametros invalidos'
+
+            ]
+        ];
+
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+    }
+
+
+});
+
+
+
+//////////// Obter extras de um evento ////////////
+
+
+
+//////////// Obter tags de um evento ////////////
