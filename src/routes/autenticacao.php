@@ -20,6 +20,8 @@
 use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 use \Firebase\JWT\JWT;
+use Bioliving\Database\Db as Db;
+use Bioliving\Custom\Autenticacao as Autenticacao;
 
 //////////// Criar token ////////////
 

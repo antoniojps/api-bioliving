@@ -11,9 +11,6 @@ require_once '../src/config/errors/errors.php';
 $dotenv = new Dotenv\Dotenv( dirname( __DIR__ ) );
 $dotenv->load();
 
-// Connection class
-require_once '../src/config/db/Db.php';
-
 /* SLIM APP */
 // criar objeto slim com container (src/config/errors/errors.php) $c
 $app = new \Slim\App($c);

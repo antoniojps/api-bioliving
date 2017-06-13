@@ -1,4 +1,7 @@
 <?php
+namespace Bioliving\Database;
+
+use \PDO; // Import do namespace global do PDO
 
 class Db {
 
