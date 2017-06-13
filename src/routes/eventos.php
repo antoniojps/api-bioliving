@@ -4,24 +4,7 @@
  * Routes para todos endpoints relativos aos eventos:
  * Scopes: admin recebe todas as informações, outros recebem apenas necessárias
  *
- * GET /eventos?page=(int)&results=(int)&by=(coluna)&order=(asc||desc)
- * Obter todos os eventos
- *
- * GET /eventos/{id}
- * Obter dados sobre um evento
- *
- * GET /eventos/{id}/utilizadores
- * Obter inscritos num evento
- *
- * GET /eventos/{id}/colaboradores
- * Obter colaboradores de um evento
- *
- * GET /eventos/{id}/eventosInfos
- * Obter extras de um evento
- *
- * GET /eventos/{id}/tags
- * Obter tags de um evento
- *
+
  * POST /eventos
  * Registar novo evento
  *
