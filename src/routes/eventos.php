@@ -38,6 +38,7 @@
 // importar classes para scope
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Bioliving\Database\Db as Db;
 
 //////////// Obter todos os eventos ////////////
 # Parametros:

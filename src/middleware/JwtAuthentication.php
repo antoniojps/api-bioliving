@@ -5,11 +5,6 @@
  * parses and authenticates a token when passed via header or cookie.
  */
 
-// importar classes para scope
-use \Psr\Http\Message\ServerRequestInterface as Request;
-use \Psr\Http\Message\ResponseInterface as Response;
-use \Firebase\JWT\JWT;
-
 // Middleware para autenticação de token
 $app->add(new \Slim\Middleware\JwtAuthentication([
 
@@ -31,12 +26,17 @@ $app->add(new \Slim\Middleware\JwtAuthentication([
 
 		"error" => function ($request, $response, $arguments) { // resposta no erro
 
-			// Todo se já expirou verificar se refresh token é valido, se sim, redirect para a route requisitada
+			// Todo se já expirou verificar se refresh token é valido, se sim, redirect para a route requisitada caso contrário mostrar não autorizado com codigo 401
 
 			$route = $request->getUri()->getPath();
 
+			// Verificar se refresh token é valido
+
+
+
 			// Em desevolvimento dizer qual o erro, em producao mostrar apenas nao autorizado
 			$data['route'] = $route;
+			$data['cookie'] = 'hey';
 			$data["status"] = "error";
 			$data["message"] = getenv('PHP_ENV') === 'desenvolvimento' ? $arguments["message"] : 'Nao autorizado';
 			return $response
