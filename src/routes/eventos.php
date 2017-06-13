@@ -13,6 +13,15 @@
  * GET /eventos/{id}/utilizadores
  * Obter inscritos num evento
  *
+ * GET /eventos/{id}/colaboradores
+ * Obter colaboradores de um evento
+ *
+ * GET /eventos/{id}/eventosInfos
+ * Obter colaboradores de um evento
+ *
+ * GET /eventos/{id}/tags
+ * Obter tags de um evento
+ *
  * POST /eventos
  * Registar novo evento
  *
@@ -191,9 +200,9 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
             }, $dados));
 
 
-            $dadosLength = (int)sizeof($dados) ;
-            $dadosDoArrayLength = (int)sizeof($dados[0]) ; // filtrar os participantes = 0
-            if ($dadosLength === 0 || $dadosDoArrayLength === 1 || $dadosDoArrayLength === 0 ) {
+            $dadosLength = (int)sizeof($dados);
+            $dadosDoArrayLength = (int)sizeof($dados[0]); // filtrar os participantes = 0
+            if ($dadosLength === 0 || $dadosDoArrayLength === 1 || $dadosDoArrayLength === 0) {
                 $dados = ["error" => 'evento inexistente'];
                 $status = 404; // Page not found
             }
@@ -207,7 +216,6 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
 
             return $response
                 ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
 
 
         } catch (PDOException $err) {
@@ -236,4 +244,80 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
         return $response
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
+});
+
+$app->get('/api/eventos/{id}/utilizadores', function (Request $request, Response $response) {
+    $id = (int)$request->getAttribute('id'); // ir buscar id a querystring
+
+    if (is_int($id) && $id > 0) {
+        $sql = "SELECT id_estatutos,nome_estatuto, `id_utilizadores`,`nome`,`apelido`,`foto`,`sobre_mini`,`telemovel` FROM `utilizadores` INNER JOIN estatutos ON utilizadores.`estatutos_id_estatutos` = estatutos.id_estatutos INNER JOIN participantes ON utilizadores.id_utilizadores = participantes.utilizadores_id_utilizadores WHERE eventos_id_eventos = :id";
+
+        try {
+            $status = 200; // OK
+
+            // iniciar ligação à base de dados
+            $db = new Db();
+
+            // conectar
+            $db = $db->connect();
+            $stmt = $db->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            $db = null;
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // remover nulls e strings vazias
+            $dados = array_filter(array_map(function ($evento) {
+                return $evento = array_filter($evento, function ($coluna) {
+                    return $coluna !== null && $coluna !== '';
+                });
+            }, $dados));
+
+
+            $dadosLength = (int)sizeof($dados);
+
+            if ($dadosLength === 0) {
+                $dados = ["error" => 'participantes inexistentes'];
+                $status = 404; // Page not found
+            }
+
+            $responseData = [
+                'status' => "$status",
+                'data' => [
+                    $dados
+                ]
+            ];
+
+            return $response
+                ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+        } catch (PDOException $err) {
+            $status = 503; // Service unavailable
+            $errorMsg = [
+                "error" => [
+                    "status" => $err->getCode(),
+                    "text" => $err->getMessage()
+                ]
+            ];
+
+            return $response
+                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+        }
+    } else {
+        $status = 422; // Unprocessable Entity
+        $errorMsg = [
+            "error" => [
+                "status" => "$status",
+                "text" => 'Parametros invalidos'
+
+            ]
+        ];
+
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+    }
+
+
 });
