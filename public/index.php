@@ -33,5 +33,7 @@ require_once "../src/middleware/JwtAuthentication.php";
 require_once "../src/routes/autenticacao.php";
 // Utilizadores
 require "../src/routes/utilizadores.php";
+// Eventos
+require "../src/routes/eventos.php";
 
 $app->run();
