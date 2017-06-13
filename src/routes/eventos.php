@@ -13,14 +13,14 @@
  * GET /eventos/{id}/utilizadores
  * Obter inscritos num evento
  *
- * POST /evento
+ * POST /eventos
  * Registar novo evento
  *
- * PUT /evento/{id}
+ * PUT /eventos/{id}
  * Atualizar evento
  * Scopes: admin ou token do request é igual ao {id}(colaborador que criou )
  *
- * DELETE /evento/{id}
+ * DELETE /eventos/{id}
  * Tornar evento inativo
  * Scopes: admin ou colaborador que criou evento
  *
@@ -146,6 +146,83 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
                 ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
         }
 
+    } else {
+        $status = 422; // Unprocessable Entity
+        $errorMsg = [
+            "error" => [
+                "status" => "$status",
+                "text" => 'Parametros invalidos'
+
+            ]
+        ];
+
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+    }
+});
+
+$app->get('/api/eventos/{id}', function (Request $request, Response $response) {
+    $id = (int)$request->getAttribute('id'); // ir buscar id
+    //verificar se é um id válido
+    if (is_int($id) && $id > 0) {
+
+        $sql = "SELECT eventos.*,tipo_evento.nome_tipo_evento as tipo,localizacao.*,COUNT(utilizadores_id_utilizadores) as participantes FROM eventos LEFT OUTER JOIN localizacao ON eventos.localizacao_localizacao = localizacao.localizacao LEFT OUTER JOIN participantes ON eventos.id_eventos = participantes.eventos_id_eventos LEFT OUTER JOIN tipo_evento ON eventos.tipo_evento_id_tipo_evento = tipo_evento.id_tipo_evento  WHERE id_eventos = :id";
+
+        try {
+
+            $status = 200; // OK
+
+            // iniciar ligação à base de dados
+            $db = new Db();
+
+            // conectar
+            $db = $db->connect();
+            $stmt = $db->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            $db = null;
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // remover nulls e strings vazias
+            $dados = array_filter(array_map(function ($evento) {
+                return $evento = array_filter($evento, function ($coluna) {
+                    return $coluna !== null && $coluna !== '';
+                });
+            }, $dados));
+
+
+            $dadosLength = (int)sizeof($dados) ;
+            $dadosDoArrayLength = (int)sizeof($dados[0]) ; // filtrar os participantes = 0
+            if ($dadosLength === 0 || $dadosDoArrayLength === 1 || $dadosDoArrayLength === 0 ) {
+                $dados = ["error" => 'evento inexistente'];
+                $status = 404; // Page not found
+            }
+
+            $responseData = [
+                'status' => "$status",
+                'data' => [
+                    $dados
+                ]
+            ];
+
+            return $response
+                ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+
+        } catch (PDOException $err) {
+            $status = 503; // Service unavailable
+            $errorMsg = [
+                "error" => [
+                    "status" => $err->getCode(),
+                    "text" => $err->getMessage()
+                ]
+            ];
+
+            return $response
+                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+        }
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [

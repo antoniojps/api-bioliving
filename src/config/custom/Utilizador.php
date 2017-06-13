@@ -40,7 +40,7 @@ class Utilizador {
 	}
 
 // Permite verificar se foi instanciado com todos os argumentos necessarios para metodos que necessitem destes
-// Exemplo: Metodo registrar necessita de ter nome,sobrenome,email,password, dataNascimento definidos, caso nao tenham retorna false e mostra um erro
+// Exemplo: Metodo registrar necessita de ter nome,sobrenome,email,password, caso nao tenham retorna false e mostra um erro
 	private function validArgNecessarios( $argArr ) {
 
 		sort( $this->argumentos );
