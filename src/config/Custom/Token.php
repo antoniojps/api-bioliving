@@ -14,7 +14,7 @@ namespace Bioliving\Custom;
 use Bioliving\Database\Db as Db;
 use Bioliving\Errors\Errors as Errors;
 use Firebase\JWT\JWT;
-use PDO as PDO;
+use \PDO as PDO;
 
 // Import do namespace global do PDO
 
@@ -146,7 +146,7 @@ class Token {
 
 		return $scope;
 	}
-
+	// Todo falta verificar se utilizador esta ativo
 	// Verificar se refresh token existe na base de dados de acordo com o utilizador que esta na payload
 	public static function verificarRefresh( $refreshToken = false ) {
 		$refreshTokenAtivo = false;
