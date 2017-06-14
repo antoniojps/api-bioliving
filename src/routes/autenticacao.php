@@ -21,7 +21,6 @@ use \Psr\Http\Message\ServerRequestInterface as Request;
 use \Psr\Http\Message\ResponseInterface as Response;
 use \Firebase\JWT\JWT;
 use Bioliving\Database\Db as Db;
-use Bioliving\Custom\Autenticacao as Autenticacao;
 
 //////////// Criar token ////////////
 
@@ -39,8 +38,8 @@ $app->post('/api/token',function(Request $request, Response $response){
 			"aud" => "http://example.com",
 			"exp" => time()+3600*24, // 24 horas para desenvolvimento
 			"iat" => time(),
-			"idUtilizador" => "69",
-			"scope"=>['normal','socio','admin']
+			"idUtilizador" => "19",
+			"scope"=>['publico','socio','admin']
 	);
 
 	// Refresh token
@@ -49,8 +48,8 @@ $app->post('/api/token',function(Request $request, Response $response){
 			"aud" => "http://example.com",
 			"exp" => time()+86400*30, // 86400*30 30 dias
 			"iat" => time(),
-			"idUtilizador" => "69",
-			"scope"=>['normal','socio','admin']
+			"idUtilizador" => "19",
+			"scope"=>['publico','socio','admin']
 	);
 
 	# Criar tokens
