@@ -1,6 +1,10 @@
 RewriteEngine on
 RewriteRule .* - [env=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteRule . index.php [L]
+
+# TODO custom error pages
+#Exemplo: //Custom 400 errors
+#ErrorDocument 400 paginadefinidaparaoerro400.html
+
