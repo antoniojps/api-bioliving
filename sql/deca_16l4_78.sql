@@ -2,7 +2,9 @@
 -- version 4.3.10
 -- http://www.phpmyadmin.net
 --
--- Generation Time: 12-Jun-2017 às 18:16
+-- Host: localhost
+-- Generation Time: 14-Jun-2017 às 04:06
+-- Versão do servidor: 5.6.23-log
 -- PHP Version: 5.6.5
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
@@ -51,19 +53,19 @@ CREATE TABLE IF NOT EXISTS `estatutos` (
 
 CREATE TABLE IF NOT EXISTS `eventos` (
   `id_eventos` int(11) NOT NULL,
-  `nome_evento` varchar(125) NOT NULL,
+  `nome_evento` varchar(65) NOT NULL,
   `data_registo_evento` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `data_evento` datetime NOT NULL,
   `descricao_short` varchar(200) DEFAULT NULL,
-  `descricao` text,
-  `max_participantes` int(11) DEFAULT NULL,
-  `min_participantes` int(11) DEFAULT NULL,
-  `idade_minima` int(11) DEFAULT NULL,
+  `descricao` varchar(6000) DEFAULT NULL,
+  `max_participantes` int(6) DEFAULT NULL,
+  `min_participantes` int(6) DEFAULT NULL,
+  `idade_minima` int(2) DEFAULT NULL,
   `data_fim` datetime DEFAULT NULL,
   `fotos` text,
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
-  `localizacao_localizacao` int(11) NOT NULL,
-  `tipo_evento_id_tipo_evento` int(11) NOT NULL
+  `localizacao_localizacao` int(11) DEFAULT NULL,
+  `tipo_evento_id_tipo_evento` int(11) DEFAULT NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
@@ -171,7 +173,7 @@ CREATE TABLE IF NOT EXISTS `passwords_blacklist` (
 CREATE TABLE IF NOT EXISTS `tags` (
   `id_tags` int(11) NOT NULL,
   `tag_nome` varchar(45) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -207,6 +209,19 @@ CREATE TABLE IF NOT EXISTS `utilizadores` (
   `ativo` tinyint(1) NOT NULL DEFAULT '1',
   `estatutos_id_estatutos` int(11) NOT NULL DEFAULT '3'
 ) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura da tabela `utilizadores_tokens`
+--
+
+CREATE TABLE IF NOT EXISTS `utilizadores_tokens` (
+  `id` int(11) NOT NULL,
+  `utilizadores_id_utilizadores` int(11) NOT NULL,
+  `data_criacao` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `refresh_token` text CHARACTER SET ascii COLLATE ascii_bin NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
 -- Indexes for dumped tables
@@ -297,6 +312,12 @@ ALTER TABLE `utilizadores`
   ADD PRIMARY KEY (`id_utilizadores`), ADD UNIQUE KEY `fk_utilizadores_localizacao_idx` (`id_utilizadores`), ADD UNIQUE KEY `email` (`email`), ADD KEY `fk_utilizadores_estatutos_idx` (`estatutos_id_estatutos`), ADD KEY `localizacao_id_localizacao` (`localizacao_id_localizacao`);
 
 --
+-- Indexes for table `utilizadores_tokens`
+--
+ALTER TABLE `utilizadores_tokens`
+  ADD PRIMARY KEY (`id`), ADD KEY `utilizadores_id_utilizadores` (`utilizadores_id_utilizadores`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -339,7 +360,7 @@ ALTER TABLE `passwords_blacklist`
 -- AUTO_INCREMENT for table `tags`
 --
 ALTER TABLE `tags`
-  MODIFY `id_tags` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id_tags` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=3;
 --
 -- AUTO_INCREMENT for table `tipo_evento`
 --
@@ -350,6 +371,11 @@ ALTER TABLE `tipo_evento`
 --
 ALTER TABLE `utilizadores`
   MODIFY `id_utilizadores` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=30;
+--
+-- AUTO_INCREMENT for table `utilizadores_tokens`
+--
+ALTER TABLE `utilizadores_tokens`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=4;
 --
 -- Constraints for dumped tables
 --
@@ -402,6 +428,12 @@ ADD CONSTRAINT `fk_eventos_has_colaboradores_eventos1` FOREIGN KEY (`eventos_id_
 ALTER TABLE `utilizadores`
 ADD CONSTRAINT `fk_utilizadores_estatutos` FOREIGN KEY (`estatutos_id_estatutos`) REFERENCES `estatutos` (`id_estatutos`) ON DELETE NO ACTION ON UPDATE NO ACTION,
 ADD CONSTRAINT `fk_utilizadores_localizacao` FOREIGN KEY (`localizacao_id_localizacao`) REFERENCES `localizacao` (`localizacao`);
+
+--
+-- Limitadores para a tabela `utilizadores_tokens`
+--
+ALTER TABLE `utilizadores_tokens`
+ADD CONSTRAINT `fk_tokens_utilizadores` FOREIGN KEY (`utilizadores_id_utilizadores`) REFERENCES `utilizadores` (`id_utilizadores`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
