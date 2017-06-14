@@ -33,7 +33,7 @@ class Utilizador {
 	public function __construct( $arr ) {
 
 		if ( gettype( $arr ) !== 'array' ) {
-			throw new Exception( "Argumento nao e uma array" );
+			throw new \Exception( "Argumento nao e uma array" );
 		}
 
 		$this->argumentos     = array_keys( $arr );
@@ -94,7 +94,7 @@ class Utilizador {
 			}
 			$db = null;
 
-		} catch ( PDOException $e ) {
+		} catch ( \PDOException $e ) {
 			echo $e->getMessage();
 			echo $e->getCode();
 		}
@@ -154,7 +154,7 @@ class Utilizador {
 					$naListaNegra = true;
 				}
 			}
-		} catch ( PDOException $e ) {
+		} catch ( \PDOException $e ) {
 			echo $e->getMessage();
 			echo $e->getCode();
 		}

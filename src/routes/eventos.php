@@ -152,7 +152,7 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
 });
 
 
-//////////// Obter todos os dados sobre um evento através do id ////////////
+//////////// Obter dados de um evento através do ID ////////////
 $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
     //verificar se é um id válido
@@ -230,7 +230,7 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
 });
 
 
-//////////// Obter todos os eventos ////////////
+//////////// Obter utilizadores que participaram/inscreveram num evento ////////////
 # Parametros:
 #   *page = pagina de resultados *obrigatorio
 #   results = número de resultados por página

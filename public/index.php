@@ -4,7 +4,7 @@
 require_once '../vendor/autoload.php';
 
 // Configuração de erros
-require_once '../src/config/errors/errors.php';
+require_once '../src/config/Errors/Errors.php';
 
 // Para utilizar variaveis de environment dentro do .env
 // https://github.com/vlucas/phpdotenv
