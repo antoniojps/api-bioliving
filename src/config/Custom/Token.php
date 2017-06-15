@@ -1,11 +1,24 @@
 <?php
 
 /**
- * Class com vários metodos utilizados frequentemente no projeto
+ * Esta classe foi criada para verificar e gerir o sistema de validação e atribuição de tokens num sistema de autenticação com access e refresh tokens, em seguida poderá ler todos os métodos existentes com uma pequena descrição do que fazem.
  *
  * Metodos estaticos:
  * - getAccessToken
  * - getRefreshToken
+ * - autenticar
+ * - getSegRestantes
+ * - getUtilizador
+ * - getScopes
+ * - verificarRefresh
+ * - gerarAccessToken
+ * - verificarAtivoScopes
+ * - gerarRefreshToken
+ * - desativarRefreshToken
+ * - apagarTokens
+ *
+ * Mais informação em: https://goo.gl/osha0i
+ * Mais informação em: https://goo.gl/osha0i
  *
  */
 
