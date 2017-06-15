@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Esta classe foi criada para verificar e gerir o sistema de validação e atribuição de tokens num sistema de autenticação com access e refresh tokens, em seguida poderá ler todos os métodos existentes com uma pequena descrição do que fazem.
+ * Esta classe foi criada para verificar e gerir o sistema de validação e atribuição de tokens num sistema de autenticação com access e refresh tokens, em seguida poderá ler todos os métodos existentes para uma pequena descrição do que fazem ver o link "mais informação"
  *
  * Metodos estaticos:
  * - getAccessToken
@@ -17,7 +17,6 @@
  * - desativarRefreshToken
  * - apagarTokens
  *
- * Mais informação em: https://goo.gl/osha0i
  * Mais informação em: https://goo.gl/osha0i
  *
  */
