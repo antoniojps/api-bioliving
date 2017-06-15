@@ -36,7 +36,7 @@ $app->post('/api/token',function(Request $request, Response $response){
 	$accessPayload = array(
 			"iss" => "Aplicacao Bioliving",
 			"aud" => "http://example.com",
-			"exp" => time()+300, // 5 mins teste
+			"exp" => time()+3600, // 5 mins teste
 			"iat" => time(),
 			"idUtilizador" => "19",
 			"scope"=>['publico','socio','admin']

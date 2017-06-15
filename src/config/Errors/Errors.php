@@ -58,6 +58,8 @@ if ( getenv( 'PHP_ENV' ) === 'producao' ) {
 //  },$e);
 //  }
 class Errors {
+
+	// Apenas chama a funçao de acordo com a variavel de environment
 	public static function filtro( $desenvolvimento, $producao = null, $exception = null) {
 		$producao = $producao ? $producao: function(){};
 		if ( is_callable( $desenvolvimento ) && is_callable($producao) ) {
@@ -68,4 +70,23 @@ class Errors {
 			}
 		}
 	}
+
+	// retorna valores
+	public static function filtroReturn( $desenvolvimento, $producao = null, $exception = null) {
+
+		$resultado = null;
+
+		$producao = $producao ? $producao: function(){};
+		if ( is_callable( $desenvolvimento ) && is_callable($producao) ) {
+			if ( getenv( 'PHP_ENV' ) === 'desenvolvimento' ) {
+				$resultado = call_user_func($desenvolvimento,$exception);
+			} else {
+				$resultado = call_user_func($producao,$exception);
+			}
+		}
+
+		return $resultado;
+
+	}
+
 }
