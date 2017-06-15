@@ -30,7 +30,7 @@
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Bioliving\Database\Db as Db;
-use Bioliving\Custom\Utilizador as Utilizador;
+
 
 //////////// Obter todos os utilizadores ////////////
 # Parametros:
@@ -125,7 +125,7 @@ $app->get( '/api/utilizadores', function ( Request $request, Response $response 
 			];
 
 			return $response
-					->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+					->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES |  JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 		} catch ( PDOException $err ) {

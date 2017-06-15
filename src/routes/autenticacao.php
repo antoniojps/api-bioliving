@@ -36,7 +36,7 @@ $app->post('/api/token',function(Request $request, Response $response){
 	$accessPayload = array(
 			"iss" => "Aplicacao Bioliving",
 			"aud" => "http://example.com",
-			"exp" => time()+3600*24, // 24 horas para desenvolvimento
+			"exp" => time()+300, // 5 mins teste
 			"iat" => time(),
 			"idUtilizador" => "19",
 			"scope"=>['publico','socio','admin']
@@ -48,6 +48,7 @@ $app->post('/api/token',function(Request $request, Response $response){
 			"aud" => "http://example.com",
 			"exp" => time()+86400*30, // 86400*30 30 dias
 			"iat" => time(),
+			"jti" => md5(uniqid(rand(), true)), // Numero random como id
 			"idUtilizador" => "19",
 			"scope"=>['publico','socio','admin']
 	);

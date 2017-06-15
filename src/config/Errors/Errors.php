@@ -58,7 +58,7 @@ if ( getenv( 'PHP_ENV' ) === 'producao' ) {
 //  },$e);
 //  }
 class Errors {
-	public static function filtro( $desenvolvimento, $producao = null, $exception) {
+	public static function filtro( $desenvolvimento, $producao = null, $exception = null) {
 		$producao = $producao ? $producao: function(){};
 		if ( is_callable( $desenvolvimento ) && is_callable($producao) ) {
 			if ( getenv( 'PHP_ENV' ) === 'desenvolvimento' ) {
