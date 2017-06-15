@@ -3,12 +3,15 @@
 //require '../src/cloudinary/Uploader.php';
 //require '../src/cloudinary/Api.php';
 //\Cloudinary::config(array(
-//    "cloud_name" => "biolivingapp",
-//    "api_key" => "258655581157566",
-//    "api_secret" => "lqRiQwepBy0qdyUgRATWkIa8v9g"
+//    "cloud_name" => getenv('CLOUD_NAME'),
+//    "api_key" => getenv('API_KEY'),
+//    "api_secret" => getenv('API_SECRET')
 //));
-// TODO: GET para pesquisar eventos por nome, tags , por horas, etc individualmente e em grupo
-// TODO: tornar evento ativo/inativo
+// TODO: GET para pesquisar eventos por nome, tags , por horas, tipo e localização etc individualmente e em grupo
+// TODO: PUT para tornar evento ativo/inativo
+// TODO: GET eventos nos ultimos 5 meses
+// TODO: POST localizações
+// TODO: POST tipos de eventos
 /*
  * Routes para todos endpoints relativos aos eventos:
  * Scopes: admin recebe todas as informações, outros recebem apenas necessárias
@@ -18,7 +21,6 @@
  * Scopes: admin ou colaborador que criou evento
  *
  */
-
 // importar classes para scope
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -151,8 +153,6 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
 });
-
-
 //////////// Obter dados de um evento através do ID ////////////
 $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
@@ -229,8 +229,6 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
 });
-
-
 //////////// Obter utilizadores que participaram/inscreveram num evento ////////////
 # Parametros:
 #   *page = pagina de resultados *obrigatorio
@@ -363,15 +361,12 @@ $app->get('/api/eventos/{id}/utilizadores', function (Request $request, Response
 
 
 });
-
-
 //////////// Obter colaboradores de um evento ////////////
 # Parametros:
 #   *page = pagina de resultados *obrigatorio
 #   results = número de resultados por página
 #   min: 1, max: 10
 #   Exemplo: /api/eventos/2/colaboradores?page=1&results=2&by=id&order=ASC
-
 $app->get('/api/eventos/{id}/colaboradores', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
 
@@ -496,8 +491,6 @@ $app->get('/api/eventos/{id}/colaboradores', function (Request $request, Respons
 
 
 });
-
-
 //////////// Obter extras de um evento + icons ////////////
 //////////// Obter colaboradores de um evento ////////////
 # Parametros:
@@ -630,8 +623,6 @@ $app->get('/api/eventos/{id}/extras', function (Request $request, Response $resp
 
 
 });
-
-
 //////////// Obter tags de um evento ////////////
 # Parametros:
 #   *page = pagina de resultados *obrigatorio
@@ -761,8 +752,6 @@ $app->get('/api/eventos/{id}/tags', function (Request $request, Response $respon
 
 
 });
-
-
 /////////// Adicionar um novo evento ////////////
 #Parametros obrigatórios do evento a criar
 #   nome_evento
@@ -940,8 +929,6 @@ $app->post('/api/eventos/add', function (Request $request, Response $response) {
     }
 
 });
-
-
 //////////////Alterar um evento///////////////////
 //Scopes: admin ou token do request é igual ao {id}(colaborador que criou )
 $app->put('/api/eventos/alter/{id}', function (Request $request, Response $response) {
@@ -1152,8 +1139,6 @@ $app->put('/api/eventos/alter/{id}', function (Request $request, Response $respo
     }
 
 });
-
-
 /////////////Apagar um evento////////////////////
 $app->delete('/api/eventos/delete/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
@@ -1180,8 +1165,15 @@ $app->delete('/api/eventos/delete/{id}', function (Request $request, Response $r
 
                 $stmt = $db->prepare($sql);
                 $stmt->execute();
-                echo '{"notice": "Evento apagado!"}';
                 $db = null;
+                $responseData = [
+                    'Resposta' => "Evento apagado com sucesso!"
+                ];
+
+                return $response
+                    ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
 
 
             } catch (PDOException $err) {
@@ -1227,3 +1219,157 @@ $app->delete('/api/eventos/delete/{id}', function (Request $request, Response $r
     }
 });
 
+//PUT para tornar evento ativo
+$app->put('/api/eventos/ative/{id}', function (Request $request, Response $response) {
+    $id =(int)$request->getAttribute('id');
+    $ativo = 1; //valor na bd que equivale a ativo
+    if (is_int($id) && $id > 0) {
+        //ver se id existe na bd antes de editar
+        $sql = "SELECT * FROM eventos WHERE id_eventos = :id";
+        $db = new Db();
+        // conectar
+        $db = $db->connect();
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $db = null;
+        $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (count($dados) >= 1) {
+    $sql = "UPDATE eventos SET ativo = :ativo WHERE id_eventos = $id";
+
+    try {
+        // Get DB object
+        $db = new db();
+        //connect
+        $db = $db->connect();
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(':ativo', $ativo);
+        $stmt->execute();
+        $responseData = [
+            'Resposta' => "Evento ativado com sucesso!"
+        ];
+
+        return $response
+            ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+
+    } catch (PDOException $err) {
+        $status = 503; // Service unavailable
+        $errorMsg = [
+            "error" => [
+                "status" => $err->getCode(),
+                "text" => $err->getMessage()
+            ]
+        ];
+
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+    }
+        } else {
+            $status = 422; // Unprocessable Entity
+            $errorMsg = [
+                "error" => [
+                    "status" => "$status",
+                    "text" => 'Evento não se encontra disponivel'
+
+                ]
+            ];
+
+            return $response
+                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+        }
+
+    }else{
+        $status = 422; // Unprocessable Entity
+        $errorMsg = [
+            "error" => [
+                "status" => "$status",
+                "text" => 'Parametros inválidos'
+
+            ]
+        ];
+
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+    }
+
+});
+//PUT para tornar evento inativo
+$app->put('/api/eventos/disable/{id}', function (Request $request, Response $response) {
+    $id =(int)$request->getAttribute('id');
+    $ativo = 0; //valor na bd que equivale a ativo
+    if (is_int($id) && $id > 0) {
+        //ver se id existe na bd antes de editar
+        $sql = "SELECT * FROM eventos WHERE id_eventos = :id";
+        $db = new Db();
+        // conectar
+        $db = $db->connect();
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        $db = null;
+        $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (count($dados) >= 1) {
+            $sql = "UPDATE eventos SET ativo = :ativo WHERE id_eventos = $id";
+
+            try {
+                // Get DB object
+                $db = new db();
+                //connect
+                $db = $db->connect();
+                $stmt = $db->prepare($sql);
+                $stmt->bindParam(':ativo', $ativo);
+                $stmt->execute();
+                $responseData = [
+                    'Resposta' => "Evento desativado com sucesso!"
+                ];
+
+                return $response
+                    ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+
+            } catch (PDOException $err) {
+                $status = 503; // Service unavailable
+                $errorMsg = [
+                    "error" => [
+                        "status" => $err->getCode(),
+                        "text" => $err->getMessage()
+                    ]
+                ];
+
+                return $response
+                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+            }
+        } else {
+            $status = 422; // Unprocessable Entity
+            $errorMsg = [
+                "error" => [
+                    "status" => "$status",
+                    "text" => 'Evento não se encontra disponivel'
+
+                ]
+            ];
+
+            return $response
+                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+        }
+
+    }else{
+        $status = 422; // Unprocessable Entity
+        $errorMsg = [
+            "error" => [
+                "status" => "$status",
+                "text" => 'Parametros inválidos'
+
+            ]
+        ];
+
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+    }
+
+});
