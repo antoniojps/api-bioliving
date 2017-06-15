@@ -8,6 +8,9 @@
         "psr-4": {
            "Bioliving\\": "src/config"
         }
-    }
+    },
+	 "require": {
+    "cloudinary/cloudinary_php": "dev-master"
+  }
 }
 

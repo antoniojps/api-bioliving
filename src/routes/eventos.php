@@ -8,10 +8,8 @@
 //    "api_secret" => getenv('API_SECRET')
 //));
 // TODO: GET para pesquisar eventos por nome, tags , por horas, tipo e localização etc individualmente e em grupo
-// TODO: PUT para tornar evento ativo/inativo
-// TODO: GET eventos nos ultimos 5 meses
-// TODO: POST localizações
-// TODO: POST tipos de eventos
+// TODO: GET contagem de eventos de x em x tempo
+
 /*
  * Routes para todos endpoints relativos aos eventos:
  * Scopes: admin recebe todas as informações, outros recebem apenas necessárias
@@ -27,9 +25,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Bioliving\Database\Db as Db;
 
 //////////// Obter todos os eventos ////////////
-# Parametros:
-#   *page = pagina de resultados *obrigatorio
-#   results = número de resultados por página
+# Variaveis alteráveis:
 #   min: 1, max: 10
 # Exemplo: /api/eventos?page=1&results=2&by=id&order=ASC
 $app->get('/api/eventos', function (Request $request, Response $response) {
@@ -888,6 +884,7 @@ $app->post('/api/eventos/add', function (Request $request, Response $response) {
             $stmt->bindParam(':dataFim', $dataFim);
             $stmt->bindParam(':ativo', $ativo);
             $stmt->execute();
+            $db = null;
 
             $responseData = [
                 'Resposta' => "Evento adicionado com sucesso!"
@@ -928,6 +925,155 @@ $app->post('/api/eventos/add', function (Request $request, Response $response) {
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
 
+});
+//POST tipo eventos
+$app->post('/api/eventos/tipo/add', function (Request $request, Response $response) {
+    $tipoNome = $request->getParam('nomeTipoEvento');
+    $error = array();
+    $minCar = 1;
+    $maxCar = 75;
+    if (is_null($tipoNome) || strlen($tipoNome) < $minCar) {
+        $error[] = array("nome" => "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!");
+    } elseif (strlen($tipoNome) > $maxCar) {
+        $error[] = array("nome" => "Nome excedeu limite máximo");
+    }
+    if (count($error) === 0) {
+
+        //buscar db todos os customers
+        $sql = "INSERT INTO tipo_evento (nome_tipo_evento) VALUES  (:nome)";
+        try {
+            // Get DB object
+            $db = new db();
+            //connect
+            $db = $db->connect();
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(':nome', $tipoNome);
+            $stmt->execute();
+            $db = null;
+            $responseData = [
+                'Resposta' => "Tipo de evento adicionado com sucesso!"
+            ];
+
+            return $response
+                ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+        } catch (PDOException $err) {
+            $status = 503; // Service unavailable
+            $errorMsg = [
+                "error" => [
+                    "status" => $err->getCode(),
+                    "text" => $err->getMessage()
+                ]
+            ];
+
+            return $response
+                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+        }
+    } else {
+        $status = 422; // Unprocessable Entity
+        $errorMsg = [
+            "error" => [
+                "status" => "$status",
+                "text" => [
+                    $error
+                ]
+
+            ]
+        ];
+
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+    }
+});
+// POST localização
+$app->post('/api/eventos/localizacao/add', function (Request $request, Response $response) {
+    $localizacao = $request->getParam('nomeLocalizacao');
+    $lat = $request->getParam('lat');
+    $lng = $request->getParam('lng');
+
+    $error = array();
+    $minCar = 1;
+    $maxCar = 75;
+    if (is_null($localizacao) || strlen($localizacao) < $minCar) {
+        $error[] = array("nome" => "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!");
+    } elseif (strlen($localizacao) > $maxCar) {
+        $error[] = array("nome" => "Nome excedeu limite máximo");
+    }
+
+    function validaLatLng($tipo, $valor)
+    {
+        $resultado = ($tipo == 'latitude')
+            ? '/^(\+|-)?(?:90(?:(?:\.0{1,8})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,8})?))$/'
+            : '/^(\+|-)?(?:180(?:(?:\.0{1,8})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\.[0-9]{1,8})?))$/';
+
+        if (preg_match($resultado, $valor)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    if (validaLatLng('latitude', $lat) === false) {
+        $error[] = array("nome" => "Latitude inválida");
+    }
+
+    if (validaLatLng('longitude', $lng) === false) {
+        $error[] = array("nome" => "Longitude inválida");
+    }
+
+    if (count($error) === 0) {
+
+        //buscar db todos os customers
+        $sql = "INSERT INTO localizacao (lat,lng,nome) VALUES  (:lat,:lng,:nome)";
+        try {
+            // Get DB object
+            $db = new db();
+            //connect
+            $db = $db->connect();
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(':nome', $localizacao);
+            $stmt->bindParam(':lat', $lat);
+            $stmt->bindParam(':lng', $lng);
+            $stmt->execute();
+            $db = null;
+            $responseData = [
+                'Resposta' => "Localização adicionada com sucesso!"
+            ];
+
+            return $response
+                ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+        } catch (PDOException $err) {
+            $status = 503; // Service unavailable
+            $errorMsg = [
+                "error" => [
+                    "status" => $err->getCode(),
+                    "text" => $err->getMessage()
+                ]
+            ];
+
+            return $response
+                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+        }
+    } else {
+        $status = 422; // Unprocessable Entity
+        $errorMsg = [
+            "error" => [
+                "status" => "$status",
+                "text" => [
+                    $error
+                ]
+
+            ]
+        ];
+
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+    }
 });
 //////////////Alterar um evento///////////////////
 //Scopes: admin ou token do request é igual ao {id}(colaborador que criou )
@@ -1174,8 +1320,6 @@ $app->delete('/api/eventos/delete/{id}', function (Request $request, Response $r
                     ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
 
-
-
             } catch (PDOException $err) {
                 $status = 503; // Service unavailable
                 $errorMsg = [
@@ -1218,10 +1362,9 @@ $app->delete('/api/eventos/delete/{id}', function (Request $request, Response $r
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
 });
-
 //PUT para tornar evento ativo
 $app->put('/api/eventos/ative/{id}', function (Request $request, Response $response) {
-    $id =(int)$request->getAttribute('id');
+    $id = (int)$request->getAttribute('id');
     $ativo = 1; //valor na bd que equivale a ativo
     if (is_int($id) && $id > 0) {
         //ver se id existe na bd antes de editar
@@ -1235,38 +1378,37 @@ $app->put('/api/eventos/ative/{id}', function (Request $request, Response $respo
         $db = null;
         $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if (count($dados) >= 1) {
-    $sql = "UPDATE eventos SET ativo = :ativo WHERE id_eventos = $id";
+            $sql = "UPDATE eventos SET ativo = :ativo WHERE id_eventos = $id";
 
-    try {
-        // Get DB object
-        $db = new db();
-        //connect
-        $db = $db->connect();
-        $stmt = $db->prepare($sql);
-        $stmt->bindParam(':ativo', $ativo);
-        $stmt->execute();
-        $responseData = [
-            'Resposta' => "Evento ativado com sucesso!"
-        ];
+            try {
+                // Get DB object
+                $db = new db();
+                //connect
+                $db = $db->connect();
+                $stmt = $db->prepare($sql);
+                $stmt->bindParam(':ativo', $ativo);
+                $stmt->execute();
+                $responseData = [
+                    'Resposta' => "Evento ativado com sucesso!"
+                ];
 
-        return $response
-            ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                return $response
+                    ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
 
+            } catch (PDOException $err) {
+                $status = 503; // Service unavailable
+                $errorMsg = [
+                    "error" => [
+                        "status" => $err->getCode(),
+                        "text" => $err->getMessage()
+                    ]
+                ];
 
-    } catch (PDOException $err) {
-        $status = 503; // Service unavailable
-        $errorMsg = [
-            "error" => [
-                "status" => $err->getCode(),
-                "text" => $err->getMessage()
-            ]
-        ];
+                return $response
+                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
-        return $response
-            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
-    }
+            }
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
@@ -1281,7 +1423,7 @@ $app->put('/api/eventos/ative/{id}', function (Request $request, Response $respo
                 ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
         }
 
-    }else{
+    } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
             "error" => [
@@ -1298,7 +1440,7 @@ $app->put('/api/eventos/ative/{id}', function (Request $request, Response $respo
 });
 //PUT para tornar evento inativo
 $app->put('/api/eventos/disable/{id}', function (Request $request, Response $response) {
-    $id =(int)$request->getAttribute('id');
+    $id = (int)$request->getAttribute('id');
     $ativo = 0; //valor na bd que equivale a ativo
     if (is_int($id) && $id > 0) {
         //ver se id existe na bd antes de editar
@@ -1330,7 +1472,6 @@ $app->put('/api/eventos/disable/{id}', function (Request $request, Response $res
                     ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
 
-
             } catch (PDOException $err) {
                 $status = 503; // Service unavailable
                 $errorMsg = [
@@ -1358,7 +1499,7 @@ $app->put('/api/eventos/disable/{id}', function (Request $request, Response $res
                 ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
         }
 
-    }else{
+    } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
             "error" => [
@@ -1373,3 +1514,4 @@ $app->put('/api/eventos/disable/{id}', function (Request $request, Response $res
     }
 
 });
+
