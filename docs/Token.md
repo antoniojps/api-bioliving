@@ -73,7 +73,7 @@ Verifica se o refresh token passado no parametro ou por default o das cookies ex
 #### 8. gerarAccessToken($refreshToken)
 Gerar e guardar access token nas cookies através do refresh token, ou seja apenas cria um novo access token se o refresh token for válido, replica os valores da payload do refresh token excepto “exp” ou seja tempo até expirar que neste será de apenas 1 hora por default, pode ser alterado através da propriedade ::$tempoAccessToken.
 
-É de salientar que a verificação do refresh as cookies ‘token’ e ‘token_refresh’ serão apagadas.
+É de salientar que se a verificação do refresh token (obrigatório para gerar um access token) for mal sucedida (não estiver ativo) este será desativado na base de dados e as cookies ‘token’ e ‘token_refresh’ serão apagadas.
 
 ---
 

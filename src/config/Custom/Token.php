@@ -261,7 +261,7 @@ class Token {
 
 	// Gerar access token através do refresh token
 
-	public static function gerarAcessToken( $refreshToken = false ) {
+	public static function gerarAccessToken( $refreshToken = false ) {
 		$tokenGerado  = false;
 		$refreshToken = $refreshToken ? $refreshToken : self::getRefreshToken();
 
@@ -289,7 +289,9 @@ class Token {
 			// Caso o refresh token já nao seja valido entao:
 			// Apagar cookies (tokens) e refresh token da base de dados
 			// Client-side terá que redireccionar para página de login
+
 		} else {
+			self::desativarRefreshToken(self::$tokenPayload['jti']);
 			self::adeusCookies();
 		}
 

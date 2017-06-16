@@ -20,6 +20,7 @@
 namespace Bioliving\Custom;
 
 use Bioliving\Database\Db as Db;
+use Bioliving\Errors\UtilizadorException as UtilizadorException;
 use \PDO; // Import do namespace global do PDO
 
 
@@ -33,7 +34,7 @@ class Utilizador {
 	public function __construct( $arr ) {
 
 		if ( gettype( $arr ) !== 'array' ) {
-			throw new \Exception( "Argumento nao e uma array" );
+			throw new UtilizadorException( "Parametro dos utilizadores nao e uma array" );
 		}
 
 		$this->argumentos     = array_keys( $arr );
@@ -214,27 +215,40 @@ class Utilizador {
 						if( $this->validarNomes()){
 
 						// Insert na base de dados
+						try {
+							$db = new Db();
+							$db = $db->connect();
+
+							$stmt = $db->prepare("INSERT INTO names (firstname,lastname,postcode) VALUES (:firstname,:lastname,:postcode)");
+
+							$stmt->bindValue(':firstname','Joana');
+							$stmt->bindValue(':lastname','Albertina');
+							$stmt->bindValue(':postcode','DWAXD231');
+							$stmt->execute();
+							$db = null;
 
 
+							echo '<b>Registrar</b>';
+						} catch (\PDOException $e){
 
-						echo '<b>Registrar</b>';
+						}
 
 						// return true;
 						} else {
-							echo 'Nomes nao sao validos';
+							throw new UtilizadorException( "Nomes nao sao validos" );
 						}
 					} else {
-						echo 'Password demasiado fraca';
+						throw new UtilizadorException( "Password fraca" );
 					}
 					// Email ja existe
 				} else {
-					echo 'Email ja existe';
+					throw new UtilizadorException( "Email existente" );
 				}
 			} else {
-				echo 'Email nao é valido';
+				throw new UtilizadorException( "Email invalido" );
 			}
 		} else {
-			echo 'Argumentos em falta';
+			throw new UtilizadorException( "Parametros em falta para utilizador o metodo registrar" );
 		}
 	}
 
