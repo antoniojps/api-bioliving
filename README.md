@@ -36,3 +36,8 @@ DB_PASS="password"
 
 ### Criação da base de dados
 Execute o ficheiro *sql/deca_16l4_78.sql* na sua base de dados MySQL e insira dados.
+
+---
+
+## Outros:
+- [Classe Tokens](docs/Token)
