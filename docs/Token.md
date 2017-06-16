@@ -1,4 +1,4 @@
-# Token
+# [Token](../src/config/Custom/Token.php)
 
 Verificação e gestão do sistema de validação e atribuição de tokens implementado o conceito de autenticação com access e refresh tokens, em seguida poderá ler todos os métodos existentes com uma pequena descrição do que fazem.
 

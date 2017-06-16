@@ -40,4 +40,4 @@ Execute o ficheiro *sql/deca_16l4_78.sql* na sua base de dados MySQL e insira da
 ---
 
 ## Outros:
-- [Classe Tokens](docs/Token.md)
+- [Documentação da Classe Token](docs/Token.md)
