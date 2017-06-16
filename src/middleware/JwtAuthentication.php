@@ -36,7 +36,6 @@ $app->add(new \Slim\Middleware\JwtAuthentication([
 
 			// Em desevolvimento dizer qual o erro, em producao mostrar apenas nao autorizado
 			$data['route'] = $route;
-			$data['cookie'] = 'hey';
 			$data["status"] = "error";
 			$data["message"] = getenv('PHP_ENV') === 'desenvolvimento' ? $arguments["message"] : 'Nao autorizado';
 			return $response

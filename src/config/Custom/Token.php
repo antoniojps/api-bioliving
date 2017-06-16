@@ -105,6 +105,17 @@ class Token {
 
 		return $cookie;
 	}
+
+	/*
+	 * Apaga as cookies
+	 */
+
+	public static function adeusCookies() {
+		// adeus cookies gostei de vos conhecer
+		setcookie( self::$accessCookieName, 'Tanto coisa so para fazer login', time() - 3600, '/', null, null, true );
+		setcookie( self::$refreshCookieName, 'E vou chegar ao fim e nao vai funcionar', time() - 3600, '/', null, null, true );
+	}
+
 	// Autenticar JWT
 	// Verifica se token expirou, ou secret nao é correta
 	// Se token nao for valido retorna false, caso contrario retorna token;
@@ -278,9 +289,7 @@ class Token {
 			// Apagar cookies (tokens) e refresh token da base de dados
 			// Client-side terá que redireccionar para página de login
 		} else {
-			// adeus cookies gostei de vos conhecer
-			setcookie( 'token', 'Tanto coisa so para fazer login', time() - 3600, '/', null, null, true );
-			setcookie( 'token_refresh', 'E vou chegar ao fim e nao vai funcionar', time() - 3600, '/', null, null, true );
+			self::adeusCookies();
 		}
 
 		return $tokenGerado;
@@ -399,44 +408,108 @@ class Token {
 			}
 		}
 
-		// Todo guardar nas cookies
-
 		return $tokenGerado;
 	}
 
 
-	// Todo Desativar refresh token atraves da claim JWT ID na base de dados
-	// Validar info com https://github.com/Respect/Validation
-	// Pode ser array de ids ou string
-	// @param jit é o json web token id
-	public static function desativarRefreshToken( $jit ) {
-		$refreshApagado = false;
+	// Desativar refresh token atraves da claim JWT ID na base de dados
+	// @param jti é o json web token id ( array ou string )
+	// (alfanumerico, entre 15 e 50 caracteres e sem espaços)
+	public static function desativarRefreshToken( $jti ) {
+		$refreshDesativado = false;
+		$jtiValido         = false;
+		$jtiType           = gettype( $jti );
+		// Apenas 1 jti
+		// Validar todos os ids dos tokens se tem o formato correto
 
-		// Apenas 1 jit
-		if ( gettype( $jit ) == 'string' && v::alnum()->noWhitespace()->length(15, 50)->validate($jit)) {
-			echo 'Ya boy é uma jit espetaculher';
-			// >1 jit
-		} else if ( gettype( $jit ) == 'array' ) {
-			echo '2';
+		if ( $jtiType === 'string' && v::alnum()->noWhitespace()->length( 15, 50 )->validate( $jti ) ) {
+			$jtiValido = true;
+			$jti       = [ "$jti" ];
+			// >1 jti
+		} else if ( $jtiType === 'array' ) {
+
+			// remover duplicados (array value para dar reset aos indexes)
+			$jti = array_values( array_unique( $jti ) );
+
+			// Validar se todos os jtis da array sao validos
+			for ( $i = 0; $i < count( $jti ); $i ++ ) {
+				if ( v::alnum()->noWhitespace()->length( 15, 50 )->validate( $jti[ $i ] ) ) {
+					$jtiValido = true;
+				} else {
+					echo $jti[ $i ];
+					$jtiValido = false;
+					break;
+				}
+			}
+		}
+		if ( $jtiValido ) {
+
+			// Criação da querie, infelizmente nao da para fazer bind de parametros com o PDO em queries que involvam CASE, dai terem sido feitas as validações anteriores de modo a ter a certeza que nao é feita SQL injection, o acesso a esta funcao so vai ser limitada pela api
+
+			$sqlWhen = '';
+			foreach ( $jti as $id ) {
+				$sqlWhen .= " WHEN '$id' THEN '0'";
+			}
+
+			$sqlIn = "'" . implode( "','", $jti ) . "'";
+
+			/* Exemplo do SQL pretendido:
+			 * UPDATE `utilizadores_tokens`
+			 * SET `ativo` = CASE id
+			 * WHEN '2964b31e9925a6d296ab330dbdc4d965' THEN '1'
+			 * WHEN 'c5238fd1e50a29947537f43a70946de9' THEN '1'
+			 * END WHERE id IN ('2964b31e9925a6d296ab330dbdc4d965','c5238fd1e50a29947537f43a70946de9')
+			 */
+
+			$sql = "UPDATE `utilizadores_tokens` SET `ativo` = CASE id $sqlWhen END WHERE id IN ($sqlIn)";
+
+
+			try {
+				// iniciar ligação à base de dados
+				$db = new Db();
+
+				// conectar
+				$db = $db->connect();
+
+				// Query
+				$stmt = $db->prepare( $sql );
+				if ( $stmt->execute() ) {
+					$refreshDesativado = true;
+				}
+				$db = null;
+
+			} catch ( \PDOException $e ) {
+				// Nao mostrar em ambiente de producao
+				Errors::filtro( function ( $e ) {
+					echo $e->getMessage();
+				}, function () {
+				}, $e );
+			}
 		}
 
-		$sql = "UPDATE `utilizadores_tokens`
-						SET `ativo` = CASE id
-						WHEN '2964b31e9925a6d296ab330dbdc4d965' THEN '0'
-						WHEN 'c5238fd1e50a29947537f43a70946de9' THEN '0'
-						END
-						WHERE id IN ('2964b31e9925a6d296ab330dbdc4d965','c5238fd1e50a29947537f43a70946de9')";
+		return $jtiValido && $refreshDesativado;
 	}
 
-	// Todo Apagar tokens
+	// Apagar tokens
 	// Verifica se existe a  cookie com o nome ‘token_refresh’ caso exista invoca o metodo verificarRefresh para averiguar se o mesmo é valido, se não é valido apenas apaga a(s) cookie(s) ( token e token_refresh ), caso seja válido torna o mesmo inválido (na base de dados) e só de seguida é que apaga a(s) cookie(s).
 
-	public static function apagarTokens( $refreshToken ) {
+	public static function apagarTokens() {
+		$refreshToken = self::getRefreshToken();
 
+		if ( $refreshToken && self::verificarRefresh( $refreshToken ) ) {
+
+			// Refresh token é valido, apagar cookies e meter como desativado na BD
+
+			$jti = self::$tokenPayload['jti'];
+			self::desativarRefreshToken($jti);
+			self::adeusCookies();
+
+		} else {
+
+			// Refresh token nao é valido, apagar cookies
+
+			self::adeusCookies();
+		}
 	}
-
-
-	// Remover access token e refresh token das cookies e apagar refresh da base de dados
-
 
 }
