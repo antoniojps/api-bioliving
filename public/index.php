@@ -32,5 +32,7 @@ require_once "../src/routes/autenticacao.php";
 require "../src/routes/utilizadores.php";
 // Eventos
 require "../src/routes/eventos.php";
+//Global
+require  "../src/routes/global.php";
 
 $app->run();
