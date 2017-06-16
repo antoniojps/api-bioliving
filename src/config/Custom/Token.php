@@ -26,7 +26,11 @@ namespace Bioliving\Custom;
 use Bioliving\Database\Db as Db;
 use Bioliving\Errors\Errors as Errors;
 use Firebase\JWT\JWT;
-use \PDO as PDO; // Import do namespace global do PDO
+use PDO as PDO;
+use Respect\Validation\Validator as v;
+
+
+// Import do namespace global do PDO
 
 
 class Token {
@@ -55,7 +59,7 @@ class Token {
 			Errors::filtro( function ( $e ) {
 				throw new \Exception( "Token com syntax inválida" );
 			}, function () {
-			});
+			} );
 		}
 
 		return $this->tokenValido;
@@ -178,16 +182,16 @@ class Token {
  * -colaborador: pode criar eventos
  * -admin: tem acesso à área de administração e a informações privilegiadas e seguras
  */
-	private static function gerarScopes($estatuto){
+	private static function gerarScopes( $estatuto ) {
 		$arrScopes = [
-				'publico' => ['publico'],
-				'normal' => ['publico','normal'],
-				'socio' => ['publico','normal','socio'],
-				'colaborador' => ['publico','normal','socio','colaborador'],
-				'admin' => ['publico','normal','socio','colaborador','admin']
+				'publico'     => [ 'publico' ],
+				'normal'      => [ 'publico', 'normal' ],
+				'socio'       => [ 'publico', 'normal', 'socio' ],
+				'colaborador' => [ 'publico', 'normal', 'socio', 'colaborador' ],
+				'admin'       => [ 'publico', 'normal', 'socio', 'colaborador', 'admin' ]
 		];
 
-		return $arrScopes[$estatuto];
+		return $arrScopes[ $estatuto ];
 	}
 
 
@@ -226,7 +230,7 @@ class Token {
 
 				// Refresh token encontrado,ativo e conta esta ativa = verificado
 
-				if ( ! empty( $dados ) && sizeof( $dados ) > 0 && $dados['token_ativo'] === '1' && $dados['utilizador_ativo'] === '1'){
+				if ( ! empty( $dados ) && sizeof( $dados ) > 0 && $dados['token_ativo'] === '1' && $dados['utilizador_ativo'] === '1' ) {
 					$refreshTokenAtivo = true;
 				}
 
@@ -245,39 +249,40 @@ class Token {
 
 	// Gerar access token através do refresh token
 
-	public static function gerarAcessToken($refreshToken = false){
-		$tokenGerado = false;
-		$refreshToken      = $refreshToken ? $refreshToken : self::getRefreshToken();
+	public static function gerarAcessToken( $refreshToken = false ) {
+		$tokenGerado  = false;
+		$refreshToken = $refreshToken ? $refreshToken : self::getRefreshToken();
 
 		// Verifica se refresh token é valido
-		if(self::autenticar($refreshToken) && self::verificarRefresh($refreshToken)){
+		if ( self::autenticar( $refreshToken ) && self::verificarRefresh( $refreshToken ) ) {
 
 			// Payload igual ao refresh token excepto jwt id e tempo atualizado
 			$accessPayload = array(
-					"iss" => self::$tokenPayload['iss'],
-					"aud" => self::$tokenPayload['aud'],
-					"exp" => time()+self::$tempoAccessToken, // 24 horas para desenvolvimento
-					"iat" => time(),
+					"iss"          => self::$tokenPayload['iss'],
+					"aud"          => self::$tokenPayload['aud'],
+					"exp"          => time() + self::$tempoAccessToken, // 24 horas para desenvolvimento
+					"iat"          => time(),
 					"idUtilizador" => self::$tokenPayload['idUtilizador'],
-					"scope"=>self::$tokenPayload['scope']
+					"scope"        => self::$tokenPayload['scope']
 			);
 
 			# Criar token
-			$tokenGerado = JWT::encode($accessPayload, getenv('SECRET_KEY'));
+			$tokenGerado = JWT::encode( $accessPayload, getenv( 'SECRET_KEY' ) );
 
 			# Criar cookies
 			// HTTP Only Cookie para NAO poder ser lida atraves de Javascript
 			// Segurança contra ataques XSS
-			setcookie(self::$accessCookieName,$tokenGerado,time()+self::$tempoAccessToken,'/',null,null,true);
+			setcookie( self::$accessCookieName, $tokenGerado, time() + self::$tempoAccessToken, '/', null, null, true );
 
-		// Caso o refresh token já nao seja valido entao:
-		// Apagar cookies (tokens) e refresh token da base de dados
-		// Client-side terá que redireccionar para página de login
+			// Caso o refresh token já nao seja valido entao:
+			// Apagar cookies (tokens) e refresh token da base de dados
+			// Client-side terá que redireccionar para página de login
 		} else {
 			// adeus cookies gostei de vos conhecer
-			setcookie('token','Tanto coisa so para fazer login',time()-3600,'/',null,null,true);
-			setcookie('token_refresh','E vou chegar ao fim e nao vai funcionar',time()-3600,'/',null,null,true);
+			setcookie( 'token', 'Tanto coisa so para fazer login', time() - 3600, '/', null, null, true );
+			setcookie( 'token_refresh', 'E vou chegar ao fim e nao vai funcionar', time() - 3600, '/', null, null, true );
 		}
+
 		return $tokenGerado;
 
 	}
@@ -286,7 +291,7 @@ class Token {
 	 *  Retorna o id do utilizador e scopes
 	 *  Retorna false se desativo
 	 */
-	public static function verificarUserAtivoScopes($idUtilizador){
+	public static function verificarUserAtivoScopes( $idUtilizador ) {
 		$utilizadorAtivo = false;
 
 		// Obter estatutos do utilizador e se está ativo
@@ -310,12 +315,12 @@ class Token {
 			$dados = $stmt->fetch( PDO::FETCH_ASSOC );
 
 			// Refresh token encontrado,ativo e conta esta ativa = verificado
-			if ( ! empty( $dados ) && sizeof( $dados ) > 0 && $dados['ativo'] === '1'){
+			if ( ! empty( $dados ) && sizeof( $dados ) > 0 && $dados['ativo'] === '1' ) {
 				// Filtragem de dados e obter scopes
 				$utilizadorAtivo = $dados;
-				$scope = self::gerarScopes($utilizadorAtivo['nome_estatuto']);
-				unset($utilizadorAtivo['nome_estatuto']);
-				unset($utilizadorAtivo['ativo']);
+				$scope           = self::gerarScopes( $utilizadorAtivo['nome_estatuto'] );
+				unset( $utilizadorAtivo['nome_estatuto'] );
+				unset( $utilizadorAtivo['ativo'] );
 				$utilizadorAtivo['scope'] = $scope;
 			}
 
@@ -336,86 +341,102 @@ class Token {
 	 *
 	 *  NOTA: Este não verifica se o id dos utilizadores é valido! Cabe ao contexto em que é utilizado fazer essa verificação
 	*/
-	public static function gerarRefreshToken($idUtilizador) {
+	public static function gerarRefreshToken( $idUtilizador ) {
 		$tokenGerado = false;
 
-			//  Metodo verificarUserAtivoScopes faz a verificaçoes devidas e retorna uma array com idUtilizador e o scope deste
-			$claimsObtidas = self::verificarUserAtivoScopes($idUtilizador);
+		//  Metodo verificarUserAtivoScopes faz a verificaçoes devidas e retorna uma array com idUtilizador e o scope deste
+		$claimsObtidas = self::verificarUserAtivoScopes( $idUtilizador );
 
-			// Gerar JWT Id Unico
-			if($claimsObtidas){
+		// Gerar JWT Id Unico
+		if ( $claimsObtidas ) {
 
-				// Payload igual ao refresh token excepto jwt id e tempo atualizado
-				$accessPayload = array(
-						"iss" => self::$defaultClaims['iss'],
-						"aud" => self::$defaultClaims['aud'],
-						"exp" => time()+self::$tempoRefreshToken,
-						"iat" => time(),
-						"jti" => md5(uniqid(rand(), true)), // Numero random como id
-						"idUtilizador" => $claimsObtidas['idUtilizador'],
-						"scope"=>$claimsObtidas['scope']
-				);
+			// Payload igual ao refresh token excepto jwt id e tempo atualizado
+			$accessPayload = array(
+					"iss"          => self::$defaultClaims['iss'],
+					"aud"          => self::$defaultClaims['aud'],
+					"exp"          => time() + self::$tempoRefreshToken,
+					"iat"          => time(),
+					"jti"          => md5( uniqid( rand(), true ) ), // Numero random como id
+					"idUtilizador" => $claimsObtidas['idUtilizador'],
+					"scope"        => $claimsObtidas['scope']
+			);
 
-				# Guardar na base de dados
-				try{
+			# Guardar na base de dados
+			try {
 
-					# Criar token
-					$tokenGerado = JWT::encode($accessPayload, getenv('SECRET_KEY'));
+				# Criar token
+				$tokenGerado = JWT::encode( $accessPayload, getenv( 'SECRET_KEY' ) );
 
-					$sql = "INSERT INTO utilizadores_tokens (id,utilizadores_id_utilizadores,data_criacao,refresh_token, ativo) VALUES (:jti,:idUtilizadores,CURRENT_TIMESTAMP, :tokenGerado, 1)";
+				$sql = "INSERT INTO utilizadores_tokens (id,utilizadores_id_utilizadores,data_criacao,refresh_token, ativo) VALUES (:jti,:idUtilizadores,CURRENT_TIMESTAMP, :tokenGerado, 1)";
 
-					// iniciar ligação à base de dados
-					$db = new Db();
+				// iniciar ligação à base de dados
+				$db = new Db();
 
-					// conectar
-					$db = $db->connect();
+				// conectar
+				$db = $db->connect();
 
-					// Binds
-					$idUtilizador = $accessPayload['idUtilizador'];
-					$jti = $accessPayload['jti']; // jtw id
+				// Binds
+				$idUtilizador = $accessPayload['idUtilizador'];
+				$jti          = $accessPayload['jti']; // jtw id
 
-					// Query
-					$stmt = $db->prepare( $sql );
-					$stmt->bindValue( ':jti', $jti, PDO::PARAM_STR);
-					$stmt->bindValue( ':idUtilizadores', $idUtilizador, PDO::PARAM_INT );
-					$stmt->bindValue( ':tokenGerado', $tokenGerado, PDO::PARAM_STR );
-					$stmt->execute();
-					$db    = null;
+				// Query
+				$stmt = $db->prepare( $sql );
+				$stmt->bindValue( ':jti', $jti, PDO::PARAM_STR );
+				$stmt->bindValue( ':idUtilizadores', $idUtilizador, PDO::PARAM_INT );
+				$stmt->bindValue( ':tokenGerado', $tokenGerado, PDO::PARAM_STR );
+				$stmt->execute();
+				$db = null;
 
-					# Criar cookie
-					setcookie(self::$refreshCookieName,$tokenGerado,time()+self::$tempoRefreshToken,'/',null,null,true);
+				# Criar cookie
+				setcookie( self::$refreshCookieName, $tokenGerado, time() + self::$tempoRefreshToken, '/', null, null, true );
 
-				}catch(\PDOException $e){
-					// Nao mostrar em ambiente de producao
-					Errors::filtro( function ( $e ) {
-						echo $e->getMessage();
-					}, function () {
-					}, $e );
-				}
+			} catch ( \PDOException $e ) {
+				// Nao mostrar em ambiente de producao
+				Errors::filtro( function ( $e ) {
+					echo $e->getMessage();
+				}, function () {
+				}, $e );
 			}
-			// Todo guardar nas cookies
+		}
+
+		// Todo guardar nas cookies
 
 		return $tokenGerado;
 	}
 
 
 	// Todo Desativar refresh token atraves da claim JWT ID na base de dados
+	// Validar info com https://github.com/Respect/Validation
 	// Pode ser array de ids ou string
-	public static function desativarRefreshToken($jit) {
+	// @param jit é o json web token id
+	public static function desativarRefreshToken( $jit ) {
 		$refreshApagado = false;
-		$jit      = $jit ? $jit : self::getRefreshToken();
+
+		// Apenas 1 jit
+		if ( gettype( $jit ) == 'string' && v::alnum()->noWhitespace()->length(15, 50)->validate($jit)) {
+			echo 'Ya boy é uma jit espetaculher';
+			// >1 jit
+		} else if ( gettype( $jit ) == 'array' ) {
+			echo '2';
+		}
+
+		$sql = "UPDATE `utilizadores_tokens`
+						SET `ativo` = CASE id
+						WHEN '2964b31e9925a6d296ab330dbdc4d965' THEN '0'
+						WHEN 'c5238fd1e50a29947537f43a70946de9' THEN '0'
+						END
+						WHERE id IN ('2964b31e9925a6d296ab330dbdc4d965','c5238fd1e50a29947537f43a70946de9')";
 	}
 
 	// Todo Apagar tokens
 	// Verifica se existe a  cookie com o nome ‘token_refresh’ caso exista invoca o metodo verificarRefresh para averiguar se o mesmo é valido, se não é valido apenas apaga a(s) cookie(s) ( token e token_refresh ), caso seja válido torna o mesmo inválido (na base de dados) e só de seguida é que apaga a(s) cookie(s).
 
-	public static function apagarTokens($refreshToken) {
+	public static function apagarTokens( $refreshToken ) {
 
 	}
 
 
 	// Remover access token e refresh token das cookies e apagar refresh da base de dados
-
 
 
 }
