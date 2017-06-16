@@ -375,7 +375,7 @@ $app->get( '/api/eventos/{id}/utilizadores', function ( Request $request, Respon
 #   *page = pagina de resultados *obrigatorio
 #   results = número de resultados por página
 #   min: 1, max: 10
-#   Exemplo: /api/eventos/2/colaboradores?page=1&results=2&by=id&order=ASC
+#   Exemplo: /api/eventos/2/colaboradores?page=1&results=4&by=id&order=ASC
 $app->get( '/api/eventos/{id}/colaboradores', function ( Request $request, Response $response ) {
 	$id = (int) $request->getAttribute( 'id' ); // ir buscar id
 
