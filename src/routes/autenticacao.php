@@ -11,12 +11,8 @@
  * Verificar dados, insert na base de dados, gerar access e refresh token e criar cookies com os mesmos
  * Scopes: todos
  *
- * PUT /token
- * Verificar que access token está prestes a expirar, verificar refresh token na base de dados, gerar novo access token e atualziar cookie
- * Scopes: todos
- *
- * DELETE /token
- * Adiciona refresh token à black list
+ * DELETE /logout
+ * Torna refresh token inativo e apaga as cookies.
  * Scopes: admin
  */
 
@@ -36,24 +32,29 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  * Nao tendo refresh token ativo, valida password e cria tokens.
  */
 $app->post( '/api/login', function ( Request $request, Response $response ) {
+// Valores default de resposta
 	$status = 401; // Unauthorized
 	$info   = 'Unauthorized';
-	// Obter dados
+
+// Obter dados
 	$parsedBody = $request->getParsedBody();
 	$email      = $parsedBody['email'];
 	$password   = $parsedBody['password'];
 
 	if ( H::obrigatorio( $email ) && H::obrigatorio( $password ) ) {
+// Verificar se nao esta logged in
 		if ( ! Token::verificarRefresh() ) {
 			try {
-				// Verificar informações
+// Verificar informações
 				$user         = new Utilizador( [
 						'email'    => $email,
 						'password' => $password
 				] );
+
+// Metodo login retorna id do utilizador ou false (se nao fez login)
 				$idUtilizador = $user->login();
 
-				// Criar tokens
+// Criar tokens
 				if ( $idUtilizador ) {
 					Token::gerarAccessToken( Token::gerarRefreshToken( $idUtilizador ) );
 					$status = 200; // Ok
@@ -62,7 +63,7 @@ $app->post( '/api/login', function ( Request $request, Response $response ) {
 			} catch ( \Bioliving\Errors\TokenException $e ) {
 				$status = 401;
 
-				// Em ambiente de desenvolvimento mostra info sobre o erro, caso contrario apenas Unauthorized
+// Em ambiente de desenvolvimento mostra info sobre o erro, caso contrario apenas Unauthorized
 				$info = Errors::filtroReturn( function ( $e ) {
 					return $e->getMessage();
 				}, function () {
@@ -123,21 +124,22 @@ $app->post( '/api/create', function ( Request $request, Response $response ) {
 	$password   = $parsedBody['password'];
 
 	if ( H::obrigatorio( $email ) && H::obrigatorio( $password ) && H::obrigatorio( $nome ) && H::obrigatorio( $sobrenome ) ) {
-		// So pode registar se nao tiver sessao iniciada
+// So pode registar se nao tiver sessao iniciada
 		if ( ! Token::verificarRefresh() ) {
 			try {
-				// Verificar informações
+// Instanciar utilizador com parametros
 				$user = new Utilizador( [
 						'email'     => $email,
 						'nome'      => $nome,
 						'sobrenome' => $sobrenome,
 						'password'  => $password
 				] );
+// Registar
 				if ( $user->registrar() ) {
-
+// Obter id
 					$idUtilizador = $user->getId();
 
-					// Criar tokens
+// Criar tokens (fazer login assim que regista)
 					if ( $idUtilizador ) {
 						Token::gerarAccessToken( Token::gerarRefreshToken( $idUtilizador ) );
 						$status = 200; // Ok
@@ -147,7 +149,7 @@ $app->post( '/api/create', function ( Request $request, Response $response ) {
 			} catch ( \Bioliving\Errors\TokenException $e ) {
 				$status = 401;
 
-				// Em ambiente de desenvolvimento mostra info sobre o erro, caso contrario apenas Unauthorized
+// Em ambiente de desenvolvimento mostra info sobre o erro, caso contrario apenas Unauthorized
 				$info = Errors::filtroReturn( function ( $e ) {
 					return $e->getMessage();
 				}, function () {
