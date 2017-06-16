@@ -24,14 +24,14 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 $app->get( '/api/eventos', function ( Request $request, Response $response ) {
 
 	$byArr = [
-			'id'          => 'id_eventos',
-			'nome'        => 'nome_evento',
-			'dataRegisto' => 'data_registo_evento',
-			'dataEvento'  => 'data_evento',
-			'dataFim'     => 'data_fim',
-			'ativo'       => 'ativo',
-			'tipoEvento'  => 'nome_tipo_evento',
-			'local'       => 'nome'
+		'id'          => 'id_eventos',
+		'nome'        => 'nome_evento',
+		'dataRegisto' => 'data_registo_evento',
+		'dataEvento'  => 'data_evento',
+		'dataFim'     => 'data_fim',
+		'ativo'       => 'ativo',
+		'tipoEvento'  => 'nome_tipo_evento',
+		'local'       => 'nome'
 	]; // Valores para ordernar por, fizemos uma array para simplificar queries
 
 
@@ -105,48 +105,48 @@ $app->get( '/api/eventos', function ( Request $request, Response $response ) {
 			}
 
 			$responseData = [
-					'status' => "$status",
-					'data'   => [
-							$dados
-					]
+				'status' => "$status",
+				'data'   => [
+					$dados
+				]
 			];
 
 			return $response
-					->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 		} catch ( PDOException $err ) {
-			$status   = 503; // Service unavailable
+			$status = 503; // Service unavailable
 			// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
 			$errorMsg = Errors::filtroReturn( function ( $err ) {
 				return [
-						"error" => [
-								"status" => $err->getCode(),
-								"text"   => $err->getMessage()
-						]
+					"error" => [
+						"status" => $err->getCode(),
+						"text"   => $err->getMessage()
+					]
 				];
 			}, function () {
 				return [
-						"error" => 'Servico Indisponivel'
+					"error" => 'Servico Indisponivel'
 				];
 			}, $err );
 
 			return $response
-					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 		}
 
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => 'Parametros invalidos'
+			"error" => [
+				"status" => "$status",
+				"text"   => 'Parametros invalidos'
 
-				]
+			]
 		];
 
 		return $response
-				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+			->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
 //////////// Obter dados de um evento através do ID ////////////
@@ -188,48 +188,48 @@ $app->get( '/api/eventos/{id}', function ( Request $request, Response $response 
 			}
 
 			$responseData = [
-					'status' => "$status",
-					'data'   => [
-							$dados
-					]
+				'status' => "$status",
+				'data'   => [
+					$dados
+				]
 			];
 
 			return $response
-					->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 		} catch ( PDOException $err ) {
-			$status   = 503; // Service unavailable
+			$status = 503; // Service unavailable
 			// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
 			$errorMsg = Errors::filtroReturn( function ( $err ) {
 				return [
-						"error" => [
-								"status" => $err->getCode(),
-								"text"   => $err->getMessage()
-						]
+					"error" => [
+						"status" => $err->getCode(),
+						"text"   => $err->getMessage()
+					]
 				];
 			}, function () {
 				return [
-						"error" => 'Servico Indisponivel'
+					"error" => 'Servico Indisponivel'
 				];
 			}, $err );
 
 			return $response
-					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 		}
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => 'Parametros invalidos'
+			"error" => [
+				"status" => "$status",
+				"text"   => 'Parametros invalidos'
 
-				]
+			]
 		];
 
 		return $response
-				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+			->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
 //////////// Obter utilizadores que participaram/inscreveram num evento ////////////
@@ -242,9 +242,9 @@ $app->get( '/api/eventos/{id}/utilizadores', function ( Request $request, Respon
 	$id = (int) $request->getAttribute( 'id' ); // ir buscar id
 
 	$byArr = [
-			'id'           => 'id_utilizadores',
-			'nome'         => 'nome',
-			'nomeEstatuto' => 'nome_estatuto'
+		'id'           => 'id_utilizadores',
+		'nome'         => 'nome',
+		'nomeEstatuto' => 'nome_estatuto'
 
 	]; // Valores para ordernar por, fizemos uma array para simplificar queries
 
@@ -325,14 +325,14 @@ $app->get( '/api/eventos/{id}/utilizadores', function ( Request $request, Respon
 			}
 
 			$responseData = [
-					'status' => "$status",
-					'data'   => [
-							$dados
-					]
+				'status' => "$status",
+				'data'   => [
+					$dados
+				]
 			];
 
 			return $response
-					->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 		} catch ( PDOException $err ) {
@@ -340,32 +340,33 @@ $app->get( '/api/eventos/{id}/utilizadores', function ( Request $request, Respon
 
 			// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
 			$errorMsg = Errors::filtroReturn( function ( $err ) {
-										return [
-												"error" => [
-														"status" => $err->getCode(),
-														"text"   => $err->getMessage()
-												]
-										];
-									}, function () {
-										return [
-												"error" => 'Servico Indisponivel'
-										];
-									}, $err );
+				return [
+					"error" => [
+						"status" => $err->getCode(),
+						"text"   => $err->getMessage()
+					]
+				];
+			}, function () {
+				return [
+					"error" => 'Servico Indisponivel'
+				];
+			}, $err );
+
 			return $response
-					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 		}
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => 'Parametros invalidos'
+			"error" => [
+				"status" => "$status",
+				"text"   => 'Parametros invalidos'
 
-				]
+			]
 		];
 
 		return $response
-				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+			->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 
 
@@ -380,8 +381,8 @@ $app->get( '/api/eventos/{id}/colaboradores', function ( Request $request, Respo
 	$id = (int) $request->getAttribute( 'id' ); // ir buscar id
 
 	$byArr = [
-			'id'   => 'colaboradores_id_colaboradores',
-			'nome' => 'nome'
+		'id'   => 'colaboradores_id_colaboradores',
+		'nome' => 'nome'
 
 	]; // Valores para ordernar por, fizemos uma array para simplificar queries
 
@@ -461,49 +462,49 @@ $app->get( '/api/eventos/{id}/colaboradores', function ( Request $request, Respo
 			}
 
 			$responseData = [
-					'status' => "$status",
-					'data'   => [
-							$dados
-					]
+				'status' => "$status",
+				'data'   => [
+					$dados
+				]
 			];
 
 			return $response
-					->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 		} catch ( PDOException $err ) {
-			$status   = 503; // Service unavailable
+			$status = 503; // Service unavailable
 
 			// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
 			$errorMsg = Errors::filtroReturn( function ( $err ) {
 				return [
-						"error" => [
-								"status" => $err->getCode(),
-								"text"   => $err->getMessage()
-						]
+					"error" => [
+						"status" => $err->getCode(),
+						"text"   => $err->getMessage()
+					]
 				];
 			}, function ( $err ) {
 				return [
-						"error" => 'Servico Indisponivel'
+					"error" => 'Servico Indisponivel'
 				];
 			}, $err );
 
 			return $response
-					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 		}
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => 'Parametros invalidos'
+			"error" => [
+				"status" => "$status",
+				"text"   => 'Parametros invalidos'
 
-				]
+			]
 		];
 
 		return $response
-				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+			->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 
 
@@ -519,8 +520,8 @@ $app->get( '/api/eventos/{id}/extras', function ( Request $request, Response $re
 	$id = (int) $request->getAttribute( 'id' ); // ir buscar id
 
 	$byArr = [
-			'id'   => 'id_extras',
-			'nome' => 'titulo'
+		'id'   => 'id_extras',
+		'nome' => 'titulo'
 
 	]; // Valores para ordernar por, fizemos uma array para simplificar queries
 
@@ -601,48 +602,48 @@ $app->get( '/api/eventos/{id}/extras', function ( Request $request, Response $re
 			}
 
 			$responseData = [
-					'status' => "$status",
-					'data'   => [
-							$dados
-					]
+				'status' => "$status",
+				'data'   => [
+					$dados
+				]
 			];
 
 			return $response
-					->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 		} catch ( PDOException $err ) {
-			$status   = 503; // Service unavailable
+			$status = 503; // Service unavailable
 			// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
 			$errorMsg = Errors::filtroReturn( function ( $err ) {
 				return [
-						"error" => [
-								"status" => $err->getCode(),
-								"text"   => $err->getMessage()
-						]
+					"error" => [
+						"status" => $err->getCode(),
+						"text"   => $err->getMessage()
+					]
 				];
 			}, function () {
 				return [
-						"error" => 'Servico Indisponivel'
+					"error" => 'Servico Indisponivel'
 				];
 			}, $err );
 
 			return $response
-					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 		}
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => 'Parametros invalidos'
+			"error" => [
+				"status" => "$status",
+				"text"   => 'Parametros invalidos'
 
-				]
+			]
 		];
 
 		return $response
-				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+			->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 
 
@@ -657,8 +658,8 @@ $app->get( '/api/eventos/{id}/tags', function ( Request $request, Response $resp
 	$id = (int) $request->getAttribute( 'id' ); // ir buscar id
 
 	$byArr = [
-			'id'   => 'id_tags',
-			'nome' => 'tag_nome'
+		'id'   => 'id_tags',
+		'nome' => 'tag_nome'
 
 	]; // Valores para ordernar por, fizemos uma array para simplificar queries
 
@@ -737,48 +738,48 @@ $app->get( '/api/eventos/{id}/tags', function ( Request $request, Response $resp
 			}
 
 			$responseData = [
-					'status' => "$status",
-					'data'   => [
-							$dados
-					]
+				'status' => "$status",
+				'data'   => [
+					$dados
+				]
 			];
 
 			return $response
-					->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 		} catch ( PDOException $err ) {
-			$status   = 503; // Service unavailable
+			$status = 503; // Service unavailable
 			// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
 			$errorMsg = Errors::filtroReturn( function ( $err ) {
 				return [
-						"error" => [
-								"status" => $err->getCode(),
-								"text"   => $err->getMessage()
-						]
+					"error" => [
+						"status" => $err->getCode(),
+						"text"   => $err->getMessage()
+					]
 				];
 			}, function () {
 				return [
-						"error" => 'Servico Indisponivel'
+					"error" => 'Servico Indisponivel'
 				];
 			}, $err );
 
 			return $response
-					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 		}
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => 'Parametros invalidos'
+			"error" => [
+				"status" => "$status",
+				"text"   => 'Parametros invalidos'
 
-				]
+			]
 		];
 
 		return $response
-				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+			->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 
 
@@ -921,31 +922,31 @@ $app->post( '/api/eventos/add', function ( Request $request, Response $response 
 			$db = null;
 
 			$responseData = [
-					'Resposta' => "Evento adicionado com sucesso!"
+				'Resposta' => "Evento adicionado com sucesso!"
 			];
 
 			return $response
-					->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 		} catch ( PDOException $err ) {
-			$status   = 503; // Service unavailable
+			$status = 503; // Service unavailable
 			// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
 			$errorMsg = Errors::filtroReturn( function ( $err ) {
 				return [
-						"error" => [
-								"status" => $err->getCode(),
-								"text"   => $err->getMessage()
-						]
+					"error" => [
+						"status" => $err->getCode(),
+						"text"   => $err->getMessage()
+					]
 				];
 			}, function () {
 				return [
-						"error" => 'Servico Indisponivel'
+					"error" => 'Servico Indisponivel'
 				];
 			}, $err );
 
 			return $response
-					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 		}
 
@@ -953,17 +954,17 @@ $app->post( '/api/eventos/add', function ( Request $request, Response $response 
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => [
-								$error
-						]
-
+			"error" => [
+				"status" => "$status",
+				"text"   => [
+					$error
 				]
+
+			]
 		];
 
 		return $response
-				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+			->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 
 } );
@@ -992,40 +993,40 @@ $app->post( '/api/eventos/tipo/add', function ( Request $request, Response $resp
 			$stmt->execute();
 			$db           = null;
 			$responseData = [
-					'Resposta' => "Tipo de evento adicionado com sucesso!"
+				'Resposta' => "Tipo de evento adicionado com sucesso!"
 			];
 
 			return $response
-					->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 		} catch ( PDOException $err ) {
 			$status   = 503; // Service unavailable
 			$errorMsg = [
-					"error" => [
-							"status" => $err->getCode(),
-							"text"   => $err->getMessage()
-					]
+				"error" => [
+					"status" => $err->getCode(),
+					"text"   => $err->getMessage()
+				]
 			];
 
 			return $response
-					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 		}
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => [
-								$error
-						]
-
+			"error" => [
+				"status" => "$status",
+				"text"   => [
+					$error
 				]
+
+			]
 		];
 
 		return $response
-				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+			->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
 // POST localização
@@ -1045,8 +1046,8 @@ $app->post( '/api/eventos/localizacao/add', function ( Request $request, Respons
 
 	function validaLatLng( $tipo, $valor ) {
 		$resultado = ( $tipo == 'latitude' )
-				? '/^(\+|-)?(?:90(?:(?:\.0{1,8})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,8})?))$/'
-				: '/^(\+|-)?(?:180(?:(?:\.0{1,8})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\.[0-9]{1,8})?))$/';
+			? '/^(\+|-)?(?:90(?:(?:\.0{1,8})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,8})?))$/'
+			: '/^(\+|-)?(?:180(?:(?:\.0{1,8})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\.[0-9]{1,8})?))$/';
 
 		if ( preg_match( $resultado, $valor ) ) {
 			return true;
@@ -1079,47 +1080,47 @@ $app->post( '/api/eventos/localizacao/add', function ( Request $request, Respons
 			$stmt->execute();
 			$db           = null;
 			$responseData = [
-					'Resposta' => "Localização adicionada com sucesso!"
+				'Resposta' => "Localização adicionada com sucesso!"
 			];
 
 			return $response
-					->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 		} catch ( PDOException $err ) {
-			$status   = 503; // Service unavailable
+			$status = 503; // Service unavailable
 			// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
 			$errorMsg = Errors::filtroReturn( function ( $err ) {
 				return [
-						"error" => [
-								"status" => $err->getCode(),
-								"text"   => $err->getMessage()
-						]
+					"error" => [
+						"status" => $err->getCode(),
+						"text"   => $err->getMessage()
+					]
 				];
 			}, function () {
 				return [
-						"error" => 'Servico Indisponivel'
+					"error" => 'Servico Indisponivel'
 				];
 			}, $err );
 
 			return $response
-					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 		}
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => [
-								$error
-						]
-
+			"error" => [
+				"status" => "$status",
+				"text"   => [
+					$error
 				]
+
+			]
 		];
 
 		return $response
-				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+			->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
 //////////////Alterar um evento///////////////////
@@ -1264,31 +1265,31 @@ $app->put( '/api/eventos/alter/{id}', function ( Request $request, Response $res
 					$stmt->execute();
 
 					$responseData = [
-							'Resposta' => "Evento alterado com sucesso!"
+						'Resposta' => "Evento alterado com sucesso!"
 					];
 
 					return $response
-							->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+						->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 				} catch ( PDOException $err ) {
-					$status   = 503; // Service unavailable
+					$status = 503; // Service unavailable
 					// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
 					$errorMsg = Errors::filtroReturn( function ( $err ) {
 						return [
-								"error" => [
-										"status" => $err->getCode(),
-										"text"   => $err->getMessage()
-								]
+							"error" => [
+								"status" => $err->getCode(),
+								"text"   => $err->getMessage()
+							]
 						];
 					}, function () {
 						return [
-								"error" => 'Servico Indisponivel'
+							"error" => 'Servico Indisponivel'
 						];
 					}, $err );
 
 					return $response
-							->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+						->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 				}
 
@@ -1296,45 +1297,45 @@ $app->put( '/api/eventos/alter/{id}', function ( Request $request, Response $res
 			} else {
 				$status   = 422; // Unprocessable Entity
 				$errorMsg = [
-						"error" => [
-								"status" => "$status",
-								"text"   => [
-										$error
-								]
-
+					"error" => [
+						"status" => "$status",
+						"text"   => [
+							$error
 						]
+
+					]
 				];
 
 				return $response
-						->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 			}
 
 		} else {
 			$status   = 422; // Unprocessable Entity
 			$errorMsg = [
-					"error" => [
-							"status" => "$status",
-							"text"   => 'Evento já não se encontra disponivel'
+				"error" => [
+					"status" => "$status",
+					"text"   => 'Evento já não se encontra disponivel'
 
-					]
+				]
 			];
 
 			return $response
-					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 		}
 
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => 'Parametros inválidos'
+			"error" => [
+				"status" => "$status",
+				"text"   => 'Parametros inválidos'
 
-				]
+			]
 		];
 
 		return $response
-				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+			->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 
 } );
@@ -1366,60 +1367,60 @@ $app->delete( '/api/eventos/delete/{id}', function ( Request $request, Response 
 				$stmt->execute();
 				$db           = null;
 				$responseData = [
-						'Resposta' => "Evento apagado com sucesso!"
+					'Resposta' => "Evento apagado com sucesso!"
 				];
 
 				return $response
-						->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+					->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 			} catch ( PDOException $err ) {
-				$status   = 503; // Service unavailable
+				$status = 503; // Service unavailable
 				// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
 				$errorMsg = Errors::filtroReturn( function ( $err ) {
 					return [
-							"error" => [
-									"status" => $err->getCode(),
-									"text"   => $err->getMessage()
-							]
+						"error" => [
+							"status" => $err->getCode(),
+							"text"   => $err->getMessage()
+						]
 					];
 				}, function () {
 					return [
-							"error" => 'Servico Indisponivel'
+						"error" => 'Servico Indisponivel'
 					];
 				}, $err );
 
 				return $response
-						->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 			}
 
 		} else {
 			$status   = 422; // Unprocessable Entity
 			$errorMsg = [
-					"error" => [
-							"status" => "$status",
-							"text"   => 'Evento já não se encontra disponivel'
+				"error" => [
+					"status" => "$status",
+					"text"   => 'Evento já não se encontra disponivel'
 
-					]
+				]
 			];
 
 			return $response
-					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 		}
 
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => 'Parametros inválidos'
+			"error" => [
+				"status" => "$status",
+				"text"   => 'Parametros inválidos'
 
-				]
+			]
 		];
 
 		return $response
-				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+			->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
 //PUT para tornar evento ativo
@@ -1449,59 +1450,59 @@ $app->put( '/api/eventos/ative/{id}', function ( Request $request, Response $res
 				$stmt->bindParam( ':ativo', $ativo );
 				$stmt->execute();
 				$responseData = [
-						'Resposta' => "Evento ativado com sucesso!"
+					'Resposta' => "Evento ativado com sucesso!"
 				];
 
 				return $response
-						->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+					->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 			} catch ( PDOException $err ) {
-				$status   = 503; // Service unavailable
+				$status = 503; // Service unavailable
 				// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
 				$errorMsg = Errors::filtroReturn( function ( $err ) {
 					return [
-							"error" => [
-									"status" => $err->getCode(),
-									"text"   => $err->getMessage()
-							]
+						"error" => [
+							"status" => $err->getCode(),
+							"text"   => $err->getMessage()
+						]
 					];
 				}, function () {
 					return [
-							"error" => 'Servico Indisponivel'
+						"error" => 'Servico Indisponivel'
 					];
 				}, $err );
 
 				return $response
-						->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 			}
 		} else {
 			$status   = 422; // Unprocessable Entity
 			$errorMsg = [
-					"error" => [
-							"status" => "$status",
-							"text"   => 'Evento não se encontra disponivel'
+				"error" => [
+					"status" => "$status",
+					"text"   => 'Evento não se encontra disponivel'
 
-					]
+				]
 			];
 
 			return $response
-					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 		}
 
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => 'Parametros inválidos'
+			"error" => [
+				"status" => "$status",
+				"text"   => 'Parametros inválidos'
 
-				]
+			]
 		];
 
 		return $response
-				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+			->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 
 } );
@@ -1532,59 +1533,59 @@ $app->put( '/api/eventos/disable/{id}', function ( Request $request, Response $r
 				$stmt->bindParam( ':ativo', $ativo );
 				$stmt->execute();
 				$responseData = [
-						'Resposta' => "Evento desativado com sucesso!"
+					'Resposta' => "Evento desativado com sucesso!"
 				];
 
 				return $response
-						->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+					->withJson( $responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 
 			} catch ( PDOException $err ) {
-				$status   = 503; // Service unavailable
+				$status = 503; // Service unavailable
 				// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
 				$errorMsg = Errors::filtroReturn( function ( $err ) {
 					return [
-							"error" => [
-									"status" => $err->getCode(),
-									"text"   => $err->getMessage()
-							]
+						"error" => [
+							"status" => $err->getCode(),
+							"text"   => $err->getMessage()
+						]
 					];
 				}, function () {
 					return [
-							"error" => 'Servico Indisponivel'
+						"error" => 'Servico Indisponivel'
 					];
 				}, $err );
 
 				return $response
-						->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
 			}
 		} else {
 			$status   = 422; // Unprocessable Entity
 			$errorMsg = [
-					"error" => [
-							"status" => "$status",
-							"text"   => 'Evento não se encontra disponivel'
+				"error" => [
+					"status" => "$status",
+					"text"   => 'Evento não se encontra disponivel'
 
-					]
+				]
 			];
 
 			return $response
-					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 		}
 
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => 'Parametros inválidos'
+			"error" => [
+				"status" => "$status",
+				"text"   => 'Parametros inválidos'
 
-				]
+			]
 		];
 
 		return $response
-				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+			->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 
 } );
