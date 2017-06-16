@@ -11,7 +11,7 @@
  * Verificar dados, insert na base de dados, gerar access e refresh token e criar cookies com os mesmos
  * Scopes: todos
  *
- * DELETE /logout
+ * DELETE /login
  * Torna refresh token inativo e apaga as cookies.
  * Scopes: admin
  */
