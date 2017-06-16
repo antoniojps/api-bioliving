@@ -6,6 +6,7 @@
  * Metodos estaticos:
  * - getAccessToken
  * - getRefreshToken
+ * - adeusCookies
  * - autenticar
  * - getSegRestantes
  * - getUtilizador
