@@ -76,7 +76,9 @@ class Errors {
 
 		$resultado = null;
 
+		// Verificar se tem segundo parametro (callback para ambiente de producao) caso NAO tenha atribuir funcao vazia
 		$producao = $producao ? $producao: function(){};
+
 		if ( is_callable( $desenvolvimento ) && is_callable($producao) ) {
 			if ( getenv( 'PHP_ENV' ) === 'desenvolvimento' ) {
 				$resultado = call_user_func($desenvolvimento,$exception);

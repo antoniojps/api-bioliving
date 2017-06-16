@@ -15,6 +15,23 @@
 		 * Não pode ser igual ao email, nome, sobrenome, nome do site
 		 * Nao pode ter caracteres que se repetem mais de 3 vezes
 		 * Diferente das x (guardadas na bd) passwords mais utilizadas em Portugal
+ *
+ * Exemplo utilização:
+ *
+try {
+	$user = new Utilizador( [
+			'email'     => 'antoniojps@ua.pt',
+			'nome'      => 'Antonio',
+			'sobrenome' => 'Santos',
+			'password'  => 'password123'
+	] );
+
+	$user->registrar();
+
+} catch ( \Bioliving\Errors\UtilizadorException $e ) {
+	echo $e->getMessage();
+}
+ *
  */
 
 namespace Bioliving\Custom;
@@ -38,8 +55,8 @@ class Utilizador {
 		}
 
 		$this->argumentos     = array_keys( $arr );
-		$this->nome           = isset( $arr['nome'] ) ? ucfirst( strtolower( $arr['nome'] ) ) : null;
-		$this->sobrenome      = isset( $arr['sobrenome'] ) ? ucfirst( strtolower( $arr['sobrenome'] ) ) : null;
+		$this->nome           = isset( $arr['nome'] ) ? $arr['nome']: null;
+		$this->sobrenome      = isset( $arr['sobrenome'] ) ? $arr['sobrenome'] : null;
 		$this->email          = isset( $arr['email'] ) ? strtolower( $arr['email'] ) : null;
 		$this->password       = isset( $arr['password'] ) ? $arr['password'] : null;
 
@@ -50,6 +67,9 @@ class Utilizador {
 // Exemplo: Metodo registrar necessita de ter nome,sobrenome,email,password, caso nao tenham retorna false e mostra um erro
 	private function validArgNecessarios( $argArr ) {
 
+		// Todo Fazer com que veja se existem os argumentos necessarios, neste momento iguala em vez de verificar se existem ou nao
+		// Todo adicionar de seguida ao metodo getId
+		// ver array_intersect
 		sort( $this->argumentos );
 		sort( $argArr );
 		if ( $this->argumentos === $argArr ) {
@@ -204,8 +224,15 @@ class Utilizador {
 
 /*
 * Registrar
+ *
+ * retorna user id se registrado com sucesso
+ * retorna false caso nao tenha registado com sucesso, podendo se ler as exceptions com um catch \Bioliving\Errors\UtilizadorException
+ *
+ *
 */
 	public function registrar() {
+
+		$userRegistado = false;
 
 		// Validações
 		if ( $this->validArgNecessarios( [ 'email', 'nome', 'sobrenome', 'password'] ) ) {
@@ -216,21 +243,28 @@ class Utilizador {
 
 						// Insert na base de dados
 						try {
+
+							$password = password_hash($this->password,PASSWORD_DEFAULT);
+
 							$db = new Db();
 							$db = $db->connect();
 
-							$stmt = $db->prepare("INSERT INTO names (firstname,lastname,postcode) VALUES (:firstname,:lastname,:postcode)");
+							// Penultimo 1 = ativo, Ultimo 3 = Estatuto Normal
+							$sql = "INSERT INTO utilizadores (id_utilizadores,nome, apelido, genero, data_nascimento, data_registo_user, email, password, foto, sobre, sobre_mini, telemovel, localizacao_id_localizacao, ativo, estatutos_id_estatutos) VALUES (NULL, :nome, :sobrenome, NULL, NULL, CURRENT_TIMESTAMP, :email, :password, NULL, NULL, NULL, NULL, NULL, '1', '3')";
 
-							$stmt->bindValue(':firstname','Joana');
-							$stmt->bindValue(':lastname','Albertina');
-							$stmt->bindValue(':postcode','DWAXD231');
+							$stmt = $db->prepare($sql);
+
+							$stmt->bindValue(':nome',$this->nome,  PDO::PARAM_STR);
+							$stmt->bindValue(':sobrenome',$this->sobrenome, PDO::PARAM_STR);
+							$stmt->bindValue(':email',$this->email, PDO::PARAM_STR);
+							$stmt->bindValue(':password',$password, PDO::PARAM_STR);
 							$stmt->execute();
 							$db = null;
 
+							$userRegistado = true;
 
-							echo '<b>Registrar</b>';
 						} catch (\PDOException $e){
-
+							throw new UtilizadorException("Erro DB : " . $e->getMessage());
 						}
 
 						// return true;
@@ -250,19 +284,95 @@ class Utilizador {
 		} else {
 			throw new UtilizadorException( "Parametros em falta para utilizador o metodo registrar" );
 		}
+
+		return $userRegistado;
+
 	}
 
 	// Login
+	// Retorna id do utilizador se funcionou
+	// Retorna false caso contrário
 	public function login() {
+
+		$userLogado = false;
+
 		// Verificar se utilizou email e password
+		if ( $this->validArgNecessarios( [ 'email','password'] ) ) {
+			if ( $this->validarEmail() ) {
 
-		// Verificar se email existe
+				// Obter hashed password do utilizador com o email utilizado
+				try {
 
-		// Verificar password
 
-		// Gerar Token
+					$db = new Db();
+					$db = $db->connect();
 
-		// Enviar Resposta
+					// Na criaçao do token verifica-se se usar está ativo.
+					$sql = "SELECT id_utilizadores,email,password FROM utilizadores WHERE email = :email";
+
+					$stmt = $db->prepare($sql);
+
+					$stmt->bindValue(':email',$this->email, PDO::PARAM_STR);
+					$stmt->execute();
+					$db = null;
+					$utilizador = $stmt->fetch(PDO::FETCH_ASSOC);
+						// Verificações se user está logado
+					if($utilizador){
+						if(password_verify($this->password,$utilizador['password'])){
+							$userLogado = $utilizador['id_utilizadores'];
+						} else {
+							throw new UtilizadorException("Password incorreta");
+						}
+					} else {
+						throw new UtilizadorException("Utilizador inexistente");
+					}
+				} catch (\PDOException $e){
+					throw new UtilizadorException("Erro DB : " . $e->getMessage());
+				}
+
+			} else {
+				throw new UtilizadorException( "Email invalido" );
+			}
+		} else {
+			throw new UtilizadorException( "Parametros em falta para utilizador no metodo login" );
+		}
+
+		return $userLogado;
+
+	}
+
+	/*
+	 * Metodo obtem o id do utilizador através de email
+	 */
+
+	public function getId(){
+
+		$idUtilizador = false;
+
+			try {
+				$db = new Db();
+				$db = $db->connect();
+
+				// Na criaçao do token verifica-se se usar está ativo.
+				$sql = "SELECT id_utilizadores,email,password FROM utilizadores WHERE email = :email";
+
+				$stmt = $db->prepare( $sql );
+
+				$stmt->bindValue( ':email', $this->email, PDO::PARAM_STR );
+				$stmt->execute();
+				$db         = null;
+				$utilizador = $stmt->fetch( PDO::FETCH_ASSOC );
+				// Verificações se user está logado
+				if ( $utilizador ) {
+					$idUtilizador = $utilizador['id_utilizadores'];
+				} else {
+					throw new UtilizadorException( "Utilizador inexistente no Metodo obterId" );
+				}
+			} catch ( \PDOException $e ) {
+				throw new UtilizadorException( "Erro DB : " . $e->getMessage() );
+			}
+		return $idUtilizador;
+
 	}
 
 

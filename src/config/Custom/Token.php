@@ -1,6 +1,9 @@
 <?php
 
 /**
+ * Desenvolvido no âmbito da cadeira de LabMM4 2016 por:
+ * António Santos, Diana Rocha, Joao Silva e Ruben Ferreira
+ *
  * Esta classe foi criada para verificar e gerir o sistema de validação e atribuição de tokens num sistema de autenticação com access e refresh tokens, em seguida poderá ler todos os métodos existentes para uma pequena descrição do que fazem ver o link "mais informação"
  *
  * Metodos estaticos:
@@ -25,7 +28,7 @@
 namespace Bioliving\Custom;
 
 use Bioliving\Database\Db as Db;
-use Bioliving\Errors\Errors as Errors;
+use Bioliving\Errors\TokenException;
 use Firebase\JWT\JWT;
 use PDO as PDO;
 use Respect\Validation\Validator as v;
@@ -37,15 +40,15 @@ use Respect\Validation\Validator as v;
 class Token {
 	private $token;
 	private $tokenValido;
-	public static $tokenPayload; // Null ate ser utilizado o metodo autenticarToken
+	public static $tokenPayload; // Null ate ser utilizado o metodo autenticar
 	public static $defaultClaims = [
 			"iss" => 'Bioeventos',
 			"aud" => 'http://labmm.clients.ua.pt'
 	];
-	public static $tempoAccessToken = 3600; // 1 hora
-	public static $tempoRefreshToken = 3600 * 24 * 365 * 4; // 4 anos
-	private static $accessCookieName = 'token';
-	private static $refreshCookieName = 'token_refresh';
+	public static $tempoAccessToken = 3600; // 1 hora 3600
+	public static $tempoRefreshToken = 3600 * 24 * 365 * 4; // 4 anos 3600 * 24 * 365 * 4
+	public static $accessCookieName = 'token';
+	public static $refreshCookieName = 'token_refresh';
 	private static $algorithm = 'HS256';
 
 
@@ -56,11 +59,8 @@ class Token {
 		if ( $this->validarSyntax() ) {
 			$this->tokenValido = true;
 		} else {
-			// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
-			Errors::filtro( function ( $e ) {
-				throw new \Exception( "Token com syntax inválida" );
-			}, function () {
-			} );
+			throw new TokenException("Token com syntax invalida");
+
 		}
 
 		return $this->tokenValido;
@@ -75,6 +75,28 @@ class Token {
 			preg_match( '/([0-9A-Za-z]+)\.([0-9A-Za-z]+)\.([0-9A-Za-z]+)/', $this->token, $tokenMatch );
 			if ( sizeof( $tokenMatch ) === 4 ) {
 				$tokenValido = true;
+			}
+		}
+
+		return $tokenValido;
+	}
+
+	// Retorna array com cada parte do token:
+	// token[0] = token
+	// token[1] = header
+	// token[2] = payload
+	// token[3] = secret
+	public static function getTokenArr($token = false) {
+
+		// Se tem argumento entao $token = argumento, caso contrario é por default o access token
+		$token = $token ? $token : self::getAccessToken();
+
+		$tokenValido = false;
+
+		if ( gettype( $token ) === 'string' ) {
+			preg_match( '/([0-9A-Za-z]+)\.([0-9A-Za-z]+)\.([0-9A-Za-z]+)/', $token, $tokenMatch );
+			if ( sizeof( $tokenMatch ) === 4 ) {
+				$tokenValido = $tokenMatch;
 			}
 		}
 
@@ -132,11 +154,7 @@ class Token {
 			$jwtAutentico       = true;
 
 		} catch ( \Exception $e ) {
-			// Nao mostrar em ambiente de producao
-			Errors::filtro( function ( $e ) {
-				echo $e->getMessage();
-			}, function () {
-			}, $e );
+			$jwtAutentico       = false;
 		}
 
 		return $jwtAutentico ? $token : false;
@@ -144,14 +162,14 @@ class Token {
 
 	// Quantos SEGUNDOS  falta até expirar, caso não seja possivel retorna false (por ex se token nao tiver claim exp)
 	public static function getSegRestantes( $token = false ) {
+		$tempoRestante = false;
 
 		// Se tem argumento entao $token = argumento, caso contrario é por default o access token
-		$token = $token ? $token : self::getAccessToken();
+		$token = $token ? self::getTokenArr($token) : self::getAccessToken();
 
-		$tempoRestante = false;
-		if ( self::autenticar( $token ) ) {
-			$tempoRestante = self::$tokenPayload['exp'] - time();
-		}
+		if($token) $tempoRestante = json_decode(base64_decode($token[2]))->exp - time();
+
+
 
 		return $tempoRestante;
 	}
@@ -159,15 +177,28 @@ class Token {
 	// Retorna ID do utilizador ao qual o token está associado
 	public static function getUtilizador( $token = false ) {
 
-		// Se tem argumento entao $token = argumento, caso contrario é por default o access token
-		$token = $token ? $token : self::getAccessToken();
-
 		$id = false;
-		if ( self::autenticar( $token ) ) {
-			$id = self::$tokenPayload['idUtilizador'];
-		}
+
+		// Se tem argumento entao $token = argumento, caso contrario é por default o access token
+		$token = $token ? self::getTokenArr($token) : self::getAccessToken();
+
+		if($token) $id = json_decode(base64_decode($token[2]))->idUtilizador;
+
 
 		return $id;
+	}
+
+	// Retorna jti ao qual o token está associado
+	public static function getJti( $token = false ) {
+
+		$jti = false;
+
+		// Se tem argumento entao $token = argumento, caso contrario é por default o access token
+		$token = $token ? self::getTokenArr($token) : self::getAccessToken();
+
+		if($token) $jti = json_decode(base64_decode($token[2]))->jti;
+
+		return $jti;
 	}
 
 	// Retorna array SCOPE do token
@@ -208,15 +239,13 @@ class Token {
 
 
 	/*
-	 * Verificar se
+	 * Verificar se refresh token existe na base de dados de acordo com o utilizador que esta na payload e se este ainda está ativo
 	 */
-	// Verificar se refresh token existe na base de dados de acordo com o utilizador que esta na payload e se este ainda está ativo
 	public static function verificarRefresh( $refreshToken = false ) {
 		$refreshTokenAtivo = false;
 		$refreshToken      = $refreshToken ? $refreshToken : self::getRefreshToken();
 
-		$idUtilizador = self::getUtilizador( $refreshToken );
-
+		$idUtilizador = $refreshToken ? self::getUtilizador( $refreshToken ) : false;
 		if ( $idUtilizador ) {
 			try {
 
@@ -247,11 +276,7 @@ class Token {
 				}
 
 			} catch ( \PDOException $e ) {
-				// Nao mostrar em ambiente de producao
-				Errors::filtro( function ( $e ) {
-					echo $e->getMessage();
-				}, function () {
-				}, $e );
+				throw new TokenException("Erro DB no Metodo verificarRefresh:".$e->getMessage());
 			}
 		}
 
@@ -284,15 +309,15 @@ class Token {
 			# Criar cookies
 			// HTTP Only Cookie para NAO poder ser lida atraves de Javascript
 			// Segurança contra ataques XSS
-			setcookie( self::$accessCookieName, $tokenGerado, time() + self::$tempoAccessToken, '/', null, null, true );
+			setcookie( self::$accessCookieName, $tokenGerado, time() + self::$tempoRefreshToken * 2, '/', null, null, true );
 
 			// Caso o refresh token já nao seja valido entao:
 			// Apagar cookies (tokens) e refresh token da base de dados
 			// Client-side terá que redireccionar para página de login
 
 		} else {
-			self::desativarRefreshToken(self::$tokenPayload['jti']);
-			self::adeusCookies();
+			self::apagarTokens($refreshToken);
+			throw new TokenException("Refresh token inválido");
 		}
 
 		return $tokenGerado;
@@ -337,11 +362,7 @@ class Token {
 			}
 
 		} catch ( \PDOException $e ) {
-			// Nao mostrar em ambiente de producao
-			Errors::filtro( function ( $e ) {
-				echo $e->getMessage();
-			}, function () {
-			}, $e );
+			throw new TokenException("Erro DB no Metodo verificarUserAtivoScopes:".$e->getMessage());
 		}
 
 		return $utilizadorAtivo;
@@ -400,15 +421,13 @@ class Token {
 				$db = null;
 
 				# Criar cookie
-				setcookie( self::$refreshCookieName, $tokenGerado, time() + self::$tempoRefreshToken, '/', null, null, true );
+				setcookie( self::$refreshCookieName, $tokenGerado, time() + self::$tempoRefreshToken * 2, '/', null, null, true );
 
 			} catch ( \PDOException $e ) {
-				// Nao mostrar em ambiente de producao
-				Errors::filtro( function ( $e ) {
-					echo $e->getMessage();
-				}, function () {
-				}, $e );
+				throw new TokenException("Erro DB:".$e->getMessage());
 			}
+		} else {
+			throw new TokenException("Utilizador inativo/inexistente ou estatuto invalido");
 		}
 
 		return $tokenGerado;
@@ -466,7 +485,6 @@ class Token {
 
 			$sql = "UPDATE `utilizadores_tokens` SET `ativo` = CASE id $sqlWhen END WHERE id IN ($sqlIn)";
 
-
 			try {
 				// iniciar ligação à base de dados
 				$db = new Db();
@@ -483,10 +501,7 @@ class Token {
 
 			} catch ( \PDOException $e ) {
 				// Nao mostrar em ambiente de producao
-				Errors::filtro( function ( $e ) {
-					echo $e->getMessage();
-				}, function () {
-				}, $e );
+				throw new TokenException("Erro DB:".$e->getMessage());
 			}
 		}
 
@@ -496,23 +511,21 @@ class Token {
 	// Apagar tokens
 	// Verifica se existe a  cookie com o nome ‘token_refresh’ caso exista invoca o metodo verificarRefresh para averiguar se o mesmo é valido, se não é valido apenas apaga a(s) cookie(s) ( token e token_refresh ), caso seja válido torna o mesmo inválido (na base de dados) e só de seguida é que apaga a(s) cookie(s).
 
-	public static function apagarTokens() {
-		$refreshToken = self::getRefreshToken();
+	public static function apagarTokens($refreshToken = false) {
+		$tokensApagados = false;
 
-		if ( $refreshToken && self::verificarRefresh( $refreshToken ) ) {
 
-			// Refresh token é valido, apagar cookies e meter como desativado na BD
+		$refreshToken = $refreshToken ? $refreshToken : self::getRefreshToken();
 
-			$jti = self::$tokenPayload['jti'];
-			self::desativarRefreshToken($jti);
+			$jti = self::getJti($refreshToken);
+			if($jti){
+				self::desativarRefreshToken($jti);
+			}
 			self::adeusCookies();
 
-		} else {
+			$tokensApagados = true;
 
-			// Refresh token nao é valido, apagar cookies
-
-			self::adeusCookies();
-		}
+		return $tokensApagados;
 	}
 
 }
