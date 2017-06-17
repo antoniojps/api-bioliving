@@ -30,7 +30,7 @@ $app->add( new \Slim\Middleware\JwtAuthentication( [
 
 		"error" => function ( $request, $response, $arguments ) { // resposta no erro
 
-			// Todo se já expirou verificar se refresh token é valido, se sim, redirect para a route requisitada caso contrário mostrar não autorizado com codigo 401
+			// Se já expirou verificar se refresh token é valido, se sim, redirect para a route requisitada caso contrário mostrar não autorizado com codigo 401
 			$uri               = $request->getUri();
 			$info              = 'Unauthorized';
 			$accessTokenGerado = false;

@@ -13,7 +13,7 @@
  *
  * DELETE /login
  * Torna refresh token inativo e apaga as cookies.
- * Scopes: admin
+ * Scopes: id do utilizador no token
  */
 
 // importar classes para scope
