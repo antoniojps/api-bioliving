@@ -1,6 +1,5 @@
 <?php
 // TODO: GET para pesquisar eventos por nome, tags , por horas, tipo e localização etc individualmente e em grupo
-// TODO: GET contagem de eventos de x em x tempo
 
 /*
  * Routes para todos endpoints relativos aos eventos:
@@ -1601,3 +1600,78 @@ $app->put( '/api/eventos/disable/{id}', function ( Request $request, Response $r
 
 } );
 
+/////////////////obter numero de eventos criados nos ultimos meses/dias////////////////
+#exemplo: /api/contagem/eventos?groupby=m&results=2&order=DESC
+#groupby=m  : por meses
+#groupby=d  : por dias
+$app->get('/api/contagem/eventos', function (Request $request, Response $response) {
+
+    $maxResults = 12; // maximo de resultados
+    $minResults = 1; // minimo de resultados por pagina
+    $groupby = "m"; //
+    $orderDefault = "ASC"; //ordenação predefenida
+
+
+    $parametros = $request->getQueryParams(); // obter parametros do querystring
+    $group = isset($parametros['groupby']) ? $parametros['groupby'] : $groupby;
+    $results = isset($parametros['results']) ? (int)$parametros['results'] : $maxResults;
+    $order = isset($parametros['order']) ? $parametros['order'] : $orderDefault;
+
+
+    $results = $results > $maxResults ? $maxResults : $results;
+    $results = $results < $minResults ? $minResults : $results;
+    $order = $order === "ASC" || $order === "DESC" ? $order : $orderDefault;
+
+    if ($group === "m") {
+        $sql = $order === $orderDefault ? "SELECT MONTH ( `data_registo_evento` ) AS 'Mes' ,COUNT(`id_eventos`) AS 'numero' FROM eventos GROUP BY MONTH ( `data_registo_evento` ) ORDER BY data_registo_evento LIMIT :limit" : "SELECT MONTH ( `data_registo_evento` ) AS 'Mes' ,COUNT(`id_eventos`) AS 'numero' FROM eventos GROUP BY MONTH ( `data_registo_evento` )  ORDER BY data_registo_evento DESC LIMIT :limit";
+    } elseif ($group === "d") {
+        $sql = $order === $orderDefault ? "SELECT cast(`data_registo_evento` AS DATE) AS 'Dia', COUNT(*) AS 'numero' FROM eventos GROUP BY cast(`data_registo_evento` AS DATE) ORDER BY data_registo_evento LIMIT :limit" : "SELECT cast(`data_registo_evento` AS DATE) AS 'Dia', COUNT(*) AS 'numero' FROM eventos GROUP BY cast(`data_registo_evento` AS DATE) ORDER BY data_registo_evento DESC LIMIT :limit";
+    }
+
+    try {
+
+        $status = 200; // OK
+        // iniciar ligação à base de dados
+        $db = new Db();
+
+        // conectar
+        $db = $db->connect();
+        $stmt = $db->prepare($sql);
+        $stmt->bindValue(':limit', (int)$results, PDO::PARAM_INT);
+        $stmt->execute();
+        $db = null;
+        $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // remover nulls e strings vazias
+        $dados = array_filter(array_map(function ($evento) {
+            return $evento = array_filter($evento, function ($coluna) {
+                return $coluna !== null && $coluna !== '';
+            });
+        }, $dados));
+
+        $responseData = [
+            'status' => "$status",
+            'data' => [
+                $dados
+            ]
+        ];
+
+        return $response
+            ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+    } catch (PDOException $err) {
+        $status = 503; // Service unavailable
+        $errorMsg = [
+            "error" => [
+                "status" => $err->getCode(),
+                "text" => $err->getMessage()
+            ]
+        ];
+
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+    }
+
+
+});
