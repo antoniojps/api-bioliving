@@ -11,6 +11,14 @@ require_once '../src/config/Errors/Errors.php';
 $dotenv = new Dotenv\Dotenv( dirname( __DIR__ ) );
 $dotenv->load();
 
+/* CLOUDINARY Configuraçao */
+
+\Cloudinary::config(array(
+		"cloud_name" => getenv('CLOUD_NAME'),
+		"api_key" => getenv('API_KEY'),
+		"api_secret" => getenv('API_SECRET')
+));
+
 /* SLIM APP */
 // criar objeto slim com container (src/config/errors/errors.php) $c
 $app = new \Slim\App($c);
@@ -22,8 +30,10 @@ $container["jwt"] = function ( $container ) {
 	return new StdClass;
 };
 
-// Middleware - JWT Autenticaçao
+// Middleware
+	// JWT Autenticaçao
 require_once "../src/middleware/JwtAuthentication.php";
+	// Todo CSRF Token Middleware
 
 // Routes:
 # /token - Verificar dados, gerar token e criar cookie com o mesmo

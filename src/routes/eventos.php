@@ -148,6 +148,7 @@ $app->get( '/api/eventos', function ( Request $request, Response $response ) {
 				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
+
 //////////// Obter dados de um evento através do ID ////////////
 $app->get( '/api/eventos/{id}', function ( Request $request, Response $response ) {
 	$id = (int) $request->getAttribute( 'id' ); // ir buscar id
@@ -231,6 +232,7 @@ $app->get( '/api/eventos/{id}', function ( Request $request, Response $response 
 				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
+
 //////////// Obter utilizadores que participaram/inscreveram num evento ////////////
 # Parametros:
 #   *page = pagina de resultados *obrigatorio
@@ -370,6 +372,7 @@ $app->get( '/api/eventos/{id}/utilizadores', function ( Request $request, Respon
 
 
 } );
+
 //////////// Obter colaboradores de um evento ////////////
 # Parametros:
 #   *page = pagina de resultados *obrigatorio
@@ -508,6 +511,7 @@ $app->get( '/api/eventos/{id}/colaboradores', function ( Request $request, Respo
 
 
 } );
+
 //////////// Obter extras de um evento + icons ////////////
 //////////// Obter colaboradores de um evento ////////////
 # Parametros:
@@ -647,6 +651,7 @@ $app->get( '/api/eventos/{id}/extras', function ( Request $request, Response $re
 
 
 } );
+
 //////////// Obter tags de um evento ////////////
 # Parametros:
 #   *page = pagina de resultados *obrigatorio
@@ -783,6 +788,7 @@ $app->get( '/api/eventos/{id}/tags', function ( Request $request, Response $resp
 
 
 } );
+
 /////////// Adicionar um novo evento ////////////
 #Parametros obrigatórios do evento a criar
 #   nome_evento
@@ -967,6 +973,7 @@ $app->post( '/api/eventos/add', function ( Request $request, Response $response 
 	}
 
 } );
+
 //POST tipo eventos
 $app->post( '/api/eventos/tipo/add', function ( Request $request, Response $response ) {
 	$tipoNome = $request->getParam( 'nomeTipoEvento' );
@@ -1028,6 +1035,7 @@ $app->post( '/api/eventos/tipo/add', function ( Request $request, Response $resp
 				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
+
 // POST localização
 $app->post( '/api/eventos/localizacao/add', function ( Request $request, Response $response ) {
 	$localizacao = $request->getParam( 'nomeLocalizacao' );
@@ -1122,6 +1130,7 @@ $app->post( '/api/eventos/localizacao/add', function ( Request $request, Respons
 				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
+
 //////////////Alterar um evento///////////////////
 //Scopes: admin ou token do request é igual ao {id}(colaborador que criou )
 $app->put( '/api/eventos/alter/{id}', function ( Request $request, Response $response ) {
@@ -1338,6 +1347,7 @@ $app->put( '/api/eventos/alter/{id}', function ( Request $request, Response $res
 	}
 
 } );
+
 /////////////Apagar um evento////////////////////
 $app->delete( '/api/eventos/delete/{id}', function ( Request $request, Response $response ) {
 	$id = (int) $request->getAttribute( 'id' ); // ir buscar id
@@ -1422,6 +1432,7 @@ $app->delete( '/api/eventos/delete/{id}', function ( Request $request, Response 
 				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
+
 //PUT para tornar evento ativo
 $app->put( '/api/eventos/ative/{id}', function ( Request $request, Response $response ) {
 	$id    = (int) $request->getAttribute( 'id' );
@@ -1505,6 +1516,7 @@ $app->put( '/api/eventos/ative/{id}', function ( Request $request, Response $res
 	}
 
 } );
+
 //PUT para tornar evento inativo
 $app->put( '/api/eventos/disable/{id}', function ( Request $request, Response $response ) {
 	$id    = (int) $request->getAttribute( 'id' );

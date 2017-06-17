@@ -13,7 +13,6 @@
 
 namespace Bioliving\Custom;
 
-
 class Helper {
 
 	// Utilizada para verificar se um parametro obrigatorio foi enviado no request
