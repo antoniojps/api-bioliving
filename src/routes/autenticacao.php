@@ -46,7 +46,7 @@ $app->post( '/api/login', function ( Request $request, Response $response ) {
 		if ( ! Token::verificarRefresh() ) {
 			try {
 // Verificar informações
-				$user         = new Utilizador( [
+				$user = new Utilizador( [
 						'email'    => $email,
 						'password' => $password
 				] );
@@ -187,6 +187,34 @@ $app->post( '/api/create', function ( Request $request, Response $response ) {
 
 	return $response
 			->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+} );
 
+//////////// Logout  ////////////
+/*
+ * Apaga tokens caso exista pelo menos um.
+ */
+$app->delete( '/api/login', function ( Request $request, Response $response ) {
+
+	$status = 503; // Service unavailable
+	$info   = 'Serviço Indisponivel';
+
+	if ( Token::getRefreshToken() || Token::getAccessToken() ) {
+		if ( Token::apagarTokens() ) {
+			$status = 200; // Ok
+			$info   = 'Logout realizado';
+		}
+	} else {
+		$status = 401; // Unauthorized
+		$info   = 'Unauthorized';
+	}
+
+	$responseData = [
+			'status' => $status,
+			'info'   => $info
+	];
+
+
+	return $response
+			->withJson( $responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 } );
 

@@ -120,8 +120,6 @@ $app->get('/api/global/pesquisa', function (Request $request, Response $response
         $dadosTotais = array();
 
         foreach ($sql as $key => $i) {
-            echo "$key";
-            echo $i;
             try {
 
                 $status = 200; // OK
