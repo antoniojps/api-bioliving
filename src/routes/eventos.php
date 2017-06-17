@@ -15,6 +15,7 @@ use Bioliving\Database\Db as Db;
 use Bioliving\Errors\Errors as Errors;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
+use Respect\Validation\Validator as v;
 
 //////////// Obter todos os eventos ////////////
 # Variaveis alteráveis:
@@ -147,6 +148,7 @@ $app->get( '/api/eventos', function ( Request $request, Response $response ) {
 				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
+
 //////////// Obter dados de um evento através do ID ////////////
 $app->get( '/api/eventos/{id}', function ( Request $request, Response $response ) {
 	$id = (int) $request->getAttribute( 'id' ); // ir buscar id
@@ -230,6 +232,7 @@ $app->get( '/api/eventos/{id}', function ( Request $request, Response $response 
 				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
+
 //////////// Obter utilizadores que participaram/inscreveram num evento ////////////
 # Parametros:
 #   *page = pagina de resultados *obrigatorio
@@ -369,6 +372,7 @@ $app->get( '/api/eventos/{id}/utilizadores', function ( Request $request, Respon
 
 
 } );
+
 //////////// Obter colaboradores de um evento ////////////
 # Parametros:
 #   *page = pagina de resultados *obrigatorio
@@ -507,6 +511,7 @@ $app->get( '/api/eventos/{id}/colaboradores', function ( Request $request, Respo
 
 
 } );
+
 //////////// Obter extras de um evento + icons ////////////
 //////////// Obter colaboradores de um evento ////////////
 # Parametros:
@@ -646,6 +651,7 @@ $app->get( '/api/eventos/{id}/extras', function ( Request $request, Response $re
 
 
 } );
+
 //////////// Obter tags de um evento ////////////
 # Parametros:
 #   *page = pagina de resultados *obrigatorio
@@ -782,6 +788,7 @@ $app->get( '/api/eventos/{id}/tags', function ( Request $request, Response $resp
 
 
 } );
+
 /////////// Adicionar um novo evento ////////////
 #Parametros obrigatórios do evento a criar
 #   nome_evento
@@ -966,6 +973,7 @@ $app->post( '/api/eventos/add', function ( Request $request, Response $response 
 	}
 
 } );
+
 //POST tipo eventos
 $app->post( '/api/eventos/tipo/add', function ( Request $request, Response $response ) {
 	$tipoNome = $request->getParam( 'nomeTipoEvento' );
@@ -1027,6 +1035,7 @@ $app->post( '/api/eventos/tipo/add', function ( Request $request, Response $resp
 				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
+
 // POST localização
 $app->post( '/api/eventos/localizacao/add', function ( Request $request, Response $response ) {
 	$localizacao = $request->getParam( 'nomeLocalizacao' );
@@ -1121,6 +1130,7 @@ $app->post( '/api/eventos/localizacao/add', function ( Request $request, Respons
 				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
+
 //////////////Alterar um evento///////////////////
 //Scopes: admin ou token do request é igual ao {id}(colaborador que criou )
 $app->put( '/api/eventos/alter/{id}', function ( Request $request, Response $response ) {
@@ -1337,6 +1347,7 @@ $app->put( '/api/eventos/alter/{id}', function ( Request $request, Response $res
 	}
 
 } );
+
 /////////////Apagar um evento////////////////////
 $app->delete( '/api/eventos/delete/{id}', function ( Request $request, Response $response ) {
 	$id = (int) $request->getAttribute( 'id' ); // ir buscar id
@@ -1421,6 +1432,7 @@ $app->delete( '/api/eventos/delete/{id}', function ( Request $request, Response 
 				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 	}
 } );
+
 //PUT para tornar evento ativo
 $app->put( '/api/eventos/ative/{id}', function ( Request $request, Response $response ) {
 	$id    = (int) $request->getAttribute( 'id' );
@@ -1504,6 +1516,7 @@ $app->put( '/api/eventos/ative/{id}', function ( Request $request, Response $res
 	}
 
 } );
+
 //PUT para tornar evento inativo
 $app->put( '/api/eventos/disable/{id}', function ( Request $request, Response $response ) {
 	$id    = (int) $request->getAttribute( 'id' );
@@ -1588,78 +1601,3 @@ $app->put( '/api/eventos/disable/{id}', function ( Request $request, Response $r
 
 } );
 
-/////////////////obter numero de eventos criados nos ultimos meses/dias////////////////
-#exemplo: /api/contagem/eventos?groupby=m&results=2&order=DESC
-#groupby=m  : por meses
-#groupby=d  : por dias
-$app->get('/api/contagem/eventos', function (Request $request, Response $response) {
-
-    $maxResults = 12; // maximo de resultados
-    $minResults = 1; // minimo de resultados por pagina
-    $groupby = "m"; //
-    $orderDefault = "ASC"; //ordenação predefenida
-
-
-    $parametros = $request->getQueryParams(); // obter parametros do querystring
-    $group = isset($parametros['groupby']) ? $parametros['groupby'] : $groupby;
-    $results = isset($parametros['results']) ? (int)$parametros['results'] : $maxResults;
-    $order = isset($parametros['order']) ? $parametros['order'] : $orderDefault;
-
-
-    $results = $results > $maxResults ? $maxResults : $results;
-    $results = $results < $minResults ? $minResults : $results;
-    $order = $order === "ASC" || $order === "DESC" ? $order : $orderDefault;
-
-    if ($group === "m") {
-        $sql = $order === $orderDefault ? "SELECT MONTH ( `data_registo_evento` ) AS 'Mes' ,COUNT(`id_eventos`) AS 'numero' FROM eventos GROUP BY MONTH ( `data_registo_evento` ) ORDER BY data_registo_evento LIMIT :limit" : "SELECT MONTH ( `data_registo_evento` ) AS 'Mes' ,COUNT(`id_eventos`) AS 'numero' FROM eventos GROUP BY MONTH ( `data_registo_evento` )  ORDER BY data_registo_evento DESC LIMIT :limit";
-    } elseif ($group === "d") {
-        $sql = $order === $orderDefault ? "SELECT cast(`data_registo_evento` AS DATE) AS 'Dia', COUNT(*) AS 'numero' FROM eventos GROUP BY cast(`data_registo_evento` AS DATE) ORDER BY data_registo_evento LIMIT :limit" : "SELECT cast(`data_registo_evento` AS DATE) AS 'Dia', COUNT(*) AS 'numero' FROM eventos GROUP BY cast(`data_registo_evento` AS DATE) ORDER BY data_registo_evento DESC LIMIT :limit";
-    }
-
-    try {
-
-        $status = 200; // OK
-        // iniciar ligação à base de dados
-        $db = new Db();
-
-        // conectar
-        $db = $db->connect();
-        $stmt = $db->prepare($sql);
-        $stmt->bindValue(':limit', (int)$results, PDO::PARAM_INT);
-        $stmt->execute();
-        $db = null;
-        $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // remover nulls e strings vazias
-        $dados = array_filter(array_map(function ($evento) {
-            return $evento = array_filter($evento, function ($coluna) {
-                return $coluna !== null && $coluna !== '';
-            });
-        }, $dados));
-
-        $responseData = [
-            'status' => "$status",
-            'data' => [
-                $dados
-            ]
-        ];
-
-        return $response
-            ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
-
-    } catch (PDOException $err) {
-        $status = 503; // Service unavailable
-        $errorMsg = [
-            "error" => [
-                "status" => $err->getCode(),
-                "text" => $err->getMessage()
-            ]
-        ];
-
-        return $response
-            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-    }
-
-
-});

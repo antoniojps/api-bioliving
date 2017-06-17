@@ -478,8 +478,8 @@ class Token {
 			/* Exemplo do SQL pretendido:
 			 * UPDATE `utilizadores_tokens`
 			 * SET `ativo` = CASE id
-			 * WHEN '2964b31e9925a6d296ab330dbdc4d965' THEN '1'
-			 * WHEN 'c5238fd1e50a29947537f43a70946de9' THEN '1'
+			 * WHEN '2964b31e9925a6d296ab330dbdc4d965' THEN '0'
+			 * WHEN 'c5238fd1e50a29947537f43a70946de9' THEN '0'
 			 * END WHERE id IN ('2964b31e9925a6d296ab330dbdc4d965','c5238fd1e50a29947537f43a70946de9')
 			 */
 
