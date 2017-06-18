@@ -45,7 +45,7 @@ $app->put('/api/localizacao/update/{id}', function (Request $request, Response $
     }
     if (count($error) === 0) {
 
-        //verificar se id já existe
+        //verificar se id existe
         $sql = "SELECT * FROM `localizacao` WHERE localizacao=:id";
 
         // Get DB object
@@ -90,8 +90,8 @@ $app->put('/api/localizacao/update/{id}', function (Request $request, Response $
 
             } else {
 
-                //buscar db todos os customers
-                $sql = "UPDATE `localizacao` SET `lat` = :lat, `lng` = :lng, `nome` = :nome WHERE `localizacao` = :id;";
+
+                $sql = "UPDATE `localizacao` SET `lat` = :lat, `lng` = :lng, `nome` = :nome WHERE `localizacao` = :id";
                 try {
                     // Get DB object
                     $db = new db();

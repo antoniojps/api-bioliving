@@ -18,7 +18,8 @@ $app->put('/api/tags/update/{id}', function (Request $request, Response $respons
     elseif (!v::alnum()->validate($tag) || !v::noWhitespace()->validate($tag)) $error[] = "Tag só pode conter numeros e letras";
 
     if (count($error) === 0) {
-        //verificar se tag existe
+
+        //verificar se id  existe
         $sql = "SELECT * FROM tags WHERE id_tags = :id ";
 
         try {
@@ -41,7 +42,7 @@ $app->put('/api/tags/update/{id}', function (Request $request, Response $respons
 
             } else {
 
-                //verificar se tag já existe  //verificar se localização já existe
+                //verificar se tag já existe
                 $sql = "SELECT * FROM `tags` WHERE `tag_nome`=:nome";
 
                 // Get DB object
@@ -64,7 +65,6 @@ $app->put('/api/tags/update/{id}', function (Request $request, Response $respons
                 } else {
 
 
-                    //buscar db todos os customers
                     $sql = "UPDATE `deca_16l4_78`.`tags` SET `tag_nome` = :nome WHERE `tags`.`id_tags` = :id;";
 
                     try {

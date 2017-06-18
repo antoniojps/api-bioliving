@@ -69,7 +69,6 @@ $app->post('/api/localizacao/add', function (Request $request, Response $respons
 
         } else {
 
-            //buscar db todos os customers
             $sql = "INSERT INTO localizacao (lat,lng,nome) VALUES  (:lat,:lng,:nome)";
             try {
                 // Get DB object

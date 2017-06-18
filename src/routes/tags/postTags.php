@@ -40,7 +40,7 @@ $app->post('/api/tags/add', function (Request $request, Response $response) {
 
             } else {
 
-                //buscar db todos os customers
+
                 $sql = "INSERT INTO tags (tag_nome) VALUES  (:nome)";
 
                 try {
