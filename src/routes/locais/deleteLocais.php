@@ -1,5 +1,4 @@
 <?php
-
 use Bioliving\Database\Db as Db;
 use Bioliving\Errors\Errors as Errors;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -7,14 +6,14 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 
 
-/////////////Apagar um evento////////////////////
-$app->delete('/api/eventos/delete/{id}', function (Request $request, Response $response) {
+/////////////Apagar um local////////////////////
+$app->delete('/api/localizacao/delete/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
-    if (is_int($id) && $id > 0) {
-//ver se id existe na bd antes de editar
-        $sql = "SELECT * FROM eventos WHERE id_eventos = :id";
+    if (v::intVal()->validate($id) && $id > 0) {
+        //ver se id existe na bd antes de editar
+        $sql = "SELECT * FROM localizacao WHERE localizacao = :id";
         $db = new Db();
-// conectar
+        // conectar
         $db = $db->connect();
         $stmt = $db->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -23,20 +22,19 @@ $app->delete('/api/eventos/delete/{id}', function (Request $request, Response $r
         $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if (count($dados) >= 1) {
 
-            $sql = "DELETE FROM eventos WHERE id_eventos = :id";
+            $sql = "DELETE FROM localizacao WHERE localizacao = :id";
 
             try {
-// Get DB object
+                // Get DB object
                 $db = new db();
-//connect
+                //connect
                 $db = $db->connect();
-
                 $stmt = $db->prepare($sql);
                 $stmt->bindValue(':id', $id, PDO::PARAM_INT);
                 $stmt->execute();
                 $db = null;
                 $responseData = [
-                    'Resposta' => "Evento apagado com sucesso!"
+                    'Resposta' => "Localizacao apagada com sucesso!"
                 ];
 
                 return $response
@@ -45,7 +43,7 @@ $app->delete('/api/eventos/delete/{id}', function (Request $request, Response $r
 
             } catch (PDOException $err) {
                 $status = 503; // Service unavailable
-// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
                         "error" => [
@@ -69,7 +67,7 @@ $app->delete('/api/eventos/delete/{id}', function (Request $request, Response $r
             $errorMsg = [
                 "error" => [
                     "status" => "$status",
-                    "text" => 'Evento já não se encontra disponivel'
+                    "text" => 'Localizacao já não se encontra disponivel'
 
                 ]
             ];
@@ -83,7 +81,7 @@ $app->delete('/api/eventos/delete/{id}', function (Request $request, Response $r
         $errorMsg = [
             "error" => [
                 "status" => "$status",
-                "text" => 'Parametros inválidos'
+                "text" => 'Atributo inválido'
 
             ]
         ];

@@ -46,28 +46,28 @@ $app->post('/api/localizacao/add', function (Request $request, Response $respons
     if (count($error) === 0) {
 
         //verificar se localização já existe
-            $sql = "SELECT * FROM `localizacao` WHERE `nome`=:nome AND `lat` LIKE :lat AND `lng` LIKE :lng";
+        $sql = "SELECT * FROM `localizacao` WHERE `nome`=:nome AND `lat` LIKE :lat AND `lng` LIKE :lng";
 
-            // Get DB object
-            $db = new db();
-            //connect
-            $db = $db->connect();
-            $stmt = $db->prepare($sql);
-            $stmt->bindParam(':nome', $localizacao);
-            $stmt->bindParam(':lat', $lat);
-            $stmt->bindParam(':lng', $lng);
-            $stmt->execute();
-            $db = null;
-            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Get DB object
+        $db = new db();
+        //connect
+        $db = $db->connect();
+        $stmt = $db->prepare($sql);
+        $stmt->bindParam(':nome', $localizacao);
+        $stmt->bindParam(':lat', $lat);
+        $stmt->bindParam(':lng', $lng);
+        $stmt->execute();
+        $db = null;
+        $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            if (count($dados)) {
-                $responseData = [
-                    'Resposta' => "Localização já existe!"
-                ];
-                return $response
-                    ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+        if (count($dados)) {
+            $responseData = [
+                'Resposta' => "Localização já existe!"
+            ];
+            return $response
+                ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
-            } else {
+        } else {
 
             //buscar db todos os customers
             $sql = "INSERT INTO localizacao (lat,lng,nome) VALUES  (:lat,:lng,:nome)";
