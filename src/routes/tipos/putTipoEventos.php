@@ -6,7 +6,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 
 /////////////////////POST tipo eventos///////////////
-$app->put('/api/eventos/tipo/update/{id}', function (Request $request, Response $response) {
+$app->put('/api/eventostipos/update/{id}', function (Request $request, Response $response) {
     $id = $request->getAttribute('id');
     $tipoNome = $request->getParam('nomeTipoEvento');
     $error = array();

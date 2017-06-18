@@ -9,12 +9,12 @@ use Respect\Validation\Validator as v;
 //////////Receber todos os locais/Pesquisar em todos os locais/////////////
 # Variaveis alteráveis:
 #   min: 1, max: 10
-# Exemplo: /api/tags?page=1&results=2&by=nome&order=DESC&msg=henrique&id=8
-$app->get('/api/tags', function (Request $request, Response $response) {
+# Exemplo: /api/eventostipos?page=1&results=2&by=nome&order=DESC&msg=desporto&id=4
+$app->get('/api/eventostipos', function (Request $request, Response $response) {
 
     $byArr = [
-        'id' => 'id_tags',
-        'nome' => 'tag_nome'
+        'id' => 'id_tipo_evento',
+        'nome' => 'nome_tipo_evento'
 
     ]; // Valores para ordernar por, fizemos uma array para simplificar queries
 
@@ -50,16 +50,16 @@ $app->get('/api/tags', function (Request $request, Response $response) {
         $passar = $byArr[$by];
 
 
-        if ($msg != $msgDefault && $id != $idDefault) $extraWhere = " WHERE id_tags = :id OR tag_nome LIKE :msg ";
-        elseif ($msg != $msgDefault && $id == $idDefault) $extraWhere = " WHERE  tag_nome LIKE :msg ";
-        elseif ($msg === $msgDefault && $id != $idDefault) $extraWhere = " WHERE id_tags = :id ";
+        if ($msg != $msgDefault && $id != $idDefault) $extraWhere = " WHERE id_tipo_evento = :id OR nome_tipo_evento LIKE :msg ";
+        elseif ($msg != $msgDefault && $id == $idDefault) $extraWhere = " WHERE  nome_tipo_evento LIKE :msg ";
+        elseif ($msg === $msgDefault && $id != $idDefault) $extraWhere = " WHERE id_tipo_evento = :id ";
         else$extraWhere = "";
 
 
         if ($order == $orderDefault) {
-            $sql = "SELECT * FROM `tags` " . $extraWhere . " ORDER BY $passar  LIMIT :limit , :results";
+            $sql = "SELECT * FROM `tipo_evento` " . $extraWhere . " ORDER BY $passar  LIMIT :limit , :results";
         } else {
-            $sql = "SELECT * FROM `tags`" . $extraWhere . " ORDER BY $passar DESC LIMIT :limit , :results";
+            $sql = "SELECT * FROM `tipo_evento`" . $extraWhere . " ORDER BY $passar DESC LIMIT :limit , :results";
 
         }
 
