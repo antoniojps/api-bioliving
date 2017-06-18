@@ -14,7 +14,6 @@ $app->put('/api/localizacao/update/{id}', function (Request $request, Response $
     $localizacao = $request->getParam('nomeLocal');
     $lat = $request->getParam('lat');
     $lng = $request->getParam('lng');
-    echo $localizacao;
     $error = array();
     $minCar = 1;
     $maxCar = 75;
