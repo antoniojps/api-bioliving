@@ -7,17 +7,14 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 
-
 /////////////////POST tags//////////////////////////
 $app->post('/api/tags/add', function (Request $request, Response $response) {
     $tag = $request->getParam('nomeTag');
     $error = array();
-    $minCar = 1;
-    $maxCar = 45;
+    $minCar = 1;  //valor minimo de caracteres da tag
+    $maxCar = 45; //valor maximo de caracteres da tag
 
     //verificar se tag existe
-
-    //buscar db todos os customers
     $sql = "SELECT * FROM tags WHERE tag_nome = :nome ";
 
     try {
@@ -124,6 +121,4 @@ $app->post('/api/tags/add', function (Request $request, Response $response) {
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
     }
-
-
 });

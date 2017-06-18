@@ -44,62 +44,90 @@ $app->post('/api/localizacao/add', function (Request $request, Response $respons
         $error[] = array("nome" => "Longitude inválida");
     }
 
-    if (count($error) === 0) {
 
-        //buscar db todos os customers
-        $sql = "INSERT INTO localizacao (lat,lng,nome) VALUES  (:lat,:lng,:nome)";
-        try {
-            // Get DB object
-            $db = new db();
-            //connect
-            $db = $db->connect();
-            $stmt = $db->prepare($sql);
-            $stmt->bindParam(':nome', $localizacao);
-            $stmt->bindParam(':lat', $lat);
-            $stmt->bindParam(':lng', $lng);
-            $stmt->execute();
-            $db = null;
-            $responseData = [
-                'Resposta' => "Localização adicionada com sucesso!"
+    //verificar se localização já existe
+    $sql = "SELECT * FROM `localizacao` WHERE `nome`=:nome AND `lat` LIKE :lat AND `lng` LIKE :lng";
+
+    // Get DB object
+    $db = new db();
+    //connect
+    $db = $db->connect();
+    $stmt = $db->prepare($sql);
+    $stmt->bindParam(':nome', $localizacao);
+    $stmt->bindParam(':lat', $lat);
+    $stmt->bindParam(':lng', $lng);
+    $stmt->execute();
+    $db = null;
+    $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (count($dados)) {
+        $responseData = [
+            'Resposta' => "Localização já existe!"
+        ];
+        return $response
+            ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+    } else {
+
+        if (count($error) === 0) {
+
+            //buscar db todos os customers
+            $sql = "INSERT INTO localizacao (lat,lng,nome) VALUES  (:lat,:lng,:nome)";
+            try {
+                // Get DB object
+                $db = new db();
+                //connect
+                $db = $db->connect();
+                $stmt = $db->prepare($sql);
+                $stmt->bindParam(':nome', $localizacao);
+                $stmt->bindParam(':lat', $lat);
+                $stmt->bindParam(':lng', $lng);
+                $stmt->execute();
+                $db = null;
+                $responseData = [
+                    'Resposta' => "Localização adicionada com sucesso!"
+                ];
+
+                return $response
+                    ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+            } catch (PDOException $err) {
+                $status = 503; // Service unavailable
+                // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                $errorMsg = Errors::filtroReturn(function ($err) {
+                    return [
+                        "error" => [
+                            "status" => $err->getCode(),
+                            "text" => $err->getMessage()
+                        ]
+                    ];
+                }, function () {
+                    return [
+                        "error" => 'Servico Indisponivel'
+                    ];
+                }, $err);
+
+                return $response
+                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+            }
+        } else {
+            $status = 422; // Unprocessable Entity
+            $errorMsg = [
+                "error" => [
+                    "status" => "$status",
+                    "text" => [
+                        $error
+                    ]
+
+                ]
             ];
 
             return $response
-                ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
-
-        } catch (PDOException $err) {
-            $status = 503; // Service unavailable
-            // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
-            $errorMsg = Errors::filtroReturn(function ($err) {
-                return [
-                    "error" => [
-                        "status" => $err->getCode(),
-                        "text" => $err->getMessage()
-                    ]
-                ];
-            }, function () {
-                return [
-                    "error" => 'Servico Indisponivel'
-                ];
-            }, $err);
-
-            return $response
                 ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
         }
-    } else {
-        $status = 422; // Unprocessable Entity
-        $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => [
-                    $error
-                ]
-
-            ]
-        ];
-
-        return $response
-            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
+
+
 });
