@@ -8,6 +8,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 /////////////////// Pesquisa global //////////////////////////////////
 //exemplo: /api/global/pesquisa?msg=henr&id=12&order=DESC&results=2&page=1&tipoeventos=false&locais=false
+
+//TODO adicionar tags
 $app->get('/api/global/pesquisa', function (Request $request, Response $response) {
 
     //predefinições
@@ -76,11 +78,6 @@ $app->get('/api/global/pesquisa', function (Request $request, Response $response
     $byUtilizadores = isset($parametros['byutilizadores']) ? $parametros['byUtilizadores'] : $defaults['byDefaultUtilizadores'];
     $byTipoEventos = isset($parametros['bytipo']) ? $parametros['byTipo'] : $defaults['byDefaultTipoEventos'];
     $byLocais = isset($parametros['bylocais']) ? $parametros['byLocais'] : $defaults['byDefaultLocais'];
-
-
-    // A partir de quando seleciona resultados
-    $limitNumber = ($page - 1) * $results;
-
 
     //tornar by validos
     $byEventos = array_key_exists($byEventos, $byArr['Eventos']) ? $byEventos : $defaults['byDefaultEventos'];
