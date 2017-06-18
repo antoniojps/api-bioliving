@@ -51,5 +51,6 @@ require "../src/routes/locais/postLocais.php";
 require "../src/routes/tipos/postTipoEventos.php";
 // Global
 require "../src/routes/global/getGlobal.php";
-
+//Tags
+require "../src/routes/tags/postTags.php";
 $app->run();

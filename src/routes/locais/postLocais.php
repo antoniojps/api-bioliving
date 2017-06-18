@@ -9,7 +9,7 @@ use Respect\Validation\Validator as v;
 
 
 //////////////// POST localização//////////////////
-$app->post('/api/eventos/localizacao/add', function (Request $request, Response $response) {
+$app->post('/api/localizacao/add', function (Request $request, Response $response) {
     $localizacao = $request->getParam('nomeLocalizacao');
     $lat = $request->getParam('lat');
     $lng = $request->getParam('lng');
