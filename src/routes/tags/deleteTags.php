@@ -7,11 +7,11 @@ use Respect\Validation\Validator as v;
 
 
 /////////////Apagar um local////////////////////
-$app->delete('/api/localizacao/delete/{id}', function (Request $request, Response $response) {
+$app->delete('/api/tags/delete/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
     if (v::intVal()->validate($id) && $id > 0) {
         //ver se id existe na bd antes de editar
-        $sql = "SELECT * FROM localizacao WHERE localizacao = :id";
+        $sql = "SELECT * FROM tags WHERE id_tags = :id";
         $db = new Db();
         // conectar
         $db = $db->connect();
@@ -22,7 +22,7 @@ $app->delete('/api/localizacao/delete/{id}', function (Request $request, Respons
         $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if (count($dados) >= 1) {
 
-            $sql = "DELETE FROM localizacao WHERE localizacao = :id";
+            $sql = "DELETE FROM tags WHERE id_tags = :id";
 
             try {
                 // Get DB object
@@ -34,7 +34,7 @@ $app->delete('/api/localizacao/delete/{id}', function (Request $request, Respons
                 $stmt->execute();
                 $db = null;
                 $responseData = [
-                    'Resposta' => "Localizacao apagada com sucesso!"
+                    'Resposta' => "Tag apagada com sucesso!"
                 ];
 
                 return $response
@@ -67,7 +67,7 @@ $app->delete('/api/localizacao/delete/{id}', function (Request $request, Respons
             $errorMsg = [
                 "error" => [
                     "status" => "$status",
-                    "text" => 'Localizacao não se encontra disponivel'
+                    "text" => 'Tag  não se encontra disponivel'
 
                 ]
             ];
