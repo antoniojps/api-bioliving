@@ -60,7 +60,6 @@ class Utilizador {
 		$this->email          = isset( $arr['email'] ) ? strtolower( $arr['email'] ) : null;
 		$this->password       = isset( $arr['password'] ) ? $arr['password'] : null;
 
-		print_r( $arr );
 	}
 
 // Permite verificar se foi instanciado com todos os argumentos necessarios para metodos que necessitem destes

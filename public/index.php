@@ -26,6 +26,21 @@ $container["jwt"] = function ($container) {
 // JWT Autenticaçao
 require_once "../src/middleware/JwtAuthentication.php";
 // Todo CSRF Token Middleware
+
+// CORS para localhost
+$app->options('/{routes:.+}', function ($request, $response, $args) {
+	return $response;
+});
+
+$app->add(function ($req, $res, $next) {
+	$response = $next($req, $res);
+	return $response
+			->withHeader('Access-Control-Allow-Origin', 'http://localhost:8080')
+			->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, content-type, Accept, Origin, Authorization')
+			->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+			->withHeader('Access-Control-Allow-Credentials', 'true');
+});
+
 // Routes:
 # /token - Verificar dados, gerar token e criar cookie com o mesmo
 require_once "../src/routes/autenticacao/routes.php";

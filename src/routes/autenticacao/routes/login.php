@@ -17,7 +17,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  */
 $app->post( '/api/login', function ( Request $request, Response $response ) {
 // Valores default de resposta
-	$status = 401; // Unauthorized
+	$status = "401"; // Unauthorized
 	$info   = 'Unauthorized';
 
 // Obter dados
@@ -79,7 +79,7 @@ $app->post( '/api/login', function ( Request $request, Response $response ) {
 	}
 
 	$responseData = [
-			'status' => $status,
+			'status' => (string) $status,
 			'info'   => $info
 	];
 
