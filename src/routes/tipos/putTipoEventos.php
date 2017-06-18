@@ -6,7 +6,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 
 /////////////////////POST tipo eventos///////////////
-$app->post('/api/eventostipos/add', function (Request $request, Response $response) {
+$app->put('/api/eventostipos/update/{id}', function (Request $request, Response $response) {
+    $id = $request->getAttribute('id');
     $tipoNome = $request->getParam('nomeTipoEvento');
     $error = array();
     $minCar = 1;
@@ -17,9 +18,8 @@ $app->post('/api/eventostipos/add', function (Request $request, Response $respon
         $error[] = array("nome" => "Nome excedeu limite máximo");
     }
     if (count($error) === 0) {
-
         //verificar se tipo já existe
-        $sql = "SELECT * FROM tipo_evento WHERE nome_tipo_evento = :nome";
+        $sql = "SELECT * FROM tipo_evento WHERE id_tipo_evento = :id";
 
         try {
             // Get DB object
@@ -27,54 +27,75 @@ $app->post('/api/eventostipos/add', function (Request $request, Response $respon
             //connect
             $db = $db->connect();
             $stmt = $db->prepare($sql);
-            $stmt->bindParam(':nome', $tipoNome);
+            $stmt->bindParam(':id', $id, PDO::PARAM_INT);
             $stmt->execute();
             $db = null;
             $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if (count($dados)) {
+            if (!count($dados)) {
                 $responseData = [
-                    'Resposta' => "Tipo de evento já existe!"
+                    'Resposta' => "id da tipo de eventos já não existe!"
                 ];
                 return $response
                     ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
             } else {
+                //verificar se localização já existe
+                $sql = "SELECT * FROM `tipo_evento` WHERE `nome_tipo_evento`=:nome ";
 
+                // Get DB object
+                $db = new db();
+                //connect
+                $db = $db->connect();
+                $stmt = $db->prepare($sql);
+                $stmt->bindParam(':nome', $tipoNome);
+                $stmt->execute();
+                $db = null;
+                $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-
-                $sql = "INSERT INTO tipo_evento (nome_tipo_evento) VALUES  (:nome)";
-                try {
-                    // Get DB object
-                    $db = new db();
-                    //connect
-                    $db = $db->connect();
-                    $stmt = $db->prepare($sql);
-                    $stmt->bindParam(':nome', $tipoNome);
-                    $stmt->execute();
-                    $db = null;
+                if (count($dados)) {
                     $responseData = [
-                        'Resposta' => "Tipo de evento adicionado com sucesso!"
+                        'Resposta' => "Tipo de evento já existe!"
                     ];
-
                     return $response
                         ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
+                } else {
 
-                } catch (PDOException $err) {
-                    $status = 503; // Service unavailable
-                    $errorMsg = [
-                        "error" => [
-                            "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
-                    ];
 
-                    return $response
-                        ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                    $sql = "UPDATE `tipo_evento` SET `nome_tipo_evento` = :nome WHERE `id_tipo_evento` = :id";
+                    try {
+                        // Get DB object
+                        $db = new db();
+                        //connect
+                        $db = $db->connect();
+                        $stmt = $db->prepare($sql);
+                        $stmt->bindParam(':nome', $tipoNome);
+                        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+                        $stmt->execute();
+                        $db = null;
+                        $responseData = [
+                            'Resposta' => "Tipo de evento alterado com sucesso!"
+                        ];
+
+                        return $response
+                            ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+                    } catch (PDOException $err) {
+                        $status = 503; // Service unavailable
+                        $errorMsg = [
+                            "error" => [
+                                "status" => $err->getCode(),
+                                "text" => $err->getMessage()
+                            ]
+                        ];
+
+                        return $response
+                            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+                    }
 
                 }
-
-
             }
 
 
@@ -115,3 +136,4 @@ $app->post('/api/eventostipos/add', function (Request $request, Response $respon
     }
 
 });
+

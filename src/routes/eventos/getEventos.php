@@ -16,7 +16,7 @@ use Respect\Validation\Validator as v;
 //////////// Obter todos os eventos ////////////
 # Variaveis alteráveis:
 #   min: 1, max: 10
-# Exemplo: /api/eventos?page=1&results=2&by=id&order=ASC
+# Exemplo: /api/eventos?page=1&results=2&by=id&order=ASC&msg=random&id=9&datainic=
 $app->get('/api/eventos', function (Request $request, Response $response) {
 
     $byArr = [
