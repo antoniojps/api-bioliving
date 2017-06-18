@@ -28,7 +28,7 @@ require_once "../src/middleware/JwtAuthentication.php";
 // Todo CSRF Token Middleware
 // Routes:
 # /token - Verificar dados, gerar token e criar cookie com o mesmo
-require_once "../src/routes/autenticacao.php";
+require_once "../src/routes/autenticacao/routes.php";
 // Utilizadores
 require "../src/routes/utilizadores.php";
 // Eventos
