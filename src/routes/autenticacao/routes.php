@@ -23,4 +23,7 @@ require_once 'routes/login.php';
 //////////// Registrar  ////////////
 require_once 'routes/create.php';
 
+//////////// Me  ////////////
+require_once 'routes/me.php';
+
 
