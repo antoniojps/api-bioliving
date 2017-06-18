@@ -18,8 +18,9 @@ $app->post('/api/eventos/tipo/add', function (Request $request, Response $respon
     }
     if (count($error) === 0) {
 
-        //buscar db todos os customers
-        $sql = "INSERT INTO tipo_evento (nome_tipo_evento) VALUES  (:nome)";
+        //verificar se tipo já existe
+        $sql = "SELECT * FROM tipo_evento WHERE nome_tipo_evento = :nome";
+
         try {
             // Get DB object
             $db = new db();
@@ -29,22 +30,69 @@ $app->post('/api/eventos/tipo/add', function (Request $request, Response $respon
             $stmt->bindParam(':nome', $tipoNome);
             $stmt->execute();
             $db = null;
-            $responseData = [
-                'Resposta' => "Tipo de evento adicionado com sucesso!"
-            ];
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (count($dados)) {
+                $responseData = [
+                    'Resposta' => "Tipo de evento já existe!"
+                ];
+                return $response
+                    ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
-            return $response
-                ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+            } else {
+
+
+                //buscar db todos os customers
+                $sql = "INSERT INTO tipo_evento (nome_tipo_evento) VALUES  (:nome)";
+                try {
+                    // Get DB object
+                    $db = new db();
+                    //connect
+                    $db = $db->connect();
+                    $stmt = $db->prepare($sql);
+                    $stmt->bindParam(':nome', $tipoNome);
+                    $stmt->execute();
+                    $db = null;
+                    $responseData = [
+                        'Resposta' => "Tipo de evento adicionado com sucesso!"
+                    ];
+
+                    return $response
+                        ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+                } catch (PDOException $err) {
+                    $status = 503; // Service unavailable
+                    $errorMsg = [
+                        "error" => [
+                            "status" => $err->getCode(),
+                            "text" => $err->getMessage()
+                        ]
+                    ];
+
+                    return $response
+                        ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+                }
+
+
+            }
 
 
         } catch (PDOException $err) {
             $status = 503; // Service unavailable
-            $errorMsg = [
-                "error" => [
-                    "status" => $err->getCode(),
-                    "text" => $err->getMessage()
-                ]
-            ];
+            // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+            $errorMsg = Errors::filtroReturn(function ($err) {
+                return [
+                    "error" => [
+                        "status" => $err->getCode(),
+                        "text" => $err->getMessage()
+                    ]
+                ];
+            }, function () {
+                return [
+                    "error" => 'Servico Indisponivel'
+                ];
+            }, $err);
 
             return $response
                 ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -65,4 +113,5 @@ $app->post('/api/eventos/tipo/add', function (Request $request, Response $respon
         return $response
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
+
 });

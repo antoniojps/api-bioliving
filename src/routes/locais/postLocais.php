@@ -18,9 +18,9 @@ $app->post('/api/localizacao/add', function (Request $request, Response $respons
     $minCar = 1;
     $maxCar = 75;
     if (is_null($localizacao) || strlen($localizacao) < $minCar) {
-        $error[] = array("nome" => "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!");
+        $error[] = array("error" => "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!");
     } elseif (strlen($localizacao) > $maxCar) {
-        $error[] = array("nome" => "Nome excedeu limite máximo");
+        $error[] = array("error" => "Nome excedeu limite máximo");
     }
 
     function validaLatLng($tipo, $valor)
@@ -37,39 +37,37 @@ $app->post('/api/localizacao/add', function (Request $request, Response $respons
     }
 
     if (validaLatLng('latitude', $lat) === false) {
-        $error[] = array("nome" => "Latitude inválida");
+        $error[] = array("error" => "Latitude inválida");
     }
 
     if (validaLatLng('longitude', $lng) === false) {
-        $error[] = array("nome" => "Longitude inválida");
+        $error[] = array("error" => "Longitude inválida");
     }
+    if (count($error) === 0) {
 
+        //verificar se localização já existe
+            $sql = "SELECT * FROM `localizacao` WHERE `nome`=:nome AND `lat` LIKE :lat AND `lng` LIKE :lng";
 
-    //verificar se localização já existe
-    $sql = "SELECT * FROM `localizacao` WHERE `nome`=:nome AND `lat` LIKE :lat AND `lng` LIKE :lng";
+            // Get DB object
+            $db = new db();
+            //connect
+            $db = $db->connect();
+            $stmt = $db->prepare($sql);
+            $stmt->bindParam(':nome', $localizacao);
+            $stmt->bindParam(':lat', $lat);
+            $stmt->bindParam(':lng', $lng);
+            $stmt->execute();
+            $db = null;
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Get DB object
-    $db = new db();
-    //connect
-    $db = $db->connect();
-    $stmt = $db->prepare($sql);
-    $stmt->bindParam(':nome', $localizacao);
-    $stmt->bindParam(':lat', $lat);
-    $stmt->bindParam(':lng', $lng);
-    $stmt->execute();
-    $db = null;
-    $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (count($dados)) {
+                $responseData = [
+                    'Resposta' => "Localização já existe!"
+                ];
+                return $response
+                    ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
-    if (count($dados)) {
-        $responseData = [
-            'Resposta' => "Localização já existe!"
-        ];
-        return $response
-            ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
-    } else {
-
-        if (count($error) === 0) {
+            } else {
 
             //buscar db todos os customers
             $sql = "INSERT INTO localizacao (lat,lng,nome) VALUES  (:lat,:lng,:nome)";
@@ -112,21 +110,22 @@ $app->post('/api/localizacao/add', function (Request $request, Response $respons
                     ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
             }
-        } else {
-            $status = 422; // Unprocessable Entity
-            $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => [
-                        $error
-                    ]
 
-                ]
-            ];
-
-            return $response
-                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
         }
+    } else {
+        $status = 422; // Unprocessable Entity
+        $errorMsg = [
+            "error" => [
+                "status" => "$status",
+                "text" => [
+                    $error
+                ]
+
+            ]
+        ];
+
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
 
 
