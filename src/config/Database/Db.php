@@ -38,7 +38,7 @@ class Db {
 
 		} catch ( \PDOException $e ) {
 			if ( getenv( 'PHP_ENV' ) === 'desenvolvimento' ) {
-				echo 'LIGA O VPN BURRO';
+				echo 'Sera que a base de dados da Universidade foi abaixo ou tu es muita nabo e esqueceste-te de ligar o VPN? Mhmm... qual sera';
 			} else {
 				echo 'Servico indisponivel';
 			}
