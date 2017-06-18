@@ -134,7 +134,7 @@ $app->post( '/api/create', function ( Request $request, Response $response ) {
 						'sobrenome' => $sobrenome,
 						'password'  => $password
 				] );
-// Registar
+// Registrar
 				if ( $user->registrar() ) {
 // Obter id
 					$idUtilizador = $user->getId();

@@ -30,7 +30,8 @@
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Bioliving\Database\Db as Db;
-
+use Bioliving\Custom\Token as Token;
+use Bioliving\Errors\Errors as Errors;
 
 //////////// Obter todos os utilizadores ////////////
 # Parametros:
@@ -38,13 +39,15 @@ use Bioliving\Database\Db as Db;
 #   results = número de resultados por página
 #   min: 1, max: 10
 # Exemplo: /api/utilizadores?page=1&results=2
+# Scope : admin
 
 $app->get( '/api/utilizadores', function ( Request $request, Response $response ) {
-
 	// ler scope $this->jwt->scope [  "normal", "socio", "admin" ]
 	// Todo Apenas pode fazer request de todos os utilizadores com scope de admin
 	// Todo Ordernar dinamicamente por coluna (byArr) e por ASC ou DESC
 	// Todo verificação dos parametros
+
+	if(Token::validarScopes('admin')){
 
 	$byArr = [
 			'id_utilizadores' => 'id',
@@ -130,12 +133,19 @@ $app->get( '/api/utilizadores', function ( Request $request, Response $response 
 
 		} catch ( PDOException $err ) {
 			$status   = 503; // Service unavailable
-			$errorMsg = [
-					"error" => [
-							"status" => $err->getCode(),
-							"text"   => $err->getMessage()
-					]
-			];
+			// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+			$errorMsg = Errors::filtroReturn(function ($err) {
+				return [
+						"error" => [
+								"status" => $err->getCode(),
+								"text" => $err->getMessage()
+						]
+				];
+			}, function () {
+				return [
+						"error" => 'Servico Indisponivel'
+				];
+			}, $err);
 
 			return $response
 					->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
@@ -153,8 +163,22 @@ $app->get( '/api/utilizadores', function ( Request $request, Response $response 
 
 		return $response
 				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+	}}else{
+
+		$status   = 401; // Unauthorized
+		$errorMsg = [
+				"error" => [
+						"status" => "$status",
+						"text"   => 'Unauthorized'
+
+				]
+		];
+		return $response
+				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
+
 	}
-} );
+
+});
 
 //////////// Get Unico Utilizador ////////////
 $app->get( '/api/utilizadores/{id}', function ( Request $request, Response $response, $args ) {
