@@ -203,13 +203,13 @@ class Token {
 	// Retorna array SCOPE do token
 	public static function getScopes( $token = false ) {
 
-		// Se tem argumento entao $token = argumento, caso contrario é por default o access token
-		$token = $token ? $token : self::getAccessToken();
 
-		$scope = [ 'publico' ];
-		if ( self::autenticar( $token ) ) {
-			$scope = self::$tokenPayload['scope'];
-		}
+		$scope = ['publico'];
+
+		// Se tem argumento entao $token = argumento, caso contrario é por default o access token
+		$token = $token ? self::getTokenArr($token) : self::getTokenArr(self::getAccessToken());
+
+		if($token) $scope = json_decode(base64_decode($token[2]))->scope;
 
 		return $scope;
 	}

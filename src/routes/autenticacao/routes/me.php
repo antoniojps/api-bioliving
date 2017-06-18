@@ -14,15 +14,15 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 $app->get( '/api/me', function ( Request $request, Response $response ) {
 
 	// Default
-	$status = 401; // Unauthorized
-	$data   = 'Unauthorized';
+	$status      = 401; // Unauthorized
+	$data        = 'Unauthorized';
 
-	if ( Token::getRefreshToken() || Token::getAccessToken() ) {
-		$status = 200; // Ok
-		$data   = [
-				'id'    => Token::getUtilizador(),
-				'scope' => Token::getScopes()
-		];
+	if ( Token::getRefreshToken() && Token::autenticar() ) {
+			$status = 200; // Ok
+			$data   = [
+					'id'    => Token::getUtilizador(),
+					'scope' => Token::getScopes()
+			];
 	}
 
 	$responseData = [
