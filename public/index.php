@@ -32,16 +32,13 @@ require_once "../src/routes/autenticacao/routes.php";
 // Utilizadores
 require "../src/routes/utilizadores.php";
 // Eventos
-require "../src/routes/eventos/getEventos.php";
-require "../src/routes/eventos/putEventos.php";
-require "../src/routes/eventos/postEventos.php";
-require "../src/routes/eventos/deleteEventos.php";
+require "../src/routes/eventos/routesEventos.php";
 // Locais
-require "../src/routes/locais/postLocais.php";
+require "../src/routes/locais/routesLocais.php";
 // Tipos
-require "../src/routes/tipos/postTipoEventos.php";
+require "../src/routes/tipos/routesTipos.php";
 // Global
-require "../src/routes/global/getGlobal.php";
+require "../src/routes/global/routesGlobal.php";
 //Tags
-require "../src/routes/tags/postTags.php";
+require "../src/routes/tags/routesTags.php";
 $app->run();
