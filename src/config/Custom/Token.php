@@ -180,10 +180,9 @@ class Token {
 		$id = false;
 
 		// Se tem argumento entao $token = argumento, caso contrario é por default o access token
-		$token = $token ? self::getTokenArr($token) : self::getAccessToken();
+		$token = $token ? self::getTokenArr($token) : self::getTokenArr(self::getAccessToken());
 
 		if($token) $id = json_decode(base64_decode($token[2]))->idUtilizador;
-
 
 		return $id;
 	}
@@ -194,7 +193,7 @@ class Token {
 		$jti = false;
 
 		// Se tem argumento entao $token = argumento, caso contrario é por default o access token
-		$token = $token ? self::getTokenArr($token) : self::getAccessToken();
+		$token = $token ? self::getTokenArr($token) : self::getTokenArr(self::getAccessToken());
 
 		if($token) $jti = json_decode(base64_decode($token[2]))->jti;
 
@@ -214,6 +213,27 @@ class Token {
 
 		return $scope;
 	}
+
+	/*
+	 * Metodo que valida scopes
+	 * @param string | scope
+	 * @param boolean | id (opcional) se true o utilizador com o id do token tem acesso
+	 * Retorna true se scope no parametro está no scopes do Access Token
+	 * Retorna false se não tiver permissao (nao tiver nos scopes)
+	 */
+	 public static function validarScopes($scope = 'publico', $id = false){
+
+		$temPermissao = false;
+	 	$scopeArr = [ 'publico', 'normal', 'socio', 'colaborador', 'admin' ];
+
+		if(v::alpha()->validate( $scope )){
+			$temPermissao = in_array($scope , Token::getScopes());
+			if($id){
+					$temPermissao = Token::getUtilizador() == $id;
+			}
+		}
+		return $temPermissao;
+	 }
 
 	/*
  * Cria array das scopes a partir do estatuto
