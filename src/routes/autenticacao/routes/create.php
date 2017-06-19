@@ -22,10 +22,10 @@ $app->post( '/api/create', function ( Request $request, Response $response ) {
 	$info   = 'Unauthorized';
 	// Obter dados
 	$parsedBody = $request->getParsedBody();
-	$email      = $parsedBody['email'];
-	$nome       = $parsedBody['nome'];
-	$sobrenome  = $parsedBody['sobrenome'];
-	$password   = $parsedBody['password'];
+	$email      = array_key_exists('email',$parsedBody) ? $parsedBody['email'] : null;
+	$nome       = array_key_exists('nome',$parsedBody) ? $parsedBody['nome'] : null;
+	$sobrenome  = array_key_exists('sobrenome',$parsedBody) ? $parsedBody['sobrenome'] : null;
+	$password   = array_key_exists( 'password', $parsedBody ) ? $parsedBody['password'] : null;
 
 	if ( H::obrigatorio( $email ) && H::obrigatorio( $password ) && H::obrigatorio( $nome ) && H::obrigatorio( $sobrenome ) ) {
 // So pode registar se nao tiver sessao iniciada

@@ -17,13 +17,13 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  */
 $app->post( '/api/login', function ( Request $request, Response $response ) {
 // Valores default de resposta
-	$status = "401"; // Unauthorized
-	$info   = 'Unauthorized';
+	$status = "400"; // Bad request
+	$info   = 'Bad request';
 
 // Obter dados
 	$parsedBody = $request->getParsedBody();
-	$email      = $parsedBody['email'];
-	$password   = $parsedBody['password'];
+	$email      = array_key_exists( 'email', $parsedBody ) ? $parsedBody['email'] : null;
+	$password   = array_key_exists( 'password', $parsedBody ) ? $parsedBody['password'] : null;
 
 	if ( H::obrigatorio( $email ) && H::obrigatorio( $password ) ) {
 // Verificar se nao esta logged in
@@ -74,7 +74,7 @@ $app->post( '/api/login', function ( Request $request, Response $response ) {
 		$info = Errors::filtroReturn( function () {
 			return 'Parametros em falta';
 		}, function () {
-			return 'Unauthorized';
+			return 'Bad request';
 		} );
 	}
 
