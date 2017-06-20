@@ -54,10 +54,14 @@ require "../src/routes/locais/routesLocais.php";
 require "../src/routes/tipos/routesTipos.php";
 // Global
 require "../src/routes/global/routesGlobal.php";
-//Tags
+// Tags
 require "../src/routes/tags/routesTags.php";
-//Interesses
+// Interesses
 require  "../src/routes/interesses/routesInteresses.php";
-//inscritos
+// inscritos
 require  "../src/routes/inscritos/routesInscritos.php";
+
+// Upload
+require  "../src/routes/upload/routes.php";
+
 $app->run();
