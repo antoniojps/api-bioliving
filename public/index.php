@@ -56,4 +56,8 @@ require "../src/routes/tipos/routesTipos.php";
 require "../src/routes/global/routesGlobal.php";
 //Tags
 require "../src/routes/tags/routesTags.php";
+//Interesses
+require  "../src/routes/interesses/routesInteresses.php";
+//inscritos
+require  "../src/routes/inscritos/routesInscritos.php";
 $app->run();

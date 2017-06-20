@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 
 /////////////////// Pesquisa global //////////////////////////////////
-//exemplo: /api/global/pesquisa?msg=henr&id=12&order=DESC&results=2&page=1&tipoeventos=false&locais=false
+//exemplo: /api/global/pesquisa?msg=henr&id=12&order=DESC&results=2&page=1&tipoeventos=false&locais=false&by=nome
 
 //TODO adicionar tags
 $app->get('/api/global/pesquisa', function (Request $request, Response $response) {
@@ -84,6 +84,7 @@ $app->get('/api/global/pesquisa', function (Request $request, Response $response
     $byUtilizadores = array_key_exists($byUtilizadores, $byArr['Utilizadores']) ? $byUtilizadores : $defaults['byDefaultUtilizadores'];
     $byTipoEventos = array_key_exists($byTipoEventos, $byArr['TipoEventos']) ? $byTipoEventos : $defaults['byDefaultTipoEventos'];
     $byLocais = array_key_exists($byLocais, $byArr['Locais']) ? $byLocais : $defaults['byDefaultLocais'];
+
 
     if ($page > 0 && $results > 0 && ($msg != $defaults['msg'] || $id != $defaults['id'])) {
         // definir numero de resultados
