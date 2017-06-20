@@ -38,7 +38,7 @@ $app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $r
                 $stmt->execute();
                 $db = null;
                 $dados = $stmt->fetch(PDO::FETCH_ASSOC);
-                echo $dados;
+
                 if($dados['inscrito']==='1'){
 
                     $dados = ["inscrito" => 'true'];

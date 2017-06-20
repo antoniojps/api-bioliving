@@ -92,3 +92,5 @@ $app->get('/api/eventos/{id}/interesses', function (Request $request, Response $
 
     }
 });
+
+
