@@ -6,7 +6,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
-$app->post('/api/eventos/{id}/interesse', function (Request $request, Response $response) {
+$app->post('/api/eventos/{id}/inscrito', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('id'); // ir buscar id do evento
     //verificar se Evento está disponivel
 
@@ -30,7 +30,7 @@ $app->post('/api/eventos/{id}/interesse', function (Request $request, Response $
                 if ($dados) {
                     //verificar se interesse já não existe
 
-                    $sql = "SELECT * FROM interesses WHERE eventos_id_eventos = :idEvento && utilizadores_id_utilizadores = :idUtilizador";
+                    $sql = "SELECT * FROM participantes WHERE eventos_id_eventos = :idEvento && utilizadores_id_utilizadores = :idUtilizador";
 
                     try {
                         // Get DB object
@@ -45,7 +45,7 @@ $app->post('/api/eventos/{id}/interesse', function (Request $request, Response $
                         $dados = $stmt->fetch(PDO::FETCH_ASSOC);
                         if (!$dados) {
 
-                            $sql = "INSERT INTO `interesses` (`eventos_id_eventos`, `utilizadores_id_utilizadores`) VALUES (:idEvento, :idUtilizador)";
+                            $sql = "INSERT INTO `participantes` (`eventos_id_eventos`, `utilizadores_id_utilizadores`) VALUES (:idEvento, :idUtilizador)";
                             try {
 
                                 $status = 200; // OK
@@ -64,7 +64,7 @@ $app->post('/api/eventos/{id}/interesse', function (Request $request, Response $
 
                                 $responseData = [
                                     'status' => "$status",
-                                    'data' => "Interesse introduzido com sucesso!"
+                                    'data' => "Inscrição efetuada com sucesso!"
                                 ];
 
                                 return $response

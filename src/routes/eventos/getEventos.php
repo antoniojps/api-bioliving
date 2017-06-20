@@ -785,7 +785,7 @@ $app->get('/api/eventos/{id}/tags', function (Request $request, Response $respon
 
 /////////// Pesquisa de eventos ///////////
 
-$app->get('/api/pesquisa/eventos', function (Request $request, Response $response){
+$app->get('/api/pesquisa/eventos', function (Request $request, Response $response) {
     $byArr = [
         'id' => 'id_eventos',
         'nome' => 'nome_evento',
@@ -811,7 +811,7 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
     $fotoMedH = 200; //
     $fotoGraW = 300;
     $fotoGraH = 300;
-    $msgDefault = '""';
+    $msgDefault = '%%';
 
 
     $parametros = $request->getQueryParams(); // obter parametros do querystring
@@ -819,11 +819,11 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
     $results = isset($parametros['results']) ? (int)$parametros['results'] : $maxResults;
     $by = isset($parametros['by']) ? $parametros['by'] : $byDefault;
     $order = isset($parametros['order']) ? $parametros['order'] : $orderDefault;
-    $dataMin = isset($parametros['dataMin']) ? (int)$parametros['dataMin'] : $dataMinUnix;
-    $dataMax = isset($parametros['dataMax']) ? (int)$parametros['dataMax'] : $dataMaxUnix;
+    $dataMin = isset($parametros['dataMin']) ? (int)$parametros['dataMin'] : false;
+    $dataMax = isset($parametros['dataMax']) ? (int)$parametros['dataMax'] : false;
     $msg = isset($parametros['msg']) ? $parametros['msg'] : $msgDefault;
 
-    if ($page > 0 && $results > 0 ) {
+    if ($page > 0 && $results > 0) {
 
         //definir numero de resultados
         //caso request tenha parametros superiores ao numero máximo permitido então repor com o valor maximo permitido e vice-versa
@@ -834,19 +834,30 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
         //order by se existe como key no array, caso nao repor com o predefenido
         $by = array_key_exists($by, $byArr) ? $by : $byDefault;
         //verificar se UNIX é valido senão repor com valores válidos quer para o valor de data max, quer para a data minima
-        $dataMax = $dataMax > $dataMaxUnix ? $dataMax : $dataMaxUnix;
-        $dataMin = $dataMin < $dataMinUnix ? $dataMin : $dataMinUnix;
+        if ($dataMin) $dataMin = $dataMin < $dataMinUnix ? $dataMin : $dataMinUnix;
+        if ($dataMax) $dataMax = $dataMax > $dataMaxUnix ? $dataMax : $dataMaxUnix;
+
         //passar dataMin e dataMax para o formato yyyy-mm-dd
 
         // A partir de quando seleciona resultados
         $limitNumber = ($page - 1) * $results;
         $passar = $byArr[$by];
-        $dataMinFormat = gmdate("Y-m-d",(int)$dataMin); //colocar a data minima no formato adquado á comparação
+        $dataMinFormat = gmdate("Y-m-d", (int)$dataMin); //colocar a data minima no formato adquado á comparação
         $dataMaxFormat = gmdate("Y-m-d", (int)$dataMax);//colocar a data máxima no formato adquado á comparação
         if ($order == $orderDefault) {
-            $sql = "SELECT id_eventos,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` BETWEEN :datamin AND :datamax ORDER BY $passar LIMIT :limit, :results";
+            if ($dataMin && $dataMax) $sql = "SELECT id_eventos,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(participantes.eventos_id_eventos) AS inscritos FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos  WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` BETWEEN :datamin AND :datamax GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
+            elseif ($dataMin && !$dataMax) $sql = "SELECT id_eventos,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(participantes.eventos_id_eventos) AS inscritos FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos  WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin  GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
+            elseif (!$dataMin && $dataMax) $sql = "SELECT id_eventos,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(participantes.eventos_id_eventos) AS inscritos FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos  WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` <= :datamax GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
+            else {
+                $sql = "SELECT id_eventos,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(participantes.eventos_id_eventos) AS inscritos FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos  WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
+            }
         } else {
-            $sql = "SELECT id_eventos,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` BETWEEN :datamin AND :datamax ORDER BY $passar DESC LIMIT :limit, :results";
+            if ($dataMin && $dataMax) $sql = "SELECT id_eventos,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(participantes.eventos_id_eventos) AS inscritos FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos  WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` BETWEEN :datamin AND :datamax GROUP BY eventos.id_eventos ORDER BY $passar DESC LIMIT :limit, :results";
+            elseif ($dataMin && !$dataMax) $sql = "SELECT id_eventos,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(participantes.eventos_id_eventos) AS inscritos FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos  WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin  GROUP BY eventos.id_eventos ORDER BY $passar DESC  LIMIT :limit, :results";
+            elseif (!$dataMin && $dataMax) $sql = "SELECT id_eventos,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(participantes.eventos_id_eventos) AS inscritos FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos  WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` <= :datamax GROUP BY eventos.id_eventos ORDER BY $passar DESC LIMIT :limit, :results";
+            else {
+                $sql = "SELECT id_eventos,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(participantes.eventos_id_eventos) AS inscritos FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos  WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
+            }
         }
 
         try {
@@ -854,7 +865,8 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
             $status = 200; // OK
             // iniciar ligação à base de dados
             $db = new Db();
-            $msgEnv = "%$msg%"; // colocar mensagem no formato correto
+            $msgEnv = $msg != $msgDefault ? "%$msg%" : $msg;
+            // colocar mensagem no formato correto
             // conectar
             $db = $db->connect();
             $stmt = $db->prepare($sql);
@@ -873,13 +885,6 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
                     return $coluna !== null && $coluna !== '';
                 });
             }, $dados));
-
-
-
-
-
-
-
 
             $dadosLength = (int)sizeof($dados);
             if ($dadosLength === 0) {
@@ -925,17 +930,6 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
             return $response
                 ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
         }
-
-
-
-
-
-
-
-
-
-
-
 
 
     } else {

@@ -11,7 +11,7 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 
-$app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $response) {
+$app->get('/api/eventos/{id}/inscrito', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('id'); // ir buscar id
 
     if (Token::validarScopes('admin',Token::getUtilizador())) {

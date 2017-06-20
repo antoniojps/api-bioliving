@@ -10,7 +10,7 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 
-$app->get('/api/eventos/{id}/interesses', function (Request $request, Response $response) {
+$app->get('/api/eventos/{id}/interesse', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('id'); // ir buscar id
 
     if (Token::validarScopes('admin',Token::getUtilizador())) {
@@ -88,9 +88,20 @@ $app->get('/api/eventos/{id}/interesses', function (Request $request, Response $
                 ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
         }
     } else {
+        $status = 401; // Unprocessable Entity
+        $errorMsg = [
+            "error" => [
+                "status" => "$status",
+                "text" => 'Acesso não autorizado'
 
+            ]
+        ];
 
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
+
+
 });
 
 
