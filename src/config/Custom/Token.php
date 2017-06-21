@@ -72,7 +72,7 @@ class Token {
 		$tokenValido = false;
 
 		if ( gettype( $this->token ) === 'string' ) {
-			preg_match( '/([0-9A-Za-z]+)\.([0-9A-Za-z]+)\.([0-9A-Za-z]+)/', $this->token, $tokenMatch );
+			preg_match( '/^([a-zA-Z0-9\-_]+)\.([a-zA-Z0-9\-_]+)\.([a-zA-Z0-9\-_]+)$/', $this->token, $tokenMatch );
 			if ( sizeof( $tokenMatch ) === 4 ) {
 				$tokenValido = true;
 			}
@@ -94,7 +94,7 @@ class Token {
 		$tokenValido = false;
 
 		if ( gettype( $token ) === 'string' ) {
-			preg_match( '/([0-9A-Za-z]+)\.([0-9A-Za-z]+)\.([0-9A-Za-z]+)/', $token, $tokenMatch );
+			preg_match( '/^([a-zA-Z0-9\-_]+)\.([a-zA-Z0-9\-_]+)\.([a-zA-Z0-9\-_]+)$/', $token, $tokenMatch );
 			if ( sizeof( $tokenMatch ) === 4 ) {
 				$tokenValido = $tokenMatch;
 			}
@@ -225,13 +225,20 @@ class Token {
 
 		$temPermissao = false;
 	 	$scopeArr = [ 'publico', 'normal', 'socio', 'colaborador', 'admin' ];
+		$temPermissaoId = false;
+		$temPermissaoScope = false;
 
 		if(v::alpha()->validate( $scope )){
-			$temPermissao = in_array($scope , Token::getScopes());
+			$temPermissaoScope = in_array($scope , Token::getScopes());
+
 			if($id){
-					$temPermissao = Token::getUtilizador() == $id;
+					// == apenas para aceitar strings ou ints ($id)
+					$temPermissaoId = Token::getUtilizador() == $id;
 			}
 		}
+
+		$temPermissao = $temPermissaoScope || $temPermissaoId;
+
 		return $temPermissao;
 	 }
 
