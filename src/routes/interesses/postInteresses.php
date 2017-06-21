@@ -11,7 +11,7 @@ $app->post('/api/eventos/interesses', function (Request $request, Response $resp
     $idEventos =(int)$request->getParam('idevento');
     $idUtilizadores =(int)$request->getParam('idutilizador');
 
-    if (!Token::validarScopes('admin')) {
+    if (Token::validarScopes('admin')) {
         //verificar se id's são validos
         if (is_int($idEventos) && $idEventos > 0 && is_int($idUtilizadores) && $idUtilizadores) {
             $sql = "SELECT * from interesses WHERE`eventos_id_eventos`=:ideventos AND `utilizadores_id_utilizadores`=:idutilizadores";
