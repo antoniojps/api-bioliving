@@ -21,14 +21,26 @@ class Helper {
 	}
 
 	/*
-	 * Verifica scopes, se as scopes estao de acordo com o requisito entao retorna true, caso contrario retorna false
-	 * $scopeToken = scopes do utilizador que estao no token
-	 * $scopeRoute = scopes que podem aceder a route
+	 * Criar nome de imagem unico, retorna esse nome
 	 */
-
- 	static public function scopes($scopeToken, $scopeRoute){
-
+ 	static public function gerarIdUnico(){
+		return  md5( uniqid( rand(), true ) );
  	}
 
+	/*
+	 * Conversão de imagem PNG em JPG
+	 */
+
+ 	static public function pngToJpg($originalFile, $outputFile, $quality){
+		$imagemOriginal = imagecreatefrompng($originalFile);
+		$imagemJpg = imagejpeg($imagemOriginal, $outputFile, $quality);
+		imagedestroy($imagemOriginal);
+
+		return $imagemJpg;
+ 	}
+
+ 	static public function converterBitsMB($bits){
+ 		return round($bits  / 1024 / 1024,2);
+ 	}
 
 }
