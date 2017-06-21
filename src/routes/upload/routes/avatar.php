@@ -33,22 +33,21 @@ $app->post( '/api/upload/avatar', function ( Request $request, Response $respons
 		// Gerar novo nome unico
 		$nomeUpload  = H::gerarIdUnico() . '.jpg';
 		$pastaUpload = ( dirname( dirname( dirname( ( dirname( __DIR__ ) ) ) ) ) ) . '\\public\\imagens\avatars\\'; // public/imagens/avatars
-		$urlFinal    = $pastaUpload . $nomeUpload;
+		$dirFinal    = $pastaUpload . $nomeUpload;
+		$urlFinal = H::obterUrl('avatar',$nomeUpload);
 
 		// Ver se tamanho nao excede limite
 		if ( $tamanho <= $tamanhoMax ) {
 			// Se PNG converter para JPG
 			if ( $formato === 'image/png' ) {
 				// Faz upload e converte para png
-				if ( H::pngToJpg( $nomeTemp, $urlFinal, 100 ) ) {
+				if ( H::pngToJpg( $nomeTemp, $dirFinal, 100 ) ) {
 					$status = 200;
-					$info   = $urlFinal;
 				}
 			} else if ( $formato === 'image/jpeg' ) {
 				// Guardar
-				if ( move_uploaded_file( $nomeTemp, $urlFinal ) ) {
+				if ( move_uploaded_file( $nomeTemp, $dirFinal ) ) {
 					$status = 200;
-					$info   = $urlFinal;
 				}
 			}
 		}

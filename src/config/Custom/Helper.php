@@ -43,4 +43,26 @@ class Helper {
  		return round($bits  / 1024 / 1024,2);
  	}
 
+	/*
+	 * Converte caminhos de recursos locais em urls pois o browser nao aceita mostrar ficheiros locais
+	 * Exemplo:
+	 *
+	 * Converte: file:///C:/xampp/htdocs/lab/public/imagens/avatars/e6ffb82712f49443f3649bb61232f577.jpg
+	 * Em: http://localhost/lab/public/imagens/avatars/e6ffb82712f49443f3649bb61232f577.jpg
+	 *
+	 */
+
+ 	static public function obterUrl($tipoImagem,$idImagem){
+		$pastaUpload = 'learning-SLIM/public/imagens/';
+
+		if($tipoImagem === 'avatar'){
+			$pastaUpload .= 'avatars/';
+		}
+
+		$url = 'http://' . $_SERVER['SERVER_NAME'] .'/'. $pastaUpload . $idImagem;
+
+
+		return $url;
+ 	}
+
 }
