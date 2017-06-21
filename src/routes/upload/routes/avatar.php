@@ -13,11 +13,10 @@ use Respect\Validation\Validator as v;
  * @param multi-form | imagem
  *
  * Verifica se imagem é jpg/png e tamanho maximo
- *
- * Todo Redimensionar imagem para dimensão máxima de avatares
+ * Faz upload para public/imagens/avatars
  *
  */
-$app->post( '/api/upload/avatar', function ( Request $request, Response $response ) {
+$app->post( '/api/imagens/avatar', function ( Request $request, Response $response ) {
 
 	$status     = 403; // Bad request
 	$info       = 'Bad request';
@@ -85,11 +84,11 @@ $app->post( '/api/upload/avatar', function ( Request $request, Response $respons
  * @param string largura (Largura da imagem pretendida)
  * Nota: Um dos parametros é obrigatório contudo nao se podem fazer queries com os dois para nao distorcer imagens
  *
- * Exemplo: /api/imagens/avatars/{nomeImagem}?altura=100
+ * Exemplo: /api/imagens/avatar/{nomeImagem}?altura=100
  *
  */
 
-$app->get( '/api/imagens/avatars/{ficheiro}', function ( Request $request, Response $response ) {
+$app->get( '/api/imagens/avatar/{ficheiro}', function ( Request $request, Response $response ) {
 
 	// Valores default
 	$path    = '/imagens/avatars/';
@@ -103,10 +102,6 @@ $app->get( '/api/imagens/avatars/{ficheiro}', function ( Request $request, Respo
 	$parametros = $request->getQueryParams();
 	$largura    = isset( $parametros['largura'] ) ? (int) $parametros['largura'] : $largura;
 	$altura     = isset( $parametros['altura'] ) ? (int) $parametros['altura'] : $altura;
-
-	// Classe nativa do PHP que fornece informações sobre ficheiros
-	// Ver: http://php.net/manual/en/class.splfileinfo.php
-	$info = new SplFileInfo( $path );
 
 	// Abrir imagem utilizando os metodos de livraria Intervention/Image
 	// Ver: http://image.intervention.io/getting_started/introduction
