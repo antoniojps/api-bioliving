@@ -8,3 +8,4 @@ RewriteRule . index.php [L]
 #Exemplo: //Custom 400 errors
 #ErrorDocument 400 paginadefinidaparaoerro400.html
 
+# Os custom errors vao ser com o modafocas vue!
