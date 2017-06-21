@@ -6,6 +6,136 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
+
+$app->post('/api/eventos/interesses', function (Request $request, Response $response) {
+    $idEventos =(int)$request->getParam('idevento');
+    $idUtilizadores =(int)$request->getParam('idutilizador');
+
+    if (!Token::validarScopes('admin')) {
+        //verificar se id's são validos
+        if (is_int($idEventos) && $idEventos > 0 && is_int($idUtilizadores) && $idUtilizadores) {
+            $sql = "SELECT * from interesses WHERE`eventos_id_eventos`=:ideventos AND `utilizadores_id_utilizadores`=:idutilizadores";
+            try {
+                // Get DB object
+                $db = new db();
+                //connect
+                $db = $db->connect();
+                $stmt = $db->prepare($sql);
+                $stmt->bindValue(':ideventos', $idEventos, PDO::PARAM_INT);
+                $stmt->bindValue(':idutilizadores', $idUtilizadores, PDO::PARAM_INT);
+                $stmt->execute();
+                $db = null;
+                $dados = $stmt->fetch(PDO::FETCH_ASSOC);
+                if (!$dados) {
+                    //post
+
+                    $sql = "INSERT INTO `interesses` (`eventos_id_eventos`, `utilizadores_id_utilizadores`) VALUES (:idEvento, :idUtilizador);";
+
+                    try {
+                        // Get DB object
+                        $db = new db();
+                        //connect
+                        $db = $db->connect();
+                        $stmt = $db->prepare($sql);
+                        $stmt->bindValue(':idEvento', $idEventos, PDO::PARAM_INT);
+                        $stmt->bindValue(':idUtilizador', $idUtilizadores, PDO::PARAM_INT);
+                        $stmt->execute();
+                        $db = null;
+                        $responseData = [
+                            'Resposta' => "Interesse introduzido com sucesso!"
+                        ];
+
+                        return $response
+                            ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+                    } catch (PDOException $err) {
+                        $status = 503; // Service unavailable
+                        // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                        $errorMsg = Errors::filtroReturn(function ($err) {
+                            return [
+                                "error" => [
+                                    "status" => $err->getCode(),
+                                    "text" => $err->getMessage()
+                                ]
+                            ];
+                        }, function () {
+                            return [
+                                "error" => 'Servico Indisponivel'
+                            ];
+                        }, $err);
+
+                        return $response
+                            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+                    }
+
+                } else {
+                    $status = 404; // Unprocessable Entity
+                    $errorMsg = [
+                        "error" => [
+                            "status" => "$status",
+                            "text" => 'Interesse já existe'
+
+                        ]
+                    ];
+
+                    return $response
+                        ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                }
+
+            } catch
+            (PDOException $err) {
+                $status = 503; // Service unavailable
+                // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                $errorMsg = Errors::filtroReturn(function ($err) {
+                    return [
+                        "error" => [
+                            "status" => $err->getCode(),
+                            "text" => $err->getMessage()
+                        ]
+                    ];
+                }, function () {
+                    return [
+                        "error" => 'Servico Indisponivel'
+                    ];
+                }, $err);
+
+                return $response
+                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+            }
+        } else {
+            $status = 422; // Unprocessable Entity
+            $errorMsg = [
+                "error" => [
+                    "status" => "$status",
+                    "text" => 'Parametros invalidos'
+
+                ]
+            ];
+
+            return $response
+                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+        }
+
+    } else {
+        $status = 401;
+        $errorMsg = [
+            "error" => [
+                "status" => "$status",
+                "text" => 'Acesso não autorizado'
+
+            ]
+        ];
+
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+    }
+
+
+});
+
+
 $app->post('/api/eventos/{id}/interesse', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('id'); // ir buscar id do evento
     //verificar se Evento está disponivel
