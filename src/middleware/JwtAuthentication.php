@@ -15,7 +15,7 @@ $app->add( new \Slim\Middleware\JwtAuthentication( [
 
 		"path" => "/api", // caminho onde irá ser feita autenticação
 
-		"passthrough" => [ "/api/login", "/api/create" , "/api/upload/avatar"], // Routes onde nao é necessário autenticação
+		"passthrough" => [ "/api/login", "/api/create" , "/api//imagens/avatar", "/api/imagens/avatar"], // Routes onde nao é necessário autenticação
 
 		"secure" => true, // apenas funciona com https
 
@@ -25,7 +25,6 @@ $app->add( new \Slim\Middleware\JwtAuthentication( [
 			// Guarda informação da payload do JWT em $container['jwt'] através de closure
 			// Podem ser posteriormente acedidos com $this->jwt->propriedade
 			$container["jwt"] = $arguments["decoded"];
-
 		},
 
 		"error" => function ( $request, $response, $arguments ) { // resposta no erro

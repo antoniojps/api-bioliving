@@ -768,9 +768,8 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
 
             $responseData = [
                 'status' => "$status",
-                'data' => [
+                'data' =>
                     $dados
-                ]
             ];
 
             return $response

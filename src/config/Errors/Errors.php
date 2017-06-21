@@ -6,7 +6,9 @@ namespace Bioliving\Errors;
 $configuration = [
 		'settings' => [
 			// Only set this if you need access to route within middleware
-				'determineRouteBeforeAppMiddleware' => true
+				'determineRouteBeforeAppMiddleware' => true,
+			// TODO APENAS PARA AMBIENTE DE DESENVOLVIMENTO!!!!
+				'displayErrorDetails' => true
 		]
 ];
 
