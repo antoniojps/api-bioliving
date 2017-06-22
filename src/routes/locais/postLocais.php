@@ -9,18 +9,18 @@ use Respect\Validation\Validator as v;
 
 
 //////////////// POST localização//////////////////
-$app->post('/api/localizacao/add', function (Request $request, Response $response) {
-    $localizacao = $request->getParam('nomeLocalizacao');
+$app->post('/api/locais', function (Request $request, Response $response) {
+    $localizacao = $request->getParam('nomeLocal');
     $lat = $request->getParam('lat');
     $lng = $request->getParam('lng');
 
-    $error = array();
+    $error = "";
     $minCar = 1;
     $maxCar = 75;
     if (is_null($localizacao) || strlen($localizacao) < $minCar) {
-        $error[] = array("error" => "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!");
+        $error .= "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!";
     } elseif (strlen($localizacao) > $maxCar) {
-        $error[] = array("error" => "Nome excedeu limite máximo");
+        $error .= "Nome excedeu limite máximo";
     }
 
     function validaLatLng($tipo, $valor)
@@ -37,13 +37,14 @@ $app->post('/api/localizacao/add', function (Request $request, Response $respons
     }
 
     if (validaLatLng('latitude', $lat) === false) {
-        $error[] = array("error" => "Latitude inválida");
+        $error .=  " Latitude inválida";
     }
 
     if (validaLatLng('longitude', $lng) === false) {
-        $error[] = array("error" => "Longitude inválida");
+        $error .= " Longitude inválida";
     }
-    if (count($error) === 0) {
+    echo $error;
+    if ($error === "") {
 
         //verificar se localização já existe
         $sql = "SELECT * FROM `localizacao` WHERE `nome`=:nome AND `lat` LIKE :lat AND `lng` LIKE :lng";
@@ -62,7 +63,8 @@ $app->post('/api/localizacao/add', function (Request $request, Response $respons
 
         if (count($dados)) {
             $responseData = [
-                'Resposta' => "Localização já existe!"
+                "status"=> "422",
+                'info' => "Localização já existe!"
             ];
             return $response
                 ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -82,7 +84,8 @@ $app->post('/api/localizacao/add', function (Request $request, Response $respons
                 $stmt->execute();
                 $db = null;
                 $responseData = [
-                    'Resposta' => "Localização adicionada com sucesso!"
+                    "status" => 200,
+                    'info' => "Localização adicionada com sucesso!"
                 ];
 
                 return $response
@@ -94,14 +97,15 @@ $app->post('/api/localizacao/add', function (Request $request, Response $respons
                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
+
                             "status" => $err->getCode(),
                             "text" => $err->getMessage()
-                        ]
+
                     ];
                 }, function () {
                     return [
-                        "error" => 'Servico Indisponivel'
+                        "status" => 503,
+                        "info" => 'Servico Indisponivel'
                     ];
                 }, $err);
 
@@ -114,13 +118,13 @@ $app->post('/api/localizacao/add', function (Request $request, Response $respons
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
+
                 "status" => "$status",
-                "text" => [
+                "info" => [
                     $error
                 ]
 
-            ]
+
         ];
 
         return $response

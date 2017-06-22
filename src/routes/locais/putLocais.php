@@ -9,7 +9,7 @@ use Respect\Validation\Validator as v;
 
 
 //////////////// PUT local//////////////////
-$app->put('/api/localizacao/update/{id}', function (Request $request, Response $response) {
+$app->put('/api/locais', function (Request $request, Response $response) {
     $id = $request->getAttribute('id');
     $localizacao = $request->getParam('nomeLocal');
     $lat = $request->getParam('lat');

@@ -6,18 +6,18 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 
 /////////////////////POST tipo eventos///////////////
-$app->put('/api/eventostipos/update/{id}', function (Request $request, Response $response) {
+$app->put('/api/tiposEventos/{id}', function (Request $request, Response $response) {
     $id = $request->getAttribute('id');
     $tipoNome = $request->getParam('nomeTipoEvento');
-    $error = array();
+    $error = "";
     $minCar = 1;
     $maxCar = 75;
     if (is_null($tipoNome) || strlen($tipoNome) < $minCar) {
-        $error[] = array("nome" => "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!");
+        $error= "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!";
     } elseif (strlen($tipoNome) > $maxCar) {
-        $error[] = array("nome" => "Nome excedeu limite máximo");
+        $error =  "Nome excedeu limite máximo";
     }
-    if (count($error) === 0) {
+    if ($error === "") {
         //verificar se tipo já existe
         $sql = "SELECT * FROM tipo_evento WHERE id_tipo_evento = :id";
 
@@ -33,7 +33,8 @@ $app->put('/api/eventostipos/update/{id}', function (Request $request, Response 
             $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
             if (!count($dados)) {
                 $responseData = [
-                    'Resposta' => "id da tipo de eventos já não existe!"
+                    "status" => "422",
+                    'info' => "id da tipo de eventos já não existe!"
                 ];
                 return $response
                     ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -54,6 +55,7 @@ $app->put('/api/eventostipos/update/{id}', function (Request $request, Response 
 
                 if (count($dados)) {
                     $responseData = [
+                        "status"=> "422",
                         'Resposta' => "Tipo de evento já existe!"
                     ];
                     return $response
@@ -74,6 +76,7 @@ $app->put('/api/eventostipos/update/{id}', function (Request $request, Response 
                         $stmt->execute();
                         $db = null;
                         $responseData = [
+                            'status' => 200,
                             'Resposta' => "Tipo de evento alterado com sucesso!"
                         ];
 
@@ -84,10 +87,10 @@ $app->put('/api/eventostipos/update/{id}', function (Request $request, Response 
                     } catch (PDOException $err) {
                         $status = 503; // Service unavailable
                         $errorMsg = [
-                            "error" => [
+
                                 "status" => $err->getCode(),
-                                "text" => $err->getMessage()
-                            ]
+                                "info" => $err->getMessage()
+
                         ];
 
                         return $response
@@ -104,14 +107,13 @@ $app->put('/api/eventostipos/update/{id}', function (Request $request, Response 
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
-                    "error" => [
                         "status" => $err->getCode(),
-                        "text" => $err->getMessage()
-                    ]
+                        "info" => $err->getMessage()
                 ];
             }, function () {
                 return [
-                    "error" => 'Servico Indisponivel'
+                    "status" => 503,
+                    "info" => 'Servico Indisponivel'
                 ];
             }, $err);
 
@@ -122,13 +124,13 @@ $app->put('/api/eventostipos/update/{id}', function (Request $request, Response 
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
+
                 "status" => "$status",
-                "text" => [
+                "info" => [
                     $error
                 ]
 
-            ]
+
         ];
 
         return $response

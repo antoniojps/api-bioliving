@@ -8,7 +8,7 @@ use Respect\Validation\Validator as v;
 
 //////////////Alterar um evento///////////////////
 //Scopes: admin ou token do request é igual ao {id}(colaborador que criou )
-$app->put('/api/eventos/alter/{id}', function (Request $request, Response $response) {
+$app->put('/api/eventos/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id');
 //ir buscar todos os parametros do metodo post do form
     $nomeEvento = $request->getParam('nomeEvento');
@@ -24,7 +24,6 @@ $app->put('/api/eventos/alter/{id}', function (Request $request, Response $respo
 //  \Cloudinary\Uploader::upload($_FILES["fileToUpload"]["tmp_name"]);
 
     $error = array();
-// TODO verificações de fotos
 // TODO verificar se existe id_localização na bd, senão inserir com respectivas lat e lng
 // TODO verificar se existe id_tipo_evento na bd, senão inserir
     if (is_int($id) && $id > 0) {

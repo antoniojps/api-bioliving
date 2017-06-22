@@ -9,6 +9,8 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 //////////// Obter todos os eventos ////////////
+
+
 $app->get('/api/eventos', function (Request $request, Response $response) {
     if (Token::validarScopes('admin')) {
         $byArr = [
@@ -643,7 +645,7 @@ $app->get('/api/eventos/{id}/tags', function (Request $request, Response $respon
  * @param string by -> coluna a ordenar (id,nome,dataRegisto,dataEvento,dataFim,ativo,tipoEvento,local) default: data do evento
  *
  */
-$app->get('/api/eventos/pesquisa', function (Request $request, Response $response) {
+$app->get('/api/pesquisa/eventos', function (Request $request, Response $response) {
     $byArr = [
         'id' => 'id_eventos',
         'nome' => 'nome_evento',

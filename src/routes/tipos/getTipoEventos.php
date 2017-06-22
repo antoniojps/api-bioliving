@@ -10,7 +10,7 @@ use Respect\Validation\Validator as v;
 # Variaveis alteráveis:
 #   min: 1, max: 10
 # Exemplo: /api/eventostipos?page=1&results=2&by=nome&order=DESC&msg=desporto&id=4
-$app->get('/api/eventostipos', function (Request $request, Response $response) {
+$app->get('/api/tiposEventos', function (Request $request, Response $response) {
 
     $byArr = [
         'id' => 'id_tipo_evento',
@@ -64,7 +64,7 @@ $app->get('/api/eventostipos', function (Request $request, Response $response) {
         }
 
         try {
-
+            $responseData="";
             $status = 200; // OK
             // iniciar ligação à base de dados
             $db = new Db();
@@ -91,6 +91,10 @@ $app->get('/api/eventostipos', function (Request $request, Response $response) {
             if ($dadosLength === 0) {
                 $dados = ["error" => 'pagina inexistente'];
                 $status = 404; // Page not found
+                $responseData =[
+                    'status' => $status,
+                    'info' =>'pagina inexistente'
+                ];
 
             } else if ($dadosLength < $results) {
                 $dadosExtra = ['info' => 'final dos resultados'];
@@ -100,13 +104,14 @@ $app->get('/api/eventostipos', function (Request $request, Response $response) {
                 $dadosExtra = ['proxPagina' => "$nextPageUrl?page=" . ++$page . "&results=$results"];
                 array_push($dados, $dadosExtra);
             }
+            if($responseData===""){
+                $responseData = [
+                    'status' => "$status",
+                    'data' => $dados
+                ];
 
-            $responseData = [
-                'status' => "$status",
-                'data' => [
-                    $dados
-                ]
-            ];
+            }
+
 
             return $response
                 ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -117,14 +122,15 @@ $app->get('/api/eventostipos', function (Request $request, Response $response) {
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
-                    "error" => [
+
                         "status" => $err->getCode(),
-                        "text" => $err->getMessage()
-                    ]
+                    "info" => $err->getMessage()
+
                 ];
             }, function () {
                 return [
-                    "error" => 'Servico Indisponivel'
+                    "status" => 503,
+                    "info" => 'Servico Indisponivel'
                 ];
             }, $err);
 
@@ -135,11 +141,9 @@ $app->get('/api/eventostipos', function (Request $request, Response $response) {
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
                 "status" => "$status",
-                "text" => 'Parametros invalidos'
+                "info" => 'Parametros invalidos'
 
-            ]
         ];
 
         return $response

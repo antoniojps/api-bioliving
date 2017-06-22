@@ -7,7 +7,7 @@ use Respect\Validation\Validator as v;
 
 
 /////////////Apagar um local////////////////////
-$app->delete('/api/eventostipos/delete/{id}', function (Request $request, Response $response) {
+$app->delete('/api/tiposEventos/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
     if (v::intVal()->validate($id) && $id > 0) {
         //ver se id existe na bd antes de editar
@@ -34,7 +34,8 @@ $app->delete('/api/eventostipos/delete/{id}', function (Request $request, Respon
                 $stmt->execute();
                 $db = null;
                 $responseData = [
-                    'Resposta' => "Tipo de evento apagado com sucesso!"
+                    'status' => 200,
+                    'info' => "Tipo de evento apagado com sucesso!"
                 ];
 
                 return $response
@@ -46,14 +47,15 @@ $app->delete('/api/eventostipos/delete/{id}', function (Request $request, Respon
                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
-                            "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+
+                        "status" => $err->getCode(),
+                        "info" => $err->getMessage()
+
                     ];
                 }, function () {
                     return [
-                        "error" => 'Servico Indisponivel'
+                        "status" => 503,
+                        "info" => 'Servico Indisponivel'
                     ];
                 }, $err);
 
@@ -64,13 +66,11 @@ $app->delete('/api/eventostipos/delete/{id}', function (Request $request, Respon
 
         } else {
             $status = 422; // Unprocessable Entity
-            $errorMsg = [
-                "error" => [
+            $errorMsg =
+                [
                     "status" => "$status",
-                    "text" => 'Tipo de evento  não se encontra disponivel'
-
-                ]
-            ];
+                    "info" => 'Tipo de evento já não se encontra disponivel'
+                ];
 
             return $response
                 ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -79,11 +79,10 @@ $app->delete('/api/eventostipos/delete/{id}', function (Request $request, Respon
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Atributo inválido'
 
-            ]
+            "status" => "$status",
+            "info" => 'Atributo inválido'
+
         ];
 
         return $response

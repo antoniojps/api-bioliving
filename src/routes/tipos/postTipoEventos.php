@@ -6,17 +6,17 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 
 /////////////////////POST tipo eventos///////////////
-$app->post('/api/eventostipos/add', function (Request $request, Response $response) {
+$app->post('/api/tiposEventos', function (Request $request, Response $response) {
     $tipoNome = $request->getParam('nomeTipoEvento');
-    $error = array();
+    $error = "";
     $minCar = 1;
     $maxCar = 75;
     if (is_null($tipoNome) || strlen($tipoNome) < $minCar) {
-        $error[] = array("nome" => "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!");
+        $error = "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!";
     } elseif (strlen($tipoNome) > $maxCar) {
-        $error[] = array("nome" => "Nome excedeu limite máximo");
+        $error = "Nome excedeu limite máximo";
     }
-    if (count($error) === 0) {
+    if ($error==="") {
 
         //verificar se tipo já existe
         $sql = "SELECT * FROM tipo_evento WHERE nome_tipo_evento = :nome";
@@ -33,7 +33,8 @@ $app->post('/api/eventostipos/add', function (Request $request, Response $respon
             $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
             if (count($dados)) {
                 $responseData = [
-                    'Resposta' => "Tipo de evento já existe!"
+                    "status"=>422,
+                    'info' => "Tipo de evento já existe!"
                 ];
                 return $response
                     ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -53,7 +54,8 @@ $app->post('/api/eventostipos/add', function (Request $request, Response $respon
                     $stmt->execute();
                     $db = null;
                     $responseData = [
-                        'Resposta' => "Tipo de evento adicionado com sucesso!"
+                        "status"=>200,
+                        'info' => "Tipo de evento adicionado com sucesso"
                     ];
 
                     return $response
@@ -63,10 +65,10 @@ $app->post('/api/eventostipos/add', function (Request $request, Response $respon
                 } catch (PDOException $err) {
                     $status = 503; // Service unavailable
                     $errorMsg = [
-                        "error" => [
+
                             "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+                            "info" => $err->getMessage()
+
                     ];
 
                     return $response
@@ -83,14 +85,15 @@ $app->post('/api/eventostipos/add', function (Request $request, Response $respon
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
-                    "error" => [
+
                         "status" => $err->getCode(),
-                        "text" => $err->getMessage()
-                    ]
+                        "info" => $err->getMessage()
+
                 ];
             }, function () {
                 return [
-                    "error" => 'Servico Indisponivel'
+                    "status" => 503,
+                    "info" => 'Servico Indisponivel'
                 ];
             }, $err);
 
@@ -101,13 +104,10 @@ $app->post('/api/eventostipos/add', function (Request $request, Response $respon
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
                 "status" => "$status",
-                "text" => [
+                "info" =>
                     $error
-                ]
 
-            ]
         ];
 
         return $response

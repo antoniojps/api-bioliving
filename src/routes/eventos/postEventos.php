@@ -15,7 +15,7 @@ use Respect\Validation\Validator as v;
 #   ativo (default = 1 ) :
 #       quanto ativo = 1 quer dizer que o evento está ativo
 #       quando ativo = 0 quer dizer que evento já não se encontra ativo
-$app->post('/api/eventos/add', function (Request $request, Response $response) {
+$app->post('/api/eventos', function (Request $request, Response $response) {
     //ir buscar todos os parametros do metodo post do form
     $nomeEvento = $request->getParam('nomeEvento');
     $data = $request->getParam('data');
@@ -26,8 +26,7 @@ $app->post('/api/eventos/add', function (Request $request, Response $response) {
     $iddMinima = $request->getParam('iddMinima');
     $dataFim = $request->getParam('dataFim');
     $ativo = $request->getParam('ativo');
-    //add foto
-    //  \Cloudinary\Uploader::upload($_FILES["fileToUpload"]["tmp_name"]);
+
 
     $error = array();
     // TODO verificações de fotos
@@ -80,13 +79,16 @@ $app->post('/api/eventos/add', function (Request $request, Response $response) {
     }
 
     ////////////validar datas introduzidas //////////////
-    if (!is_null($dataFim) && $dataFim != "") {
-        if (!validateDate($dataFim)) {
-            $error[] = array("data_fim" => "Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss");
+
+        if (!is_null($dataFim) && $dataFim != "") {
+            if (!validateDate($dataFim)) {
+                $error[] = array("data_fim" => "Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss");
+            }
+        } else {
+            $dataFim = null;
         }
-    } else {
-        $dataFim = null;
-    }
+
+
     if (!is_null($data) && $data != "") {
         if (!validateDate($data)) {
             $error[] = array("data" => "Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss");
@@ -181,10 +183,8 @@ $app->post('/api/eventos/add', function (Request $request, Response $response) {
         $errorMsg = [
             "error" => [
                 "status" => "$status",
-                "text" => [
+                "text" =>
                     $error
-                ]
-
             ]
         ];
 

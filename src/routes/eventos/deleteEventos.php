@@ -8,7 +8,7 @@ use Respect\Validation\Validator as v;
 
 
 /////////////Apagar um evento////////////////////
-$app->delete('/api/eventos/delete/{id}', function (Request $request, Response $response) {
+$app->delete('/api/eventos/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
     if (is_int($id) && $id > 0) {
 //ver se id existe na bd antes de editar
