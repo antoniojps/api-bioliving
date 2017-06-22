@@ -20,7 +20,7 @@ $app->post('/api/locais', function (Request $request, Response $response) {
     if (is_null($localizacao) || strlen($localizacao) < $minCar) {
         $error .= "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!";
     } elseif (strlen($localizacao) > $maxCar) {
-        $error .= "Nome excedeu limite máximo";
+        $error .= "Nome excedeu limite máximo.";
     }
 
     function validaLatLng($tipo, $valor)
@@ -37,13 +37,13 @@ $app->post('/api/locais', function (Request $request, Response $response) {
     }
 
     if (validaLatLng('latitude', $lat) === false) {
-        $error .=  " Latitude inválida";
+        $error .=  " Latitude inválida.";
     }
 
     if (validaLatLng('longitude', $lng) === false) {
-        $error .= " Longitude inválida";
+        $error .= " Longitude inválida.";
     }
-    echo $error;
+
     if ($error === "") {
 
         //verificar se localização já existe

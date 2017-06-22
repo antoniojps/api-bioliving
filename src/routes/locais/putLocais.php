@@ -9,7 +9,7 @@ use Respect\Validation\Validator as v;
 
 
 //////////////// PUT local//////////////////
-$app->put('/api/locais', function (Request $request, Response $response) {
+$app->put('/api/locais/{id}', function (Request $request, Response $response) {
     $id = $request->getAttribute('id');
     $localizacao = $request->getParam('nomeLocal');
     $lat = $request->getParam('lat');
@@ -18,9 +18,9 @@ $app->put('/api/locais', function (Request $request, Response $response) {
     $minCar = 1;
     $maxCar = 75;
     if (is_null($localizacao) || strlen($localizacao) < $minCar) {
-        $error[] = array("error" => "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!");
+        $error .= "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!";
     } elseif (strlen($localizacao) > $maxCar) {
-        $error[] = array("error" => "Nome excedeu limite máximo");
+        $error .= "Nome excedeu limite máximo.";
     }
 
     function validaLatLng($tipo, $valor)
@@ -37,13 +37,14 @@ $app->put('/api/locais', function (Request $request, Response $response) {
     }
 
     if (validaLatLng('latitude', $lat) === false) {
-        $error[] = array("error" => "Latitude inválida");
+        $error .=  " Latitude inválida.";
     }
 
     if (validaLatLng('longitude', $lng) === false) {
-        $error[] = array("error" => "Longitude inválida");
+        $error .= " Longitude inválida.";
     }
-    if (count($error) === 0) {
+
+    if ($error === "") {
 
         //verificar se id existe
         $sql = "SELECT * FROM `localizacao` WHERE localizacao=:id";
@@ -60,7 +61,8 @@ $app->put('/api/locais', function (Request $request, Response $response) {
 
         if (!count($dados)) {
             $responseData = [
-                'error' => "id da localização não existe!"
+                "status"=> "422",
+                'info' => "id da localização não existe!"
             ];
             return $response
                 ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -83,7 +85,8 @@ $app->put('/api/locais', function (Request $request, Response $response) {
 
             if (count($dados)) {
                 $responseData = [
-                    'Resposta' => "Localização já existe!"
+                    "status"=> 422,
+                    'Resposta' => "Nome localização já existe!"
                 ];
                 return $response
                     ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -105,6 +108,7 @@ $app->put('/api/locais', function (Request $request, Response $response) {
                     $stmt->execute();
                     $db = null;
                     $responseData = [
+                        "status"=> 200,
                         'Resposta' => "Localização alterada com sucesso!"
                     ];
 
@@ -117,14 +121,13 @@ $app->put('/api/locais', function (Request $request, Response $response) {
                     // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                     $errorMsg = Errors::filtroReturn(function ($err) {
                         return [
-                            "error" => [
-                                "status" => $err->getCode(),
-                                "text" => $err->getMessage()
-                            ]
+                            "status" => $err->getCode(),
+                            "text" => $err->getMessage()
                         ];
                     }, function () {
                         return [
-                            "error" => 'Servico Indisponivel'
+                            "status" => 503,
+                            "info" => 'Servico Indisponivel'
                         ];
                     }, $err);
 
@@ -138,13 +141,11 @@ $app->put('/api/locais', function (Request $request, Response $response) {
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => [
-                    $error
-                ]
-
+            "status" => "$status",
+            "info" => [
+                $error
             ]
+
         ];
 
         return $response

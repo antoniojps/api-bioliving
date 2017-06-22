@@ -34,7 +34,8 @@ $app->delete('/api/locais/{id}', function (Request $request, Response $response)
                 $stmt->execute();
                 $db = null;
                 $responseData = [
-                    'Resposta' => "Localizacao apagada com sucesso!"
+                    "status" => 200,
+                    'info' => "Local apagado com sucesso!"
                 ];
 
                 return $response
@@ -46,14 +47,15 @@ $app->delete('/api/locais/{id}', function (Request $request, Response $response)
                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
-                            "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+
+                        "status" => $err->getCode(),
+                        "info" => $err->getMessage()
+
                     ];
                 }, function () {
                     return [
-                        "error" => 'Servico Indisponivel'
+                        "status" => 503,
+                        "info" => 'Servico Indisponivel'
                     ];
                 }, $err);
 
@@ -65,11 +67,8 @@ $app->delete('/api/locais/{id}', function (Request $request, Response $response)
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Localizacao não se encontra disponivel'
-
-                ]
+                "status" => "$status",
+                "info" => 'Local não se encontra disponivel'
             ];
 
             return $response
@@ -79,11 +78,8 @@ $app->delete('/api/locais/{id}', function (Request $request, Response $response)
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Atributo inválido'
-
-            ]
+            "status" => "$status",
+            "info" => 'Atributo inválido'
         ];
 
         return $response
