@@ -8,15 +8,16 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 
 /////////////////POST tags//////////////////////////
-$app->post('/api/tags/add', function (Request $request, Response $response) {
+$app->post('/api/tags', function (Request $request, Response $response) {
     $tag = $request->getParam('nomeTag');
-    $error = array();
+    echo $tag;
+    $error = "";
     $minCar = 1;  //valor minimo de caracteres da tag
     $maxCar = 45; //valor maximo de caracteres da tag
-    if (!v::stringType()->length($minCar, $maxCar)->validate($tag)) $error[] = "Insira uma tag com pelo menos $minCar caracteres e no maximo $maxCar";
-    elseif (!v::alnum()->validate($tag) || !v::noWhitespace()->validate($tag)) $error[] = "Tag só pode conter numeros e letras";
+    if (!v::stringType()->length($minCar, $maxCar)->validate($tag)) $error = "Insira uma tag com pelo menos $minCar caracteres e no maximo $maxCar";
+    elseif (!v::alnum()->validate($tag) || !v::noWhitespace()->validate($tag)) $error = "Tag só pode conter numeros e letras";
 
-    if (count($error) === 0) {
+    if ($error=== "") {
         //verificar se tag existe
         $sql = "SELECT * FROM tags WHERE tag_nome = :nome ";
 
@@ -33,7 +34,8 @@ $app->post('/api/tags/add', function (Request $request, Response $response) {
 
             if (count($dados)) {
                 $responseData = [
-                    'Resposta' => "Tag já existe!"
+                    "status" => "422",
+                    'info' => "Tag já existe!"
                 ];
                 return $response
                     ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -53,7 +55,8 @@ $app->post('/api/tags/add', function (Request $request, Response $response) {
                     $stmt->execute();
                     $db = null;
                     $responseData = [
-                        'Resposta' => "Tag adicionada com sucesso!"
+                        "status" => 200,
+                        'info' => "Tag adicionada com sucesso!"
                     ];
 
                     return $response
@@ -65,14 +68,15 @@ $app->post('/api/tags/add', function (Request $request, Response $response) {
                     // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                     $errorMsg = Errors::filtroReturn(function ($err) {
                         return [
-                            "error" => [
+
                                 "status" => $err->getCode(),
-                                "text" => $err->getMessage()
-                            ]
+                                "info" => $err->getMessage()
+
                         ];
                     }, function () {
                         return [
-                            "error" => 'Servico Indisponivel'
+                            "status" => 503,
+                            "info" => 'Servico Indisponivel'
                         ];
                     }, $err);
 
@@ -90,14 +94,15 @@ $app->post('/api/tags/add', function (Request $request, Response $response) {
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
-                    "error" => [
+
                         "status" => $err->getCode(),
-                        "text" => $err->getMessage()
-                    ]
+                        "info" => $err->getMessage()
+
                 ];
             }, function () {
                 return [
-                    "error" => 'Servico Indisponivel'
+                    "status"=> 503,
+                    "info" => 'Servico Indisponivel'
                 ];
             }, $err);
 
@@ -110,7 +115,7 @@ $app->post('/api/tags/add', function (Request $request, Response $response) {
         $errorMsg = [
             "error" => [
                 "status" => "$status",
-                "text" => [
+                "info" => [
                     $error
                 ]
             ]

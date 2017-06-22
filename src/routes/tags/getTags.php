@@ -103,9 +103,9 @@ $app->get('/api/tags', function (Request $request, Response $response) {
 
             $responseData = [
                 'status' => "$status",
-                'data' => [
+                'data' =>
                     $dados
-                ]
+
             ];
 
             return $response
@@ -117,13 +117,14 @@ $app->get('/api/tags', function (Request $request, Response $response) {
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
-                    "error" => [
+
                         "status" => $err->getCode(),
-                        "text" => $err->getMessage()
-                    ]
+                        "info" => $err->getMessage()
+
                 ];
             }, function () {
                 return [
+                    "status" => 503,
                     "error" => 'Servico Indisponivel'
                 ];
             }, $err);
@@ -135,11 +136,11 @@ $app->get('/api/tags', function (Request $request, Response $response) {
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Parametros invalidos'
 
-            ]
+                "status" => "$status",
+                "info" => 'Parametros invalidos'
+
+
         ];
 
         return $response

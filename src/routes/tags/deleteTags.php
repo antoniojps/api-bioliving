@@ -7,7 +7,7 @@ use Respect\Validation\Validator as v;
 
 
 /////////////Apagar um local////////////////////
-$app->delete('/api/tags/delete/{id}', function (Request $request, Response $response) {
+$app->delete('/api/tags/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
     if (v::intVal()->validate($id) && $id > 0) {
         //ver se id existe na bd antes de editar
@@ -34,7 +34,8 @@ $app->delete('/api/tags/delete/{id}', function (Request $request, Response $resp
                 $stmt->execute();
                 $db = null;
                 $responseData = [
-                    'Resposta' => "Tag apagada com sucesso!"
+                    "status" => 200,
+                    'info' => "Tag apagada com sucesso!"
                 ];
 
                 return $response
@@ -46,14 +47,15 @@ $app->delete('/api/tags/delete/{id}', function (Request $request, Response $resp
                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
+
                             "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+                            "info" => $err->getMessage()
+
                     ];
                 }, function () {
                     return [
-                        "error" => 'Servico Indisponivel'
+                        "status"=>503,
+                        "info" => 'Servico Indisponivel'
                     ];
                 }, $err);
 
@@ -65,11 +67,11 @@ $app->delete('/api/tags/delete/{id}', function (Request $request, Response $resp
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Tag  não se encontra disponivel'
 
-                ]
+                    "status" => "$status",
+                    "info" => 'Tag  não se encontra disponivel'
+
+
             ];
 
             return $response
@@ -79,11 +81,11 @@ $app->delete('/api/tags/delete/{id}', function (Request $request, Response $resp
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Atributo inválido'
 
-            ]
+                "status" => "$status",
+                "info" => 'Atributo inválido'
+
+
         ];
 
         return $response
