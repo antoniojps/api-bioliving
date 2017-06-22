@@ -7,12 +7,7 @@ require_once '../src/config/Errors/Errors.php';
 // https://github.com/vlucas/phpdotenv
 $dotenv = new Dotenv\Dotenv(dirname(__DIR__));
 $dotenv->load();
-/* CLOUDINARY Configuraçao */
-\Cloudinary::config(array(
-		"cloud_name" => getenv('CLOUD_NAME'),
-		"api_key" => getenv('API_KEY'),
-		"api_secret" => getenv('API_SECRET')
-));
+
 /* SLIM APP */
 // criar objeto slim com container (src/config/errors/errors.php) $c
 $app = new \Slim\App($c);
