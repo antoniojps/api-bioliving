@@ -61,8 +61,23 @@ class Helper {
 
 		$url = 'http://' . $_SERVER['SERVER_NAME'] .'/'. $pastaUpload . $idImagem;
 
-
 		return $url;
  	}
+
+ 	/*
+ 	 *	 Filtrar array: remover indices com valores nulls ou strings vazias ''
+ 	 */
+ 	 static public function filtrarArray($arr){
+		 $arr = array_filter(array_map(function ($valor1) {
+			 return $valor1 = array_filter($valor1, function ($valor2) {
+				 return $valor2 !== null && $valor2 !== '';
+			 });
+		 }, $arr));
+
+		 return $arr;
+ 	 }
+
+
+
 
 }
