@@ -13,8 +13,8 @@ use Bioliving\Custom\Token as Token;
 $app->get('/api/eventos/{id}/interesse', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('id'); // ir buscar id
 
-    if (Token::validarScopes('admin',Token::getUtilizador())) {
-        $idUtilizador =(int) Token::getUtilizador();
+    if (Token::validarScopes('admin', Token::getUtilizador())) {
+        $idUtilizador = (int)Token::getUtilizador();
 
 
         //verificar se é um id válido
@@ -37,18 +37,20 @@ $app->get('/api/eventos/{id}/interesse', function (Request $request, Response $r
                 $stmt->execute();
                 $db = null;
                 $dados = $stmt->fetch(PDO::FETCH_ASSOC);
-                if($dados['interessado']==='1'){
+                if ($dados['interessado'] === '1') {
 
-                    $dados = ["interessado" => 'true'];
-                }else{
-                    $dados = ["interessado" => 'false'];
+                    $dados = [
+                        "status" => 200,
+                        "info" => 'true'
+                    ];
+                } else {
+                    $dados = [
+                        "status" => 200,
+                        "info" => 'false'
+                    ];
                 }
 
-                $responseData = [
-                    'status' => "$status",
-                    'data' =>
-                        $dados
-                ];
+                $responseData = $dados;
 
                 return $response
                     ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -59,14 +61,15 @@ $app->get('/api/eventos/{id}/interesse', function (Request $request, Response $r
                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
-                            "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+
+                        "status" => $err->getCode(),
+                        "info" => $err->getMessage()
+
                     ];
                 }, function () {
                     return [
-                        "error" => 'Servico Indisponivel'
+                        "status" => 503,
+                        "info" => 'Servico Indisponivel'
                     ];
                 }, $err);
 
@@ -77,11 +80,11 @@ $app->get('/api/eventos/{id}/interesse', function (Request $request, Response $r
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Parametros invalidos'
 
-                ]
+                "status" => "$status",
+                "info" => 'Parametros invalidos'
+
+
             ];
 
             return $response
@@ -90,11 +93,11 @@ $app->get('/api/eventos/{id}/interesse', function (Request $request, Response $r
     } else {
         $status = 401; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Acesso não autorizado'
 
-            ]
+            "status" => "$status",
+            "info" => 'Acesso não autorizado'
+
+
         ];
 
         return $response
@@ -127,7 +130,7 @@ $app->get('/api/eventos/{id}/interesses', function (Request $request, Response $
     $minResults = 1; // minimo de resultados por pagina
     $byDefault = 'id'; // order by predefinido
     $paginaDefault = 1; // pagina predefenida
-    $orderDefault = "DESC"; //ordenação predefenida
+    $orderDefault = "ASC"; //ordenação predefenida
 
 
     $parametros = $request->getQueryParams(); // obter parametros do querystring
@@ -152,9 +155,9 @@ $app->get('/api/eventos/{id}/interesses', function (Request $request, Response $
 
         //Apenas informações básicas dos inscritos para por exemplo cards, e ao clicar na card o utilizador pode ser reencaminhado para o masterdetail do utlizador da card
         if ($order == $orderDefault) {
-            $sql = "SELECT id_estatutos,nome_estatuto, `id_utilizadores`,`nome`,`apelido`,`foto`,`sobre_mini`,`telemovel` FROM `utilizadores` INNER JOIN estatutos ON utilizadores.`estatutos_id_estatutos` = estatutos.id_estatutos INNER JOIN interesses ON utilizadores.id_utilizadores = interesses.utilizadores_id_utilizadores WHERE eventos_id_eventos = :id ORDER BY $passar DESC LIMIT :limit , :results";
-        } else {
             $sql = "SELECT id_estatutos,nome_estatuto, `id_utilizadores`,`nome`,`apelido`,`foto`,`sobre_mini`,`telemovel` FROM `utilizadores` INNER JOIN estatutos ON utilizadores.`estatutos_id_estatutos` = estatutos.id_estatutos INNER JOIN interesses ON utilizadores.id_utilizadores = interesses.utilizadores_id_utilizadores WHERE eventos_id_eventos = :id ORDER BY $passar  LIMIT :limit , :results";
+        } else {
+            $sql = "SELECT id_estatutos,nome_estatuto, `id_utilizadores`,`nome`,`apelido`,`foto`,`sobre_mini`,`telemovel` FROM `utilizadores` INNER JOIN estatutos ON utilizadores.`estatutos_id_estatutos` = estatutos.id_estatutos INNER JOIN interesses ON utilizadores.id_utilizadores = interesses.utilizadores_id_utilizadores WHERE eventos_id_eventos = :id ORDER BY $passar DESC LIMIT :limit , :results";
 
         }
 
@@ -199,9 +202,9 @@ $app->get('/api/eventos/{id}/interesses', function (Request $request, Response $
 
             $responseData = [
                 'status' => "$status",
-                'data' => [
+                'data' =>
                     $dados
-                ]
+
             ];
 
             return $response
@@ -214,14 +217,13 @@ $app->get('/api/eventos/{id}/interesses', function (Request $request, Response $
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
-                    "error" => [
-                        "status" => $err->getCode(),
-                        "text" => $err->getMessage()
-                    ]
+                    "status" => $err->getCode(),
+                    "info" => $err->getMessage()
                 ];
             }, function () {
                 return [
-                    "error" => 'Servico Indisponivel'
+                    "status" => 503,
+                    "info" => "Servico Indisponive"
                 ];
             }, $err);
 
@@ -231,11 +233,11 @@ $app->get('/api/eventos/{id}/interesses', function (Request $request, Response $
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Parametros invalidos'
 
-            ]
+            "status" => "$status",
+            "info" => 'Parametros invalidos'
+
+
         ];
 
         return $response

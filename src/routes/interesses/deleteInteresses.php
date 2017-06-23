@@ -7,7 +7,6 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 
-
 $app->delete('/api/eventos/{idevento}/interesses/{idutilizador}', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('idevento'); // ir buscar id do evento
     $idUtilizadores = (int)$request->getAttribute('idutilizador'); // ir buscar id do evento
@@ -43,7 +42,8 @@ $app->delete('/api/eventos/{idevento}/interesses/{idutilizador}', function (Requ
                         $stmt->execute();
                         $db = null;
                         $responseData = [
-                            'Resposta' => "Interesse anulado com sucesso!"
+                            "status" => 200,
+                            'info' => "Interesse anulado com sucesso!"
                         ];
 
                         return $response
@@ -54,14 +54,15 @@ $app->delete('/api/eventos/{idevento}/interesses/{idutilizador}', function (Requ
                         // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                         $errorMsg = Errors::filtroReturn(function ($err) {
                             return [
-                                "error" => [
-                                    "status" => $err->getCode(),
-                                    "text" => $err->getMessage()
-                                ]
+
+                                "status" => $err->getCode(),
+                                "info" => $err->getMessage()
+
                             ];
                         }, function () {
                             return [
-                                "error" => 'Servico Indisponivel'
+                                "status" => 503,
+                                "info" => 'Servico Indisponivel'
                             ];
                         }, $err);
 
@@ -73,11 +74,8 @@ $app->delete('/api/eventos/{idevento}/interesses/{idutilizador}', function (Requ
                 } else {
                     $status = 404; // Unprocessable Entity
                     $errorMsg = [
-                        "error" => [
-                            "status" => "$status",
-                            "text" => 'Interesse já não existe'
-
-                        ]
+                        "status" => "$status",
+                        "info" => 'Interesse já não existe'
                     ];
 
                     return $response
@@ -90,14 +88,14 @@ $app->delete('/api/eventos/{idevento}/interesses/{idutilizador}', function (Requ
                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
-                            "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+
+                        "status" => $err->getCode(),
+                        "info" => $err->getMessage()
                     ];
                 }, function () {
                     return [
-                        "error" => 'Servico Indisponivel'
+                        "status" => 503,
+                        "info" => 'Servico Indisponivel'
                     ];
                 }, $err);
 
@@ -108,11 +106,8 @@ $app->delete('/api/eventos/{idevento}/interesses/{idutilizador}', function (Requ
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Parametros invalidos'
-
-                ]
+                "status" => "$status",
+                "info" => 'Parametros invalidos'
             ];
 
             return $response
@@ -122,18 +117,17 @@ $app->delete('/api/eventos/{idevento}/interesses/{idutilizador}', function (Requ
     } else {
         $status = 401;
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Acesso não autorizado'
 
-            ]
+            "status" => "$status",
+            "info" => 'Acesso não autorizado'
+
+
         ];
 
         return $response
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
 });
-
 
 
 /////////////Apagar um interesse atráves do utilizador logado////////////////////
@@ -173,7 +167,8 @@ $app->delete('/api/eventos/{id}/interesse', function (Request $request, Response
                         $stmt->execute();
                         $db = null;
                         $responseData = [
-                            'Resposta' => "Interesse anulada com sucesso!"
+                            "status" => 200,
+                            'info' => "Interesse anulada com sucesso!"
                         ];
 
                         return $response
@@ -185,14 +180,15 @@ $app->delete('/api/eventos/{id}/interesse', function (Request $request, Response
                         // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                         $errorMsg = Errors::filtroReturn(function ($err) {
                             return [
-                                "error" => [
-                                    "status" => $err->getCode(),
-                                    "text" => $err->getMessage()
-                                ]
+
+                                "status" => $err->getCode(),
+                                "info" => $err->getMessage()
+
                             ];
                         }, function () {
                             return [
-                                "error" => 'Servico Indisponivel'
+                                "status" => 503,
+                                "info" => 'Servico Indisponivel'
                             ];
                         }, $err);
 
@@ -205,11 +201,11 @@ $app->delete('/api/eventos/{id}/interesse', function (Request $request, Response
                 } else {
                     $status = 404; // Unprocessable Entity
                     $errorMsg = [
-                        "error" => [
-                            "status" => "$status",
-                            "text" => 'Interesse já existe'
 
-                        ]
+                        "status" => "$status",
+                        "info" => 'Interesse já não existe'
+
+
                     ];
 
                     return $response
@@ -222,13 +218,14 @@ $app->delete('/api/eventos/{id}/interesse', function (Request $request, Response
                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
-                            "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+
+                        "status" => $err->getCode(),
+                        "info" => $err->getMessage()
+
                     ];
                 }, function () {
                     return [
+                        "status" => 503,
                         "error" => 'Servico Indisponivel'
                     ];
                 }, $err);
@@ -242,11 +239,10 @@ $app->delete('/api/eventos/{id}/interesse', function (Request $request, Response
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Parametros invalidos'
 
-                ]
+                "status" => "$status",
+                "info" => 'Parametros invalidos'
+
             ];
 
             return $response
@@ -257,17 +253,16 @@ $app->delete('/api/eventos/{id}/interesse', function (Request $request, Response
     } else {
         $status = 401; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Acesso não autorizado'
 
-            ]
+            "status" => "$status",
+            "info" => 'Acesso não autorizado'
+
+
         ];
 
         return $response
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
-
 
 
 });

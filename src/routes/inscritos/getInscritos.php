@@ -33,7 +33,7 @@ $app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $r
     $minResults = 1; // minimo de resultados por pagina
     $byDefault = 'id'; // order by predefinido
     $paginaDefault = 1; // pagina predefenida
-    $orderDefault = "DESC"; //ordenação predefenida
+    $orderDefault = "ASC"; //ordenação predefenida
 
 
     $parametros = $request->getQueryParams(); // obter parametros do querystring
@@ -58,9 +58,9 @@ $app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $r
 
         //Apenas informações básicas dos inscritos para por exemplo cards, e ao clicar na card o utilizador pode ser reencaminhado para o masterdetail do utlizador da card
         if ($order == $orderDefault) {
-            $sql = "SELECT id_estatutos,nome_estatuto, `id_utilizadores`,`nome`,`apelido`,`foto`,`sobre_mini`,`telemovel` FROM `utilizadores` INNER JOIN estatutos ON utilizadores.`estatutos_id_estatutos` = estatutos.id_estatutos INNER JOIN participantes ON utilizadores.id_utilizadores = participantes.utilizadores_id_utilizadores WHERE eventos_id_eventos = :id ORDER BY $passar DESC LIMIT :limit , :results";
-        } else {
             $sql = "SELECT id_estatutos,nome_estatuto, `id_utilizadores`,`nome`,`apelido`,`foto`,`sobre_mini`,`telemovel` FROM `utilizadores` INNER JOIN estatutos ON utilizadores.`estatutos_id_estatutos` = estatutos.id_estatutos INNER JOIN participantes ON utilizadores.id_utilizadores = participantes.utilizadores_id_utilizadores WHERE eventos_id_eventos = :id ORDER BY $passar  LIMIT :limit , :results";
+        } else {
+            $sql = "SELECT id_estatutos,nome_estatuto, `id_utilizadores`,`nome`,`apelido`,`foto`,`sobre_mini`,`telemovel` FROM `utilizadores` INNER JOIN estatutos ON utilizadores.`estatutos_id_estatutos` = estatutos.id_estatutos INNER JOIN participantes ON utilizadores.id_utilizadores = participantes.utilizadores_id_utilizadores WHERE eventos_id_eventos = :id ORDER BY $passar DESC LIMIT :limit , :results";
 
         }
 
@@ -105,9 +105,9 @@ $app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $r
 
             $responseData = [
                 'status' => "$status",
-                'data' => [
+                'data' =>
                     $dados
-                ]
+
             ];
 
             return $response
@@ -120,13 +120,14 @@ $app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $r
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
-                    "error" => [
+
                         "status" => $err->getCode(),
-                        "text" => $err->getMessage()
-                    ]
+                        "info" => $err->getMessage()
+
                 ];
             }, function () {
                 return [
+                    "status" => 503,
                     "error" => 'Servico Indisponivel'
                 ];
             }, $err);
@@ -137,11 +138,11 @@ $app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $r
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Parametros invalidos'
 
-            ]
+                "status" => "$status",
+                "info" => 'Parametros invalidos'
+
+
         ];
 
         return $response
@@ -184,16 +185,18 @@ $app->get('/api/eventos/{id}/inscrito', function (Request $request, Response $re
 
                 if($dados['inscrito']==='1'){
 
-                    $dados = ["inscrito" => 'true'];
+                    $dados = [
+                        "status" => 200,
+                        "info" => 'true'
+                    ];
                 }else{
-                    $dados = ["inscrito" => 'false'];
+                    $dados = [
+                        "status" => 200,
+                        "info" => 'false'
+                    ];
                 }
 
-                $responseData = [
-                    'status' => "$status",
-                    'data' =>
-                        $dados
-                ];
+                $responseData = $dados;
 
                 return $response
                     ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -204,14 +207,15 @@ $app->get('/api/eventos/{id}/inscrito', function (Request $request, Response $re
                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
+
                             "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+                            "info" => $err->getMessage()
+
                     ];
                 }, function () {
                     return [
-                        "error" => 'Servico Indisponivel'
+                        "status" => 503,
+                        "info" => 'Servico Indisponivel'
                     ];
                 }, $err);
 
@@ -222,18 +226,26 @@ $app->get('/api/eventos/{id}/inscrito', function (Request $request, Response $re
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Parametros invalidos'
 
-                ]
+                    "status" => "$status",
+                    "info" => 'Parametros invalidos'
+
+
             ];
 
             return $response
                 ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
         }
     } else {
+        $status = 401; // Unprocessable Entity
+        $errorMsg = [
 
+            "status"=> $status,
+            "info"=> "Acesso não autorizado"
+
+        ];
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
     }
 });
