@@ -23,7 +23,7 @@ $app->put('/api/eventos/{id}', function (Request $request, Response $response) {
 //add foto
 //  \Cloudinary\Uploader::upload($_FILES["fileToUpload"]["tmp_name"]);
 
-    $error = array();
+    $error = "";
 // TODO verificar se existe id_localização na bd, senão inserir com respectivas lat e lng
 // TODO verificar se existe id_tipo_evento na bd, senão inserir
     if (is_int($id) && $id > 0) {
@@ -47,9 +47,9 @@ $app->put('/api/eventos/{id}', function (Request $request, Response $response) {
             $minCar = 1;
             $maxCar = 64;
             if (is_null($nomeEvento) || strlen($nomeEvento) < $minCar) {
-                $error[] = array("nome" => "Insira um nome para o evento com mais que " . $minCar . " caracter. Este campo é obrigatório!");
+                $error.="Insira um nome para o evento com mais que " . $minCar . " caracter. Este campo é obrigatório! ";
             } elseif (strlen($nomeEvento) > $maxCar) {
-                $error[] = array("nome" => "Nome excedeu limite máximo");
+                $error.="Nome excedeu limite máximo";
             }
 
 ///////////função para validar datas/////////////
@@ -75,25 +75,25 @@ $app->put('/api/eventos/{id}', function (Request $request, Response $response) {
                     $desc = null;
                 } elseif (strlen($desc) > $max) {
 
-                    $error[] = array($errorName => $errorName . " excedeu limite máximo de " . $max . " caracteres");
+                    $error.=$errorName . " excedeu limite máximo de " . $max . " caracteres. ";
 
                 } elseif (strlen($desc) < $min) {
 
-                    $error[] = array($errorName => $errorName . " tem de ter pelo menos " . $min . " caracteres");
+                    $error.=$errorName . " tem de ter pelo menos " . $min . " caracteres. ";
                 }
             }
 
             ////////////validar datas introduzidas //////////////
             if (!is_null($dataFim) && $dataFim != "") {
                 if (!validateDate($dataFim)) {
-                    $error[] = array("data_fim" => "Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss");
+                    $error.="Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss";
                 }
             } else {
                 $dataFim = null;
             }
             if (!is_null($data) && $data != "") {
                 if (!validateDate($data)) {
-                    $error[] = array("data" => "Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss");
+                    $error.="Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss";
                 }
             } else {
                 $data = null;
@@ -150,7 +150,8 @@ $app->put('/api/eventos/{id}', function (Request $request, Response $response) {
                     $stmt->execute();
 
                     $responseData = [
-                        'Resposta' => "Evento alterado com sucesso!"
+                        "status"=>200,
+                        'info' => "Evento alterado com sucesso!"
                     ];
 
                     return $response
@@ -162,14 +163,15 @@ $app->put('/api/eventos/{id}', function (Request $request, Response $response) {
 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                     $errorMsg = Errors::filtroReturn(function ($err) {
                         return [
-                            "error" => [
+
                                 "status" => $err->getCode(),
-                                "text" => $err->getMessage()
-                            ]
+                                "info" => $err->getMessage()
+
                         ];
                     }, function () {
                         return [
-                            "error" => 'Servico Indisponivel'
+                            "status" => 503,
+                            "info" => 'Servico Indisponivel'
                         ];
                     }, $err);
 
@@ -182,13 +184,8 @@ $app->put('/api/eventos/{id}', function (Request $request, Response $response) {
             } else {
                 $status = 422; // Unprocessable Entity
                 $errorMsg = [
-                    "error" => [
                         "status" => "$status",
-                        "text" => [
-                            $error
-                        ]
-
-                    ]
+                        "info" => $error
                 ];
 
                 return $response
@@ -198,11 +195,11 @@ $app->put('/api/eventos/{id}', function (Request $request, Response $response) {
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Evento já não se encontra disponivel'
 
-                ]
+                    "status" => "$status",
+                    "info" => 'Evento já não se encontra disponivel'
+
+
             ];
 
             return $response
@@ -212,11 +209,11 @@ $app->put('/api/eventos/{id}', function (Request $request, Response $response) {
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Parametros inválidos'
 
-            ]
+                "status" => "$status",
+                "info" => 'Parametros inválidos'
+
+
         ];
 
         return $response

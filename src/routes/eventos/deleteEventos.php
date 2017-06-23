@@ -36,7 +36,8 @@ $app->delete('/api/eventos/{id}', function (Request $request, Response $response
                 $stmt->execute();
                 $db = null;
                 $responseData = [
-                    'Resposta' => "Evento apagado com sucesso!"
+                    "status" =>200,
+                    'info' => "Evento apagado com sucesso!"
                 ];
 
                 return $response
@@ -48,14 +49,15 @@ $app->delete('/api/eventos/{id}', function (Request $request, Response $response
 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
+
                             "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+                            "info" => $err->getMessage()
+
                     ];
                 }, function () {
                     return [
-                        "error" => 'Servico Indisponivel'
+                        "status" => 503,
+                        "info" => 'Servico Indisponivel'
                     ];
                 }, $err);
 
@@ -67,11 +69,11 @@ $app->delete('/api/eventos/{id}', function (Request $request, Response $response
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Evento já não se encontra disponivel'
 
-                ]
+                    "status" => "$status",
+                    "info" => 'Evento já não se encontra disponivel'
+
+
             ];
 
             return $response
@@ -81,11 +83,11 @@ $app->delete('/api/eventos/{id}', function (Request $request, Response $response
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Parametros inválidos'
 
-            ]
+                "status" => "$status",
+                "info" => 'Parametros inválidos'
+
+
         ];
 
         return $response

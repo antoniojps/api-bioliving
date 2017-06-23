@@ -12,7 +12,7 @@ use Bioliving\Custom\Helper as H;
 //////////// Obter todos os eventos ////////////
 
 $app->get('/api/eventos', function (Request $request, Response $response) {
-    if (Token::validarScopes('admin')) {
+    if (!Token::validarScopes('admin')) {
         $byArr = [
             'id' => 'id_eventos',
             'nome' => 'nome_evento',
@@ -80,24 +80,30 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
 
                 $dadosLength = (int)sizeof($dados);
                 if ($dadosLength === 0) {
-                    $dados = ["error" => 'pagina inexistente'];
+                    $responseData = [
+                        "status"=>404,
+                        "info" => 'pagina inexistente'
+                    ];
                     $status = 404; // Page not found
 
                 } else if ($dadosLength < $results) {
-                    $dadosExtra = ['info' => 'final dos resultados'];
-                    array_push($dados, $dadosExtra);
+                    $responseData=[
+                        "status"=>200,
+                        "data"=>$dados,
+                        "info"=>"final dos resultados"
+                    ];
+
+
                 } else {
                     $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-                    $dadosExtra = ['proxPagina' => "$nextPageUrl?page=" . ++$page . "&results=$results"];
-                    array_push($dados, $dadosExtra);
+                    $responseData=[
+                        "status"=>200,
+                        "data"=>$dados,
+                        "proxPagina"=>"$nextPageUrl?page=" . ++$page . "&results=$results"
+                    ];
                 }
 
-                $responseData = [
-                    'status' => "$status",
-                    'data' =>
-                        $dados
 
-                ];
 
                 return $response
                     ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -108,14 +114,15 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
+
                             "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+                            "info" => $err->getMessage()
+
                     ];
                 }, function () {
                     return [
-                        "error" => 'Servico Indisponivel'
+                        "status" =>503,
+                        "info" => 'Servico Indisponivel'
                     ];
                 }, $err);
 
@@ -126,11 +133,11 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Parametros invalidos'
 
-                ]
+                    "status" => "$status",
+                    "info" => 'Parametros invalidos'
+
+
             ];
 
             return $response
@@ -139,11 +146,11 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
     } else {
         $status = 401;
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Acesso não autorizado'
 
-            ]
+                "status" => "$status",
+                "info" => 'Acesso não autorizado'
+
+
         ];
 
         return $response
@@ -187,15 +194,19 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
             $dadosLength = (int)sizeof($dados);
             $dadosDoArrayLength = (int)sizeof($dados[0]); // filtrar os participantes = 0
             if ($dadosLength === 0 || $dadosDoArrayLength === 1 || $dadosDoArrayLength === 0) {
-                $dados = ["error" => 'evento inexistente'];
-                $status = 404; // Page not found
+                $responseData = [
+                    "status" => 404,
+                    "info" => 'evento inexistente'
+                ];// Page not found
+            }else{
+                $responseData = [
+                    'status' => "$status",
+                    'data' =>
+                        $dados
+                ];
             }
 
-            $responseData = [
-                'status' => "$status",
-                'data' =>
-                    $dados
-            ];
+
 
             return $response
                 ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -206,14 +217,13 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
-                    "error" => [
-                        "status" => $err->getCode(),
-                        "text" => $err->getMessage()
-                    ]
+                    "status" => $err->getCode(),
+                    "info" => $err->getMessage()
                 ];
             }, function () {
                 return [
-                    "error" => 'Servico Indisponivel'
+                    "status"=>503,
+                    "info" => 'Servico Indisponivel'
                 ];
             }, $err);
 
@@ -224,11 +234,10 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Parametros invalidos'
 
-            ]
+                "status" => "$status",
+                "info" => 'Parametros invalidos'
+
         ];
 
         return $response
@@ -310,23 +319,26 @@ $app->get('/api/eventos/{id}/colaboradores', function (Request $request, Respons
             $dadosLength = (int)sizeof($dados);
 
             if ($dadosLength === 0) {
-                $dados = ["error" => 'página inexistentes'];
-                $status = 404; // Page not found
+                $responseData = [
+                    "status"=>404,
+                    "info" => 'página inexistentes'
+                ]; // Page not found
             } else if ($dadosLength < $results) {
-                $dadosExtra = ['info' => 'final dos resultados'];
-                array_push($dados, $dadosExtra);
+
+                $responseData = [
+                    "status"=>200,
+                    "data"=>$dados,
+                    'info' => 'final dos resultados'
+                ];
+
             } else {
                 $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-                $dadosExtra = ['proxPagina' => "$nextPageUrl?page=" . ++$page . "&results=$results"];
-                array_push($dados, $dadosExtra);
+                $responseData=[
+                    "status"=>200,
+                    "data"=>$dados,
+                    "proxPagina"=>"$nextPageUrl?page=" . ++$page . "&results=$results"
+                ];
             }
-
-            $responseData = [
-                'status' => "$status",
-                'data' =>
-                    $dados
-
-            ];
 
             return $response
                 ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -338,14 +350,15 @@ $app->get('/api/eventos/{id}/colaboradores', function (Request $request, Respons
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
-                    "error" => [
+
                         "status" => $err->getCode(),
-                        "text" => $err->getMessage()
-                    ]
+                        "info" => $err->getMessage()
+
                 ];
             }, function ($err) {
                 return [
-                    "error" => 'Servico Indisponivel'
+                    "status"=>503,
+                    "info" => 'Servico Indisponivel'
                 ];
             }, $err);
 
@@ -356,11 +369,11 @@ $app->get('/api/eventos/{id}/colaboradores', function (Request $request, Respons
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Parametros invalidos'
 
-            ]
+                "status" => "$status",
+                "info" => 'Parametros invalidos'
+
+
         ];
 
         return $response
@@ -446,20 +459,19 @@ $app->get('/api/eventos/{id}/extras', function (Request $request, Response $resp
             $dadosLength = (int)sizeof($dados);
 
             if ($dadosLength === 0) {
-                $dados = ["error" => 'página inexistentes'];
+                $dados["info"]= 'página inexistentes';
                 $status = 404; // Page not found
             } else if ($dadosLength < $results) {
-                $dadosExtra = ['info' => 'final dos resultados'];
-                array_push($dados, $dadosExtra);
+                $dados['info'] = 'final dos resultados';
+
             } else {
                 $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-                $dadosExtra = ['proxPagina' => "$nextPageUrl?page=" . ++$page . "&results=$results"];
-                array_push($dados, $dadosExtra);
+                $dados['proxPagina'] = "$nextPageUrl?page=" . ++$page . "&results=$results";
             }
 
             $responseData = [
                 'status' => "$status",
-                'data' =>
+                'info' =>
                     $dados
             ];
 

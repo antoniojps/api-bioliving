@@ -28,7 +28,7 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
     $ativo = $request->getParam('ativo');
 
 
-    $error = array();
+    $error = "";
     // TODO verificações de fotos
     // TODO verificar se existe id_localização na bd, senão inserir com respectivas lat e lng
     // TODO verificar se existe id_tipo_evento na bd, senão inserir
@@ -42,9 +42,9 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
     $minCar = 1;
     $maxCar = 64;
     if (is_null($nomeEvento) || strlen($nomeEvento) < $minCar) {
-        $error[] = array("nome" => "Insira um nome para o evento com mais que " . $minCar . " caracter. Este campo é obrigatório!");
+        $error .= "Insira um nome para o evento com mais que " . $minCar . " caracter. Este campo é obrigatório! ";
     } elseif (strlen($nomeEvento) > $maxCar) {
-        $error[] = array("nome" => "Nome excedeu limite máximo");
+        $error.="Nome excedeu limite máximo. ";
     }
 
     ///////////função para validar datas/////////////
@@ -70,11 +70,11 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
             $desc = null;
         } elseif (strlen($desc) > $max) {
 
-            $error[] = array($errorName => $errorName . " excedeu limite máximo de " . $max . " caracteres");
+            $error.= $errorName . " excedeu limite máximo de " . $max . " caracteres ";
 
         } elseif (strlen($desc) < $min) {
 
-            $error[] = array($errorName => $errorName . " tem de ter pelo menos " . $min . " caracteres");
+            $error.=$errorName . " tem de ter pelo menos " . $min . " caracteres ";
         }
     }
 
@@ -82,7 +82,7 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
 
         if (!is_null($dataFim) && $dataFim != "") {
             if (!validateDate($dataFim)) {
-                $error[] = array("data_fim" => "Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss");
+                $error.= "Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss ";
             }
         } else {
             $dataFim = null;
@@ -91,7 +91,7 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
 
     if (!is_null($data) && $data != "") {
         if (!validateDate($data)) {
-            $error[] = array("data" => "Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss");
+            $error.="Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss ";
         }
     } else {
         $data = null;
@@ -149,7 +149,8 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
             $db = null;
 
             $responseData = [
-                'Resposta' => "Evento adicionado com sucesso!"
+                "status" => 200,
+                'info' => "Evento adicionado com sucesso!"
             ];
 
             return $response
@@ -161,14 +162,15 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
-                    "error" => [
+
                         "status" => $err->getCode(),
-                        "text" => $err->getMessage()
-                    ]
+                        "info" => $err->getMessage()
+
                 ];
             }, function () {
                 return [
-                    "error" => 'Servico Indisponivel'
+                    "status"=> 503,
+                    "info" => 'Servico Indisponivel'
                 ];
             }, $err);
 
@@ -181,11 +183,11 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
+
                 "status" => "$status",
-                "text" =>
+                "info" =>
                     $error
-            ]
+
         ];
 
         return $response
