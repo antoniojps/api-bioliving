@@ -79,10 +79,12 @@ $app->put('/api/tags/{id}', function (Request $request, Response $response) {
                         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
                         $stmt->bindParam(':nome', $tag);
                         $stmt->execute();
+                        $id = $db->lastInsertId();
                         $db = null;
                         $responseData = [
                             "status" => 200,
-                            'info' => "Tag alterada com sucesso!"
+                            'info' => "Tag alterada com sucesso!",
+                            "data"=> $id
                         ];
 
                         return $response

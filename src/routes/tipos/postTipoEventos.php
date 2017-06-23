@@ -8,9 +8,17 @@ use Respect\Validation\Validator as v;
 /////////////////////POST tipo eventos///////////////
 $app->post('/api/tiposEventos', function (Request $request, Response $response) {
     $tipoNome = $request->getParam('nomeTipoEvento');
+    $idIcon = (int)$request->getParam('idIcon');
+
     $error = "";
     $minCar = 1;
     $maxCar = 75;
+    if (!is_null($idIcon) && $idIcon != "") {
+        if (!v::intVal()->validate('10')) $error .= "Id do icon inváldo ";
+
+    } else {
+        $idIcon = null;
+    }
     if (is_null($tipoNome) || strlen($tipoNome) < $minCar) {
         $error = "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!";
     } elseif (strlen($tipoNome) > $maxCar) {
@@ -19,7 +27,7 @@ $app->post('/api/tiposEventos', function (Request $request, Response $response) 
     if ($error==="") {
 
         //verificar se tipo já existe
-        $sql = "SELECT * FROM tipo_evento WHERE nome_tipo_evento = :nome";
+        $sql = "SELECT * FROM tipo_evento WHERE nome_tipo_evento = :nome AND icons_id=:id";
 
         try {
             // Get DB object
@@ -28,6 +36,7 @@ $app->post('/api/tiposEventos', function (Request $request, Response $response) 
             $db = $db->connect();
             $stmt = $db->prepare($sql);
             $stmt->bindParam(':nome', $tipoNome);
+            $stmt->bindParam(':id', $idIcon);
             $stmt->execute();
             $db = null;
             $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -43,7 +52,7 @@ $app->post('/api/tiposEventos', function (Request $request, Response $response) 
 
 
 
-                $sql = "INSERT INTO tipo_evento (nome_tipo_evento) VALUES  (:nome)";
+                $sql = "INSERT INTO tipo_evento (nome_tipo_evento,icons_id) VALUES  (:nome,:idIcone)";
                 try {
                     // Get DB object
                     $db = new db();
@@ -51,11 +60,14 @@ $app->post('/api/tiposEventos', function (Request $request, Response $response) 
                     $db = $db->connect();
                     $stmt = $db->prepare($sql);
                     $stmt->bindParam(':nome', $tipoNome);
+                    $stmt->bindParam(':idIcone', $idIcon, PDO::PARAM_INT);
                     $stmt->execute();
+                    $id = $db->lastInsertId();
                     $db = null;
                     $responseData = [
                         "status"=>200,
-                        'info' => "Tipo de evento adicionado com sucesso"
+                        'info' => "Tipo de evento adicionado com sucesso",
+                        "data"=> $id
                     ];
 
                     return $response

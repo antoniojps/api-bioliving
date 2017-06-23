@@ -9,9 +9,17 @@ use Respect\Validation\Validator as v;
 $app->put('/api/tiposEventos/{id}', function (Request $request, Response $response) {
     $id = $request->getAttribute('id');
     $tipoNome = $request->getParam('nomeTipoEvento');
+    $idIcon = (int)$request->getParam('idIcon');
     $error = "";
     $minCar = 1;
     $maxCar = 75;
+
+    if (!is_null($idIcon) && $idIcon != "") {
+        if (!v::intVal()->validate('10')) $error .= "Id do icon inváldo ";
+
+    } else {
+        $idIcon = null;
+    }
     if (is_null($tipoNome) || strlen($tipoNome) < $minCar) {
         $error= "Insira um nome para o tipo de evento com mais que " . $minCar . " caracter. Este campo é obrigatório!";
     } elseif (strlen($tipoNome) > $maxCar) {
@@ -41,7 +49,7 @@ $app->put('/api/tiposEventos/{id}', function (Request $request, Response $respon
 
             } else {
                 //verificar se localização já existe
-                $sql = "SELECT * FROM `tipo_evento` WHERE `nome_tipo_evento`=:nome ";
+                $sql = "SELECT * FROM `tipo_evento` WHERE `nome_tipo_evento`=:nome AND icons_id=:id";
 
                 // Get DB object
                 $db = new db();
@@ -49,6 +57,7 @@ $app->put('/api/tiposEventos/{id}', function (Request $request, Response $respon
                 $db = $db->connect();
                 $stmt = $db->prepare($sql);
                 $stmt->bindParam(':nome', $tipoNome);
+                $stmt->bindParam(':id', $idIcon);
                 $stmt->execute();
                 $db = null;
                 $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -56,7 +65,7 @@ $app->put('/api/tiposEventos/{id}', function (Request $request, Response $respon
                 if (count($dados)) {
                     $responseData = [
                         "status"=> "422",
-                        'Resposta' => "Tipo de evento já existe!"
+                        'Resposta' => "Tipo de evento já existe!",
                     ];
                     return $response
                         ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -64,7 +73,7 @@ $app->put('/api/tiposEventos/{id}', function (Request $request, Response $respon
                 } else {
 
 
-                    $sql = "UPDATE `tipo_evento` SET `nome_tipo_evento` = :nome WHERE `id_tipo_evento` = :id";
+                    $sql = "UPDATE `tipo_evento` SET `nome_tipo_evento`= :nome, `icons_id` = :idIcone  WHERE `id_tipo_evento` = :id";
                     try {
                         // Get DB object
                         $db = new db();
@@ -73,11 +82,12 @@ $app->put('/api/tiposEventos/{id}', function (Request $request, Response $respon
                         $stmt = $db->prepare($sql);
                         $stmt->bindParam(':nome', $tipoNome);
                         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+                        $stmt->bindParam(':idIcone', $idIcon, PDO::PARAM_INT);
                         $stmt->execute();
                         $db = null;
                         $responseData = [
                             'status' => 200,
-                            'Resposta' => "Tipo de evento alterado com sucesso!"
+                            'Resposta' => "Tipo de evento alterado com sucesso!",
                         ];
 
                         return $response

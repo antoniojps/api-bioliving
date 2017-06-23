@@ -10,7 +10,6 @@ use Respect\Validation\Validator as v;
 /////////////////POST tags//////////////////////////
 $app->post('/api/tags', function (Request $request, Response $response) {
     $tag = $request->getParam('nomeTag');
-    echo $tag;
     $error = "";
     $minCar = 1;  //valor minimo de caracteres da tag
     $maxCar = 45; //valor maximo de caracteres da tag
@@ -53,10 +52,12 @@ $app->post('/api/tags', function (Request $request, Response $response) {
                     $stmt = $db->prepare($sql);
                     $stmt->bindParam(':nome', $tag);
                     $stmt->execute();
+                    $id = $db->lastInsertId();
                     $db = null;
                     $responseData = [
                         "status" => 200,
-                        'info' => "Tag adicionada com sucesso!"
+                        'info' => "Tag adicionada com sucesso!",
+                        "data"=> $id
                     ];
 
                     return $response
