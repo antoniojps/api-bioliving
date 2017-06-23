@@ -67,6 +67,10 @@ $app->post( '/api/create', function ( Request $request, Response $response ) {
 				}, function () {
 					return 'Unauthorized';
 				}, $e );
+			} catch (\Bioliving\Errors\UtilizadorVisivelException $e){
+				// erros visiveis para o utilizador
+				$status = 401;
+				$info = $e->getMessage();
 			}
 		} else {
 			$status = 401;

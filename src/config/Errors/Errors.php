@@ -7,10 +7,12 @@ $configuration = [
 		'settings' => [
 			// Only set this if you need access to route within middleware
 				'determineRouteBeforeAppMiddleware' => true,
-			// TODO APENAS PARA AMBIENTE DE DESENVOLVIMENTO!!!!
-				'displayErrorDetails' => true
 		]
 ];
+
+if(getenv('PHP_ENV') === 'desenvolvimento'){
+	$configuration['settings']['displayErrorDetails'] = true;
+}
 
 $c = new \Slim\Container( $configuration );
 

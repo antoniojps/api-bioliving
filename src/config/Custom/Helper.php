@@ -65,9 +65,9 @@ class Helper {
  	}
 
  	/*
- 	 *	 Filtrar array: remover indices com valores nulls ou strings vazias ''
+ 	 *	 Filtrar array mutidimensional: remover indices com valores nulls ou strings vazias ''
  	 */
- 	 static public function filtrarArray($arr){
+ 	 static public function filtrarArrMulti($arr){
 		 $arr = array_filter(array_map(function ($valor1) {
 			 return $valor1 = array_filter($valor1, function ($valor2) {
 				 return $valor2 !== null && $valor2 !== '';
@@ -76,6 +76,16 @@ class Helper {
 
 		 return $arr;
  	 }
+
+	static public function filtrarArr($arr){
+		$arr = array_filter(array_map(function ($valor) {
+				if($valor !== null && $valor !== '')
+				return $valor;
+				else return false;
+		}, $arr));
+
+		return $arr;
+	}
 
 
 

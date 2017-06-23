@@ -17,13 +17,17 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  */
 $app->post( '/api/login', function ( Request $request, Response $response ) {
 // Valores default de resposta
-	$status = "400"; // Bad request
+	$status = 400; // Bad request
 	$info   = 'Bad request';
+	$email = '';
+	$password = '';
 
 // Obter dados
 	$parsedBody = $request->getParsedBody();
-	$email      = array_key_exists( 'email', $parsedBody ) ? $parsedBody['email'] : null;
-	$password   = array_key_exists( 'password', $parsedBody ) ? $parsedBody['password'] : null;
+	if ( isset( $parsedBody ) ) {
+		$email    = array_key_exists( 'email', $parsedBody ) ? $parsedBody['email'] : null;
+		$password = array_key_exists( 'password', $parsedBody ) ? $parsedBody['password'] : null;
+	}
 
 	if ( H::obrigatorio( $email ) && H::obrigatorio( $password ) ) {
 // Verificar se nao esta logged in
@@ -51,7 +55,7 @@ $app->post( '/api/login', function ( Request $request, Response $response ) {
 				$info = Errors::filtroReturn( function ( $e ) {
 					return $e->getMessage();
 				}, function () {
-					return 'Unauthorized';
+					return 'Ocorreu um erro';
 				}, $e );
 
 			} catch ( \Bioliving\Errors\UtilizadorException $e ) {
@@ -59,8 +63,12 @@ $app->post( '/api/login', function ( Request $request, Response $response ) {
 				$info   = Errors::filtroReturn( function ( $e ) {
 					return $e->getMessage();
 				}, function () {
-					return 'Unauthorized';
+					return 'Ocorreu um erro';
 				}, $e );
+			} catch (\Bioliving\Errors\UtilizadorVisivelException $e){
+				// erros visiveis para o utilizador
+				$status = 401;
+				$info = $e->getMessage();
 			}
 		} else {
 			$status = 401;

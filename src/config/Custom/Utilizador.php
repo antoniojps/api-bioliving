@@ -38,6 +38,7 @@ namespace Bioliving\Custom;
 
 use Bioliving\Database\Db as Db;
 use Bioliving\Errors\UtilizadorException as UtilizadorException;
+use Bioliving\Errors\UtilizadorVisivelException as UtilizadorVisivelException;
 use \PDO; // Import do namespace global do PDO
 
 
@@ -268,17 +269,17 @@ class Utilizador {
 
 						// return true;
 						} else {
-							throw new UtilizadorException( "Nomes nao sao validos" );
+							throw new UtilizadorVisivelException( "Nomes nao sao validos" );
 						}
 					} else {
-						throw new UtilizadorException( "Password fraca" );
+						throw new UtilizadorVisivelException( "Password fraca" );
 					}
 					// Email ja existe
 				} else {
-					throw new UtilizadorException( "Email existente" );
+					throw new UtilizadorVisivelException( "Email existente" );
 				}
 			} else {
-				throw new UtilizadorException( "Email invalido" );
+				throw new UtilizadorVisivelException( "Email invalido" );
 			}
 		} else {
 			throw new UtilizadorException( "Parametros em falta para utilizador o metodo registrar" );
@@ -320,17 +321,17 @@ class Utilizador {
 						if(password_verify($this->password,$utilizador['password'])){
 							$userLogado = $utilizador['id_utilizadores'];
 						} else {
-							throw new UtilizadorException("Password incorreta");
+							throw new UtilizadorVisivelException("Password incorreta");
 						}
 					} else {
-						throw new UtilizadorException("Utilizador inexistente");
+						throw new UtilizadorVisivelException("Utilizador inexistente");
 					}
 				} catch (\PDOException $e){
 					throw new UtilizadorException("Erro DB : " . $e->getMessage());
 				}
 
 			} else {
-				throw new UtilizadorException( "Email invalido" );
+				throw new UtilizadorVisivelException( "Email invalido" );
 			}
 		} else {
 			throw new UtilizadorException( "Parametros em falta para utilizador no metodo login" );
