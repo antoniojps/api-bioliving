@@ -189,23 +189,26 @@ $app->get('/api/eventos/{id}/interesses', function (Request $request, Response $
             $dadosLength = (int)sizeof($dados);
 
             if ($dadosLength === 0) {
-                $dados = ["error" => 'participantes/página inexistentes'];
-                $status = 404; // Page not found
+                $responseData = [
+                    "status" => 404,
+                    "info" => 'pagina inexistente'
+                ]; // Page not found
             } else if ($dadosLength < $results) {
-                $dadosExtra = ['info' => 'final dos resultados'];
-                array_push($dados, $dadosExtra);
+                $responseData = [
+                    "status" => 200,
+                    "data" => $dados,
+                    "info" => "final dos resultados"
+                ];
             } else {
                 $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-                $dadosExtra = ['proxPagina' => "$nextPageUrl?page=" . ++$page . "&results=$results"];
-                array_push($dados, $dadosExtra);
+                $responseData = [
+                    "status" => 200,
+                    "data" => $dados,
+                    "proxPagina" => "$nextPageUrl?page=" . ++$page . "&results=$results"
+                ];
             }
 
-            $responseData = [
-                'status' => "$status",
-                'data' =>
-                    $dados
 
-            ];
 
             return $response
                 ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
