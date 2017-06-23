@@ -12,7 +12,7 @@ use Bioliving\Custom\Helper as H;
 //////////// Obter todos os eventos ////////////
 
 $app->get('/api/eventos', function (Request $request, Response $response) {
-    if (!Token::validarScopes('admin')) {
+    if (Token::validarScopes('admin')) {
         $byArr = [
             'id' => 'id_eventos',
             'nome' => 'nome_evento',
@@ -166,7 +166,7 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
 
     if (is_int($id) && $id > 0) {
 
-        $sql = "SELECT eventos.*,tipo_evento.nome_tipo_evento as tipo,localizacao.*,COUNT(utilizadores_id_utilizadores) as participantes FROM eventos LEFT OUTER JOIN localizacao ON eventos.localizacao_localizacao = localizacao.localizacao LEFT OUTER JOIN participantes ON eventos.id_eventos = participantes.eventos_id_eventos LEFT OUTER JOIN tipo_evento ON eventos.tipo_evento_id_tipo_evento = tipo_evento.id_tipo_evento  WHERE id_eventos = :id";
+        $sql = "SELECT eventos.*,tipo_evento.nome_tipo_evento as tipo,localizacao.*,COUNT(utilizadores_id_utilizadores) as participantes,facebook_id FROM eventos LEFT OUTER JOIN localizacao ON eventos.localizacao_localizacao = localizacao.localizacao LEFT OUTER JOIN participantes ON eventos.id_eventos = participantes.eventos_id_eventos LEFT OUTER JOIN tipo_evento ON eventos.tipo_evento_id_tipo_evento = tipo_evento.id_tipo_evento  WHERE id_eventos = :id";
 
         try {
 
@@ -194,6 +194,7 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
             $dadosLength = (int)sizeof($dados);
             $dadosDoArrayLength = (int)sizeof($dados[0]); // filtrar os participantes = 0
             if ($dadosLength === 0 || $dadosDoArrayLength === 1 || $dadosDoArrayLength === 0) {
+                $status = 404;
                 $responseData = [
                     "status" => 404,
                     "info" => 'evento inexistente'
@@ -319,6 +320,7 @@ $app->get('/api/eventos/{id}/colaboradores', function (Request $request, Respons
             $dadosLength = (int)sizeof($dados);
 
             if ($dadosLength === 0) {
+                $status = 404;
                 $responseData = [
                     "status"=>404,
                     "info" => 'página inexistentes'
@@ -414,7 +416,9 @@ $app->get('/api/eventos/{id}/extras', function (Request $request, Response $resp
             // remover nulls e strings vazias
             $dados = H::filtrarArrMulti($dados);
             $dadosLength = (int)sizeof($dados);
+
             if ($dadosLength === 0) {
+                $status = 404;
                 $info = 'evento inexistente ou sem extras';
                 $status = 404; // Page not found
             } else {
@@ -632,6 +636,7 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
 
             $dadosLength = (int)sizeof($dados);
             if ($dadosLength === 0) {
+                $status = 404;
                 $responseData = [
                     "status"=>404,
                     "info" => 'pagina inexistente'
