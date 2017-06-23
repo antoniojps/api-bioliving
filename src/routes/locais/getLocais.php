@@ -35,112 +35,155 @@ $app->get('/api/locais', function (Request $request, Response $response) {
     $order = isset($parametros['order']) ? $parametros['order'] : $orderDefault;
     $id = isset($parametros['id']) ? (int)$parametros['id'] : $idDefault;
     $msg = isset($parametros['msg']) ? $parametros['msg'] : $msgDefault;
+    $minLat = isset($parametros['minLat']) ? $parametros['minLat'] : false;
+    $maxLat = isset($parametros['maxLat']) ? $parametros['maxLat'] : false;
+    $minLng = isset($parametros['minLng']) ? $parametros['minLng'] : false;
+    $maxLng = isset($parametros['maxLng']) ? $parametros['maxLng'] : false;
 
-    if ($page > 0 && $results > 0) {
-        //definir numero de resultados
-        //caso request tenha parametros superiores ao numero máximo permitido então repor com o valor maximo permitido e vice-versa
-        $results = $results > $maxResults ? $maxResults : $results; //se o querystring results for maior que o valor maximo definido passa a ser esse valor maximo definido
-        $results = $results < $minResults ? $minResults : $results; //se o querystring results for menor que o valor minimo definido passa a ser esse valor minimo definido
-        //caso tenha parametros diferentes de "ASC" ou "DESC" então repor com o predefinido
-        $order = $order == "ASC" || $order == "DESC" ? $order : $orderDefault;
-        //order by se existe como key no array, caso nao repor com o predefenido
-        $by = array_key_exists($by, $byArr) ? $by : $byDefault;
+    function validaLatLng($tipo, $valor)
+    {
+        $resultado = ($tipo == 'latitude')
+            ? '/^(\+|-)?(?:90(?:(?:\.0{1,8})?)|(?:[0-9]|[1-8][0-9])(?:(?:\.[0-9]{1,8})?))$/'
+            : '/^(\+|-)?(?:180(?:(?:\.0{1,8})?)|(?:[0-9]|[1-9][0-9]|1[0-7][0-9])(?:(?:\.[0-9]{1,8})?))$/';
 
-        // A partir de quando seleciona resultados
-        $limitNumber = ($page - 1) * $results;
-        $passar = $byArr[$by];
-
-
-        if ($msg != $msgDefault && $id != $idDefault) $extraWhere = " WHERE localizacao = :id OR nome LIKE :msg ";
-        elseif ($msg != $msgDefault && $id == $idDefault) $extraWhere = " WHERE  nome LIKE :msg ";
-        elseif ($msg === $msgDefault && $id != $idDefault) $extraWhere = " WHERE localizacao = :id ";
-        else$extraWhere = "";
-
-
-        if ($order == $orderDefault) {
-            $sql = "SELECT * FROM `localizacao` " . $extraWhere . " ORDER BY $passar  LIMIT :limit , :results";
+        if (preg_match($resultado, $valor)) {
+            return true;
         } else {
-            $sql = "SELECT * FROM `localizacao`" . $extraWhere . " ORDER BY $passar DESC LIMIT :limit , :results";
-
+            return false;
         }
+    }
 
-        try {
-            $responseData ="";
-            $status = 200; // OK
-            // iniciar ligação à base de dados
-            $db = new Db();
-            $msgEnv = "%$msg%";
-            // conectar
-            $db = $db->connect();
-            $stmt = $db->prepare($sql);
-            $stmt->bindValue(':limit', (int)$limitNumber, PDO::PARAM_INT);
-            $stmt->bindValue(':results', (int)$results, PDO::PARAM_INT);
-            if ($id != $idDefault) $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-            if ($msg != $msgDefault) $stmt->bindValue(':msg', $msgEnv, PDO::PARAM_INT);
-            $stmt->execute();
-            $db = null;
-            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    if (!validaLatLng('latitude', $minLat)) $minLat = false;
+    if (!validaLatLng('latitude', $maxLat)) $maxLat = false;
+    if (!validaLatLng('longitude', $minLng)) $minLng = false;
+    if (!validaLatLng('longitude', $maxLng)) $maxLng = false;
 
-            // remover nulls e strings vazias
-            $dados = array_filter(array_map(function ($evento) {
-                return $evento = array_filter($evento, function ($coluna) {
-                    return $coluna !== null && $coluna !== '';
-                });
-            }, $dados));
 
-            $dadosLength = (int)sizeof($dados);
-            if ($dadosLength === 0) {
-                $responseData = [
-                    "status"=>404,
-                    "info" => 'pagina inexistente'
-                ]; // Page not found
-            } else if ($dadosLength < $results) {
-                $responseData=[
-                    "status"=>200,
-                    "data"=>$dados,
-                    "info"=>"final dos resultados"
-                ];
+    if ($minLat != false & $maxLat != false & $minLng != false & $maxLng != false) {
+
+
+        if ($page > 0 && $results > 0) {
+            //definir numero de resultados
+            //caso request tenha parametros superiores ao numero máximo permitido então repor com o valor maximo permitido e vice-versa
+            $results = $results > $maxResults ? $maxResults : $results; //se o querystring results for maior que o valor maximo definido passa a ser esse valor maximo definido
+            $results = $results < $minResults ? $minResults : $results; //se o querystring results for menor que o valor minimo definido passa a ser esse valor minimo definido
+            //caso tenha parametros diferentes de "ASC" ou "DESC" então repor com o predefinido
+            $order = $order == "ASC" || $order == "DESC" ? $order : $orderDefault;
+            //order by se existe como key no array, caso nao repor com o predefenido
+            $by = array_key_exists($by, $byArr) ? $by : $byDefault;
+
+            // A partir de quando seleciona resultados
+            $limitNumber = ($page - 1) * $results;
+            $passar = $byArr[$by];
+
+
+            if ($msg != $msgDefault && $id != $idDefault) $extraWhere = " WHERE (localizacao = :id OR nome LIKE :msg) AND lat >= :minLat AND lat <= :maxLat
+      AND lng >= :minLng AND lng <= :maxLng ";
+            elseif ($msg != $msgDefault && $id == $idDefault) $extraWhere = " WHERE  nome LIKE :msg AND lat >= :minLat AND lat <= :maxLat
+      AND lng >= :minLng AND lng <= :maxLng";
+            elseif ($msg === $msgDefault && $id != $idDefault) $extraWhere = " WHERE localizacao = :id AND  lat >= :minLat AND MyLat <= :maxLat
+      AND lng >= :minLng AND lng <= :maxLng";
+            else$extraWhere = "WHERE lat >= :minLat AND lat <= :maxLat
+      AND lng >= :minLng AND lng <= :maxLng ";
+
+
+            if ($order == $orderDefault) {
+                $sql = "SELECT * FROM `localizacao` " . $extraWhere . " ORDER BY $passar  LIMIT :limit , :results";
             } else {
-                $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-                $responseData=[
-                    "status"=>200,
-                    "data"=>$dados,
-                    "proxPagina"=>"$nextPageUrl?page=" . ++$page . "&results=$results"
-                ];
+                $sql = "SELECT * FROM `localizacao`" . $extraWhere . " ORDER BY $passar DESC LIMIT :limit , :results";
+
             }
 
+            try {
+                $responseData = "";
+                $status = 200; // OK
+                // iniciar ligação à base de dados
+                $db = new Db();
+                $msgEnv = "%$msg%";
+                // conectar
+                $db = $db->connect();
+                $stmt = $db->prepare($sql);
 
-            return $response
-                ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                $stmt->bindValue(':limit', (int)$limitNumber, PDO::PARAM_INT);
+                $stmt->bindValue(':results', (int)$results, PDO::PARAM_INT);
+                $stmt->bindValue(':minLat', (int)$minLat, PDO::PARAM_INT);
+                $stmt->bindValue(':maxLat', (int)$maxLat, PDO::PARAM_INT);
+                $stmt->bindValue(':minLng', (int)$minLng, PDO::PARAM_INT);
+                $stmt->bindValue(':maxLng', (int)$maxLng, PDO::PARAM_INT);
+                if ($id != $idDefault) $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+                if ($msg != $msgDefault) $stmt->bindValue(':msg', $msgEnv, PDO::PARAM_INT);
+                $stmt->execute();
+                $db = null;
+                $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                // remover nulls e strings vazias
+                $dados = array_filter(array_map(function ($evento) {
+                    return $evento = array_filter($evento, function ($coluna) {
+                        return $coluna !== null && $coluna !== '';
+                    });
+                }, $dados));
 
 
-        } catch (PDOException $err) {
-            $status = 503; // Service unavailable
-            // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
-            $errorMsg = Errors::filtroReturn(function ($err) {
-                return [
+                $dadosLength = (int)sizeof($dados);
+                if ($dadosLength === 0) {
+                    $responseData = [
+                        "status" => 404,
+                        "info" => 'pagina inexistente'
+                    ]; // Page not found
+                } else {
+                    $status = 200;
+                    $responseData = [
+                        "status" => 200,
+                        "info" => "Localizações no intervalo definido com sucesso!",
+                        "data" => $dados
+
+                    ];
+                }
+
+
+                return $response
+                    ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+            } catch (PDOException $err) {
+                $status = 503; // Service unavailable
+                // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                $errorMsg = Errors::filtroReturn(function ($err) {
+                    return [
 
                         "status" => $err->getCode(),
                         "info" => $err->getMessage()
 
-                ];
-            }, function () {
-                return [
-                    "status" => 503,
-                    "info" => 'Servico Indisponivel'
-                ];
-            }, $err);
+                    ];
+                }, function () {
+                    return [
+                        "status" => 503,
+                        "info" => 'Servico Indisponivel'
+                    ];
+                }, $err);
+
+                return $response
+                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+            }
+
+        } else {
+            $status = 422; // Unprocessable Entity
+            $errorMsg = [
+
+                "status" => "$status",
+                "info" => 'Parametros invalidos'
+
+
+            ];
 
             return $response
                 ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
         }
-
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
 
-                "status" => "$status",
-                "info" => 'Parametros invalidos'
+            "status" => "$status",
+            "info" => 'Parametros invalidos'
 
 
         ];
@@ -148,4 +191,5 @@ $app->get('/api/locais', function (Request $request, Response $response) {
         return $response
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
+
 });

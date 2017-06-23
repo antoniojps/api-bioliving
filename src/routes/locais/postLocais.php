@@ -82,10 +82,12 @@ $app->post('/api/locais', function (Request $request, Response $response) {
                 $stmt->bindParam(':lat', $lat);
                 $stmt->bindParam(':lng', $lng);
                 $stmt->execute();
+                $idInserido = $db->lastInsertId();
                 $db = null;
                 $responseData = [
                     "status" => 200,
-                    'info' => "Localização adicionada com sucesso!"
+                    'info' => "Localização adicionada com sucesso!",
+                    "data"=> $idInserido
                 ];
 
                 return $response

@@ -27,26 +27,29 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
     $iddMinima = $request->getParam('iddMinima');
     $dataFim = $request->getParam('dataFim');
     $ativo = $request->getParam('ativo');
-    $local =(int)$request->getParam('local');
+    $local = (int)$request->getParam('local');
     $tipo = (int)$request->getParam('tipo');
     $fb = (int)$request->getParam('facebook');
     $error = "";
 
+
     if (!is_null($local) && $local != "") {
-        if(!v::intVal()->validate('10')) $error.="Id do local inváldo ";
+        if (!v::intVal()->validate('10')) $error .= "Id do local inváldo ";
+
     } else {
         $local = null;
     }
     if (!is_null($tipo) && $tipo != "") {
-        if(!v::intVal()->validate('10')) $error.="Id do tipo inváldo ";
+        if (!v::intVal()->validate('10')) $error .= "Id do tipo inváldo ";
     } else {
         $tipo = null;
     }
     if (!is_null($fb) && $fb != "") {
-        if(!v::intVal()->validate('10')) $error.="Id do tipo inváldo ";
+        if (!v::intVal()->validate('10')) $error .= "Id do tipo inváldo ";
     } else {
         $fb = null;
     }
+
 
     //verificaçoes necessárias para garantir que nao sao introduzidos valores inválidos
     ////////////validar nome evento///////////
@@ -59,7 +62,7 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
     if (is_null($nomeEvento) || strlen($nomeEvento) < $minCar) {
         $error .= "Insira um nome para o evento com mais que " . $minCar . " caracter. Este campo é obrigatório! ";
     } elseif (strlen($nomeEvento) > $maxCar) {
-        $error.="Nome excedeu limite máximo. ";
+        $error .= "Nome excedeu limite máximo. ";
     }
 
     ///////////função para validar datas/////////////
@@ -85,28 +88,28 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
             $desc = null;
         } elseif (strlen($desc) > $max) {
 
-            $error.= $errorName . " excedeu limite máximo de " . $max . " caracteres ";
+            $error .= $errorName . " excedeu limite máximo de " . $max . " caracteres ";
 
         } elseif (strlen($desc) < $min) {
 
-            $error.=$errorName . " tem de ter pelo menos " . $min . " caracteres ";
+            $error .= $errorName . " tem de ter pelo menos " . $min . " caracteres ";
         }
     }
 
     ////////////validar datas introduzidas //////////////
 
-        if (!is_null($dataFim) && $dataFim != "") {
-            if (!validateDate($dataFim)) {
-                $error.= "Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss ";
-            }
-        } else {
-            $dataFim = null;
+    if (!is_null($dataFim) && $dataFim != "") {
+        if (!validateDate($dataFim)) {
+            $error .= "Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss ";
         }
+    } else {
+        $dataFim = null;
+    }
 
 
     if (!is_null($data) && $data != "") {
         if (!validateDate($data)) {
-            $error.="Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss ";
+            $error .= "Data introduzida inválida, insira novamente com o seguinte formato YYYY-MM-DD hh:mm:ss ";
         }
     } else {
         $data = null;
@@ -142,52 +145,140 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
 
 
     if (count($error) != "") {// não existe erro logo insere na bd
-        $sql = "INSERT INTO eventos (nome_evento,data_evento,descricao,descricao_short,max_participantes,min_participantes,idade_minima,data_fim,ativo,localizacao_localizacao,tipo_evento_id_tipo_evento,facebook_id) VALUES
-    (:nomeEvento,:data,:descricao,:descricaoShort,:max,:min,:idd,:dataFim,:ativo,:local,:tipo,:fb)";
-
+        $sql = "SELECT * FROM localizacao WHERE localizacao = :local ";
         try {
             // Get DB object
             $db = new db();
             //connect
             $db = $db->connect();
             $stmt = $db->prepare($sql);
-            $stmt->bindParam(':nomeEvento', $nomeEvento);
-            $stmt->bindParam(':data', $data);
-            $stmt->bindParam(':descricao', $descricao);
-            $stmt->bindParam(':descricaoShort', $descricaoShort);
-            $stmt->bindParam(':max', $maxParticipantes);
-            $stmt->bindParam(':min', $minParticipantes);
-            $stmt->bindParam(':idd', $iddMinima);
-            $stmt->bindParam(':dataFim', $dataFim);
-            $stmt->bindParam(':ativo', $ativo);
+
             $stmt->bindParam(':local', $local);
-            $stmt->bindParam(':tipo', $tipo);
-            $stmt->bindParam(':fb', $fb);
             $stmt->execute();
             $db = null;
+            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (!count($dados)) {
+                $responseData = [
+                    "status" => "404",
+                    'info' => "Local já não existe!"
+                ];
+                return $response
+                    ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
-            $responseData = [
-                "status" => 200,
-                'info' => "Evento adicionado com sucesso!"
-            ];
+            } else {
+                $sql = "SELECT * FROM tipo_evento WHERE id_tipo_evento = :tipo ";
+                try {
+                    // Get DB object
+                    $db = new db();
+                    //connect
+                    $db = $db->connect();
+                    $stmt = $db->prepare($sql);
 
-            return $response
-                ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                    $stmt->bindParam(':tipo', $tipo);
+                    $stmt->execute();
+                    $db = null;
+                    $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    if (!count($dados)) {
+                        $responseData = [
+                            "status" => "404",
+                            'info' => "Tipo de evento já não existe!"
+                        ];
+                        return $response
+                            ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+                    } else {
+
+                        $sql = "INSERT INTO eventos (nome_evento,data_evento,descricao,descricao_short,max_participantes,min_participantes,idade_minima,data_fim,ativo,localizacao_localizacao,tipo_evento_id_tipo_evento,facebook_id) VALUES
+    (:nomeEvento,:data,:descricao,:descricaoShort,:max,:min,:idd,:dataFim,:ativo,:local,:tipo,:fb)";
+
+                        try {
+                            // Get DB object
+                            $db = new db();
+                            //connect
+                            $db = $db->connect();
+                            $stmt = $db->prepare($sql);
+                            $stmt->bindParam(':nomeEvento', $nomeEvento);
+                            $stmt->bindParam(':data', $data);
+                            $stmt->bindParam(':descricao', $descricao);
+                            $stmt->bindParam(':descricaoShort', $descricaoShort);
+                            $stmt->bindParam(':max', $maxParticipantes);
+                            $stmt->bindParam(':min', $minParticipantes);
+                            $stmt->bindParam(':idd', $iddMinima);
+                            $stmt->bindParam(':dataFim', $dataFim);
+                            $stmt->bindParam(':ativo', $ativo);
+                            $stmt->bindParam(':local', $local);
+                            $stmt->bindParam(':tipo', $tipo);
+                            $stmt->bindParam(':fb', $fb);
+                            $stmt->execute();
+                            $db = null;
+
+                            $responseData = [
+                                "status" => 200,
+                                'info' => "Evento adicionado com sucesso!"
+                            ];
+
+                            return $response
+                                ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
 
+                        } catch (PDOException $err) {
+                            $status = 503; // Service unavailable
+                            // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                            $errorMsg = Errors::filtroReturn(function ($err) {
+                                return [
+
+                                    "status" => $err->getCode(),
+                                    "info" => $err->getMessage()
+
+                                ];
+                            }, function () {
+                                return [
+                                    "status" => 503,
+                                    "info" => 'Servico Indisponivel'
+                                ];
+                            }, $err);
+
+                            return $response
+                                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+                        }
+
+                    }
+                } catch (PDOException $err) {
+                    $status = 503; // Service unavailable
+                    // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                    $errorMsg = Errors::filtroReturn(function ($err) {
+                        return [
+
+                            "status" => $err->getCode(),
+                            "info" => $err->getMessage()
+
+                        ];
+                    }, function () {
+                        return [
+                            "status" => 503,
+                            "info" => 'Servico Indisponivel'
+                        ];
+                    }, $err);
+
+                    return $response
+                        ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+                }
+            }
         } catch (PDOException $err) {
             $status = 503; // Service unavailable
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
 
-                        "status" => $err->getCode(),
-                        "info" => $err->getMessage()
+                    "status" => $err->getCode(),
+                    "info" => $err->getMessage()
 
                 ];
             }, function () {
                 return [
-                    "status"=> 503,
+                    "status" => 503,
                     "info" => 'Servico Indisponivel'
                 ];
             }, $err);
@@ -196,15 +287,13 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
                 ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
         }
-
-
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
 
-                "status" => "$status",
-                "info" =>
-                    $error
+            "status" => "$status",
+            "info" =>
+                $error
 
         ];
 
