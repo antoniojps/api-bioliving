@@ -13,8 +13,6 @@ class Db {
 	private $dbpass;
 
 	public function __construct() {
-
-
 		$this->dbhost = getenv( 'DB_HOST' );
 		$this->dbname = getenv( 'DB_NAME' );
 		$this->dbuser = getenv( 'DB_USER' );

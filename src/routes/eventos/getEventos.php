@@ -373,55 +373,34 @@ $app->get('/api/eventos/{id}/colaboradores', function (Request $request, Respons
 
 //////////// Obter extras de um evento + icons ////////////
 $app->get('/api/eventos/{id}/extras', function (Request $request, Response $response) {
-    $id = (int)$request->getAttribute('id'); // ir buscar id
+    $id = $request->getAttribute('id'); // ir buscar id
 
-    $byArr = [
-        'id' => 'id_extras',
-        'nome' => 'titulo'
+    // Valores para ordernar por, fizemos uma array para simplificar queries
 
-    ]; // Valores para ordernar por, fizemos uma array para simplificar queries
-
-
-    //valores default
-    $maxResults = 10; // maximo de resultados por pagina
-    $minResults = 1; // minimo de resultados por pagina
-    $byDefault = 'nome'; // order by predefinido
-    $paginaDefault = 1; // pagina predefenida
     $orderDefault = "ASC"; //ordenação predefenida
 
 
     $parametros = $request->getQueryParams(); // obter parametros do querystring
-    $page = isset($parametros['page']) ? (int)$parametros['page'] : $paginaDefault;
-    $results = isset($parametros['results']) ? (int)$parametros['results'] : $maxResults;
-    $by = isset($parametros['by']) ? $parametros['by'] : $byDefault;
     $order = isset($parametros['order']) ? $parametros['order'] : $orderDefault;
 
 
-    if (is_int($id) && $id > 0 && $page > 0 && $results > 0) {
+    if (v::intVal()->validate($id) && $id > 0) {
 
-        //caso request tenha parametros superiores ao numero máximo permitido então repor com o valor maximo permitido e vice-versa
-        $results = $results > $maxResults ? $maxResults : $results; //se o querystring results for maior que o valor maximo definido passa a ser esse valor maximo definido
-        $results = $results < $minResults ? $minResults : $results; //se o querystring results for menor que o valor minimo definido passa a ser esse valor minimo definido
+        $dados = '';
+        $info = 'Servico indisponivel';
+
         //caso tenha parametros diferentes de "ASC" ou "DESC" então repor com o predefinido
         $order = $order == "ASC" || $order == "DESC" ? $order : $orderDefault;
-        //order by se existe como key no array, caso nao repor com o predefenido
-        $by = array_key_exists($by, $byArr) ? $by : $byDefault;
-        //A partir de quando seleciona resultados
-        $limitNumber = ($page - 1) * $results;
-        $passar = $byArr[$by];
 
         //Apenas informações básicas dos inscritos para por exemplo cards, e ao clicar na card o utilizador pode ser reencaminhado para o masterdetail do utlizador da card
         if ($order != $orderDefault) {
-            $sql = "SELECT titulo, descricao, iconsA.classe AS descricao_classe, descricao_pequena, iconsB.classe AS descricao_pequena_classe FROM `eventos_has_eventos_infos` LEFT JOIN eventos_infos ON eventos_has_eventos_infos.eventos_infos_id_extras = eventos_infos.id_extras LEFT JOIN icons iconsA ON eventos_infos.icons_id_icons = iconsA.id_icons LEFT JOIN icons iconsB ON eventos_infos.icons_pequeno_icons_id = iconsB.id_icons WHERE eventos_id_eventos = :id ORDER BY $passar DESC  LIMIT :limit , :results";
+            $sql = "SELECT titulo, descricao, iconsA.classe AS descricao_classe, descricao_pequena, iconsB.classe AS descricao_pequena_classe FROM `eventos_has_eventos_infos` LEFT JOIN eventos_infos ON eventos_has_eventos_infos.eventos_infos_id_extras = eventos_infos.id_extras LEFT JOIN icons iconsA ON eventos_infos.icons_id_icons = iconsA.id_icons LEFT JOIN icons iconsB ON eventos_infos.icons_pequeno_icons_id = iconsB.id_icons WHERE eventos_id_eventos = :id ORDER BY eventos_infos.id_extras DESC";
         } else {
-            $sql = "SELECT titulo, descricao, iconsA.classe AS descricao_classe, descricao_pequena, iconsB.classe AS descricao_pequena_classe FROM `eventos_has_eventos_infos` LEFT JOIN eventos_infos ON eventos_has_eventos_infos.eventos_infos_id_extras = eventos_infos.id_extras LEFT JOIN icons iconsA ON eventos_infos.icons_id_icons = iconsA.id_icons LEFT JOIN icons iconsB ON eventos_infos.icons_pequeno_icons_id = iconsB.id_icons WHERE eventos_id_eventos = :id ORDER BY $passar  LIMIT :limit , :results";
+            $sql = "SELECT titulo, descricao, iconsA.classe AS descricao_classe, descricao_pequena, iconsB.classe AS descricao_pequena_classe FROM `eventos_has_eventos_infos` LEFT JOIN eventos_infos ON eventos_has_eventos_infos.eventos_infos_id_extras = eventos_infos.id_extras LEFT JOIN icons iconsA ON eventos_infos.icons_id_icons = iconsA.id_icons LEFT JOIN icons iconsB ON eventos_infos.icons_pequeno_icons_id = iconsB.id_icons WHERE eventos_id_eventos = :id ORDER BY eventos_infos.id_extras";
 
         }
 
-
         try {
-            $status = 200; // OK
-
             // iniciar ligação à base de dados
             $db = new Db();
 
@@ -429,77 +408,51 @@ $app->get('/api/eventos/{id}/extras', function (Request $request, Response $resp
             $db = $db->connect();
             $stmt = $db->prepare($sql);
             $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-            $stmt->bindValue(':limit', (int)$limitNumber, PDO::PARAM_INT);
-            $stmt->bindValue(':results', (int)$results, PDO::PARAM_INT);
             $stmt->execute();
             $db = null;
             $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // remover nulls e strings vazias
-            $dados = array_filter(array_map(function ($evento) {
-                return $evento = array_filter($evento, function ($coluna) {
-                    return $coluna !== null && $coluna !== '';
-                });
-            }, $dados));
-
+            $dados = H::filtrarArrMulti($dados);
 
             $dadosLength = (int)sizeof($dados);
 
             if ($dadosLength === 0) {
-                $dados = ["error" => 'página inexistentes'];
+                $info = 'evento inexistente ou sem extras';
                 $status = 404; // Page not found
-            } else if ($dadosLength < $results) {
-                $dadosExtra = ['info' => 'final dos resultados'];
-                array_push($dados, $dadosExtra);
             } else {
-                $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-                $dadosExtra = ['proxPagina' => "$nextPageUrl?page=" . ++$page . "&results=$results"];
-                array_push($dados, $dadosExtra);
+                $info = 'extras obtidos com sucesso';
+                $status = 200; // Ok
             }
-
-            $responseData = [
-                'status' => "$status",
-                'data' =>
-                    $dados
-            ];
-
-            return $response
-                ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
 
         } catch (PDOException $err) {
             $status = 503; // Service unavailable
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
-            $errorMsg = Errors::filtroReturn(function ($err) {
-                return [
-                    "error" => [
-                        "status" => $err->getCode(),
-                        "text" => $err->getMessage()
-                    ]
-                ];
+            $info = Errors::filtroReturn(function ($err) {
+                return  $err->getCode();
             }, function () {
-                return [
-                    "error" => 'Servico Indisponivel'
-                ];
+                return 'servico indisponivel';
             }, $err);
-
-            return $response
-                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
         }
     } else {
         $status = 422; // Unprocessable Entity
-        $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Parametros invalidos'
-
-            ]
-        ];
-
-        return $response
-            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+        $info = 'Parametros invalidos';
     }
+
+
+
+    $responseData = [
+        'status' => "$status",
+        'info' => "$info",
+        'data' => $dados
+    ];
+
+    $responseData = H::filtrarArr($responseData);
+
+
+    return $response
+        ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
 
 });
