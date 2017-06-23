@@ -1,7 +1,6 @@
 <?php
 
 
-
 // importar classes para scope
 use Bioliving\Database\Db as Db;
 use Bioliving\Errors\Errors as Errors;
@@ -92,23 +91,25 @@ $app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $r
             $dadosLength = (int)sizeof($dados);
 
             if ($dadosLength === 0) {
-                $dados = ["error" => 'participantes/página inexistentes'];
-                $status = 404; // Page not found
+                $responseData = [
+                    "status" => 404,
+                    "info" => 'pagina inexistente'
+                ]; // Page not found
             } else if ($dadosLength < $results) {
-                $dadosExtra = ['info' => 'final dos resultados'];
-                array_push($dados, $dadosExtra);
+                $responseData = [
+                    "status" => 200,
+                    "data" => $dados,
+                    "info" => "final dos resultados"
+                ];
             } else {
                 $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-                $dadosExtra = ['proxPagina' => "$nextPageUrl?page=" . ++$page . "&results=$results"];
-                array_push($dados, $dadosExtra);
+                $responseData = [
+                    "status" => 200,
+                    "data" => $dados,
+                    "proxPagina" => "$nextPageUrl?page=" . ++$page . "&results=$results"
+                ];
             }
 
-            $responseData = [
-                'status' => "$status",
-                'data' =>
-                    $dados
-
-            ];
 
             return $response
                 ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -121,8 +122,8 @@ $app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $r
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
 
-                        "status" => $err->getCode(),
-                        "info" => $err->getMessage()
+                    "status" => $err->getCode(),
+                    "info" => $err->getMessage()
 
                 ];
             }, function () {
@@ -139,8 +140,8 @@ $app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $r
         $status = 422; // Unprocessable Entity
         $errorMsg = [
 
-                "status" => "$status",
-                "info" => 'Parametros invalidos'
+            "status" => "$status",
+            "info" => 'Parametros invalidos'
 
 
         ];
@@ -153,13 +154,12 @@ $app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $r
 });
 
 
-
 ////////////GET de para saber se um utilizador está inscrito////////////////////
 $app->get('/api/eventos/{id}/inscrito', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('id'); // ir buscar id
 
-    if (Token::validarScopes('admin',Token::getUtilizador())) {
-        $idUtilizador =(int) Token::getUtilizador();
+    if (Token::validarScopes('admin', Token::getUtilizador())) {
+        $idUtilizador = (int)Token::getUtilizador();
 
 
         //verificar se é um id válido
@@ -183,13 +183,13 @@ $app->get('/api/eventos/{id}/inscrito', function (Request $request, Response $re
                 $db = null;
                 $dados = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                if($dados['inscrito']==='1'){
+                if ($dados['inscrito'] === '1') {
 
                     $dados = [
                         "status" => 200,
                         "info" => 'true'
                     ];
-                }else{
+                } else {
                     $dados = [
                         "status" => 200,
                         "info" => 'false'
@@ -208,8 +208,8 @@ $app->get('/api/eventos/{id}/inscrito', function (Request $request, Response $re
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
 
-                            "status" => $err->getCode(),
-                            "info" => $err->getMessage()
+                        "status" => $err->getCode(),
+                        "info" => $err->getMessage()
 
                     ];
                 }, function () {
@@ -227,8 +227,8 @@ $app->get('/api/eventos/{id}/inscrito', function (Request $request, Response $re
             $status = 422; // Unprocessable Entity
             $errorMsg = [
 
-                    "status" => "$status",
-                    "info" => 'Parametros invalidos'
+                "status" => "$status",
+                "info" => 'Parametros invalidos'
 
 
             ];
@@ -240,8 +240,8 @@ $app->get('/api/eventos/{id}/inscrito', function (Request $request, Response $re
         $status = 401; // Unprocessable Entity
         $errorMsg = [
 
-            "status"=> $status,
-            "info"=> "Acesso não autorizado"
+            "status" => $status,
+            "info" => "Acesso não autorizado"
 
         ];
         return $response

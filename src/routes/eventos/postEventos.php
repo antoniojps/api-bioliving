@@ -27,12 +27,26 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
     $iddMinima = $request->getParam('iddMinima');
     $dataFim = $request->getParam('dataFim');
     $ativo = $request->getParam('ativo');
-
-
+    $local =(int)$request->getParam('local');
+    $tipo = (int)$request->getParam('tipo');
+    $fb = (int)$request->getParam('facebook');
     $error = "";
-    // TODO verificações de fotos
-    // TODO verificar se existe id_localização na bd, senão inserir com respectivas lat e lng
-    // TODO verificar se existe id_tipo_evento na bd, senão inserir
+
+    if (!is_null($local) && $local != "") {
+        if(!v::intVal()->validate('10')) $error.="Id do local inváldo ";
+    } else {
+        $local = null;
+    }
+    if (!is_null($tipo) && $tipo != "") {
+        if(!v::intVal()->validate('10')) $error.="Id do tipo inváldo ";
+    } else {
+        $tipo = null;
+    }
+    if (!is_null($fb) && $fb != "") {
+        if(!v::intVal()->validate('10')) $error.="Id do tipo inváldo ";
+    } else {
+        $fb = null;
+    }
 
     //verificaçoes necessárias para garantir que nao sao introduzidos valores inválidos
     ////////////validar nome evento///////////
@@ -127,9 +141,9 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
     $ativo = $ativo != 1 && $ativo != 0 || $ativo == "" ? $ativo = 1 : $ativo;
 
 
-    if (count($error) == 0) {// não existe erro logo insere na bd
-        $sql = "INSERT INTO eventos (nome_evento,data_evento,descricao,descricao_short,max_participantes,min_participantes,idade_minima,data_fim,ativo) VALUES
-    (:nomeEvento,:data,:descricao,:descricaoShort,:max,:min,:idd,:dataFim,:ativo)";
+    if (count($error) != "") {// não existe erro logo insere na bd
+        $sql = "INSERT INTO eventos (nome_evento,data_evento,descricao,descricao_short,max_participantes,min_participantes,idade_minima,data_fim,ativo,localizacao_localizacao,tipo_evento_id_tipo_evento,facebook_id) VALUES
+    (:nomeEvento,:data,:descricao,:descricaoShort,:max,:min,:idd,:dataFim,:ativo,:local,:tipo,:fb)";
 
         try {
             // Get DB object
@@ -146,6 +160,9 @@ $app->post('/api/eventos', function (Request $request, Response $response) {
             $stmt->bindParam(':idd', $iddMinima);
             $stmt->bindParam(':dataFim', $dataFim);
             $stmt->bindParam(':ativo', $ativo);
+            $stmt->bindParam(':local', $local);
+            $stmt->bindParam(':tipo', $tipo);
+            $stmt->bindParam(':fb', $fb);
             $stmt->execute();
             $db = null;
 
