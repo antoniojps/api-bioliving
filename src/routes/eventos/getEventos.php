@@ -84,7 +84,7 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
                         "status"=>404,
                         "info" => 'pagina inexistente'
                     ];
-                    $status = 404; // Page not found
+                    // Page not found
 
                 } else if ($dadosLength < $results) {
                     $responseData=[
@@ -632,23 +632,28 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
 
             $dadosLength = (int)sizeof($dados);
             if ($dadosLength === 0) {
-                $dados = ["error" => 'pagina inexistente'];
-                $status = 404; // Page not found
+                $responseData = [
+                    "status"=>404,
+                    "info" => 'pagina inexistente'
+                ]; // Page not found
 
             } else if ($dadosLength < $results) {
-                $dadosExtra = ['info' => 'final dos resultados'];
-                array_push($dados, $dadosExtra);
+                $responseData=[
+                    "status"=>200,
+                    "data"=>$dados,
+                    "info"=>"final dos resultados"
+                ];
+
             } else {
                 $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-                $dadosExtra = ['proxPagina' => "$nextPageUrl?page=" . ++$page . "&results=$results"];
-                array_push($dados, $dadosExtra);
+                $responseData=[
+                    "status"=>200,
+                    "data"=>$dados,
+                    "proxPagina"=>"$nextPageUrl?page=" . ++$page . "&results=$results"
+                ];
             }
 
-            $responseData = [
-                'status' => "$status",
-                'data' =>
-                    $dados
-            ];
+
 
             return $response
                 ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
@@ -659,14 +664,15 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
-                    "error" => [
+
                         "status" => $err->getCode(),
-                        "text" => $err->getMessage()
-                    ]
+                        "info" => $err->getMessage()
+
                 ];
             }, function () {
                 return [
-                    "error" => 'Servico Indisponivel'
+                    "status"=>503,
+                    "info" => 'Servico Indisponivel'
                 ];
             }, $err);
 
@@ -678,11 +684,11 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Parametros invalidos'
 
-            ]
+                "status" => "$status",
+                "info" => 'Parametros invalidos'
+
+
         ];
 
         return $response

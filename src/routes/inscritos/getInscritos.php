@@ -128,7 +128,7 @@ $app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $r
             }, function () {
                 return [
                     "status" => 503,
-                    "error" => 'Servico Indisponivel'
+                    "info" => 'Servico Indisponivel'
                 ];
             }, $err);
 

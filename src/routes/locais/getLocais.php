@@ -90,26 +90,22 @@ $app->get('/api/locais', function (Request $request, Response $response) {
 
             $dadosLength = (int)sizeof($dados);
             if ($dadosLength === 0) {
-                $dados = ["error" => 'pagina inexistente'];
-                $status = 404; // Page not found
-                $responseData =[
-                    'status' => $status,
-                    'info' =>'pagina inexistente'
-                ];
+                $responseData = [
+                    "status"=>404,
+                    "info" => 'pagina inexistente'
+                ]; // Page not found
             } else if ($dadosLength < $results) {
-                $dadosExtra = ['info' => 'final dos resultados'];
-                array_push($dados, $dadosExtra);
+                $responseData=[
+                    "status"=>200,
+                    "data"=>$dados,
+                    "info"=>"final dos resultados"
+                ];
             } else {
                 $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-                $dadosExtra = ['proxPagina' => "$nextPageUrl?page=" . ++$page . "&results=$results"];
-                array_push($dados, $dadosExtra);
-            }
-            if($responseData==""){
-                $responseData = [
-                    'status' => "$status",
-                    'data' =>
-                        $dados
-
+                $responseData=[
+                    "status"=>200,
+                    "data"=>$dados,
+                    "proxPagina"=>"$nextPageUrl?page=" . ++$page . "&results=$results"
                 ];
             }
 

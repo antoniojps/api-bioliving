@@ -90,28 +90,26 @@ $app->get('/api/tiposEventos', function (Request $request, Response $response) {
             $dadosLength = (int)sizeof($dados);
             if ($dadosLength === 0) {
                 $dados = ["error" => 'pagina inexistente'];
-                $status = 404; // Page not found
-                $responseData =[
-                    'status' => $status,
-                    'info' =>'pagina inexistente'
+                // Page not found
+                $responseData = [
+                    "status"=>404,
+                    "info" => 'pagina inexistente'
                 ];
 
             } else if ($dadosLength < $results) {
-                $dadosExtra = ['info' => 'final dos resultados'];
-                array_push($dados, $dadosExtra);
+                $responseData=[
+                    "status"=>200,
+                    "data"=>$dados,
+                    "info"=>"final dos resultados"
+                ];
             } else {
                 $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-                $dadosExtra = ['proxPagina' => "$nextPageUrl?page=" . ++$page . "&results=$results"];
-                array_push($dados, $dadosExtra);
-            }
-            if($responseData===""){
-                $responseData = [
-                    'status' => "$status",
-                    'data' => $dados
+                $responseData=[
+                    "status"=>200,
+                    "data"=>$dados,
+                    "proxPagina"=>"$nextPageUrl?page=" . ++$page . "&results=$results"
                 ];
-
             }
-
 
             return $response
                 ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
