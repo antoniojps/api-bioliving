@@ -8,8 +8,8 @@ use Bioliving\Custom\Token as Token;
 
 
 $app->post('/api/eventos/inscritos', function (Request $request, Response $response) {
-    $idEventos = (int)$request->getParam('idevento');
-    $idUtilizadores = (int)$request->getParam('idutilizador');
+    $idEventos = (int)$request->getParam('idEvento');
+    $idUtilizadores = (int)$request->getParam('idUtilizador');
 
     if (Token::validarScopes('admin')) {
         //verificar se id's são validos
@@ -42,7 +42,8 @@ $app->post('/api/eventos/inscritos', function (Request $request, Response $respo
                         $stmt->execute();
                         $db = null;
                         $responseData = [
-                            'Resposta' => "Inscrito com sucesso!"
+                            "status" => 200,
+                            'info' => "Inscrito com sucesso!"
                         ];
 
                         return $response
@@ -53,14 +54,15 @@ $app->post('/api/eventos/inscritos', function (Request $request, Response $respo
                         // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                         $errorMsg = Errors::filtroReturn(function ($err) {
                             return [
-                                "error" => [
+
                                     "status" => $err->getCode(),
-                                    "text" => $err->getMessage()
-                                ]
+                                    "info" => $err->getMessage()
+
                             ];
                         }, function () {
                             return [
-                                "error" => 'Servico Indisponivel'
+                                "status" => 503,
+                                "info" => 'Servico Indisponivel'
                             ];
                         }, $err);
 
@@ -70,13 +72,11 @@ $app->post('/api/eventos/inscritos', function (Request $request, Response $respo
                     }
 
                 } else {
-                    $status = 404; // Unprocessable Entity
+                    $status = 422; // Unprocessable Entity
                     $errorMsg = [
-                        "error" => [
                             "status" => "$status",
                             "text" => 'Inscrição já existe'
 
-                        ]
                     ];
 
                     return $response
@@ -89,14 +89,15 @@ $app->post('/api/eventos/inscritos', function (Request $request, Response $respo
                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
+
                             "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+                            "info" => $err->getMessage()
+
                     ];
                 }, function () {
                     return [
-                        "error" => 'Servico Indisponivel'
+                        "status" => 503,
+                        "info" => 'Servico Indisponivel'
                     ];
                 }, $err);
 
@@ -107,11 +108,11 @@ $app->post('/api/eventos/inscritos', function (Request $request, Response $respo
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Parametros invalidos'
 
-                ]
+                    "status" => "$status",
+                    "info" => 'Parametros invalidos'
+
+
             ];
 
             return $response
@@ -121,17 +122,18 @@ $app->post('/api/eventos/inscritos', function (Request $request, Response $respo
     } else {
         $status = 401;
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Acesso não autorizado'
 
-            ]
+                "status" => "$status",
+                "info" => 'Acesso não autorizado'
+
+
         ];
 
         return $response
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
 });
+
 
 
 $app->post('/api/eventos/{id}/inscrito', function (Request $request, Response $response) {
@@ -156,7 +158,7 @@ $app->post('/api/eventos/{id}/inscrito', function (Request $request, Response $r
                 $db = null;
                 $dados = $stmt->fetch(PDO::FETCH_ASSOC);
                 if ($dados) {
-                    //verificar se interesse já não existe
+                    //verificar se inscrição já não existe
 
                     $sql = "SELECT * FROM participantes WHERE eventos_id_eventos = :idEvento && utilizadores_id_utilizadores = :idUtilizador";
 
@@ -192,7 +194,7 @@ $app->post('/api/eventos/{id}/inscrito', function (Request $request, Response $r
 
                                 $responseData = [
                                     'status' => "$status",
-                                    'data' => "Inscrição efetuada com sucesso!"
+                                    'info' => "Inscrição efetuada com sucesso!"
                                 ];
 
                                 return $response
@@ -204,14 +206,13 @@ $app->post('/api/eventos/{id}/inscrito', function (Request $request, Response $r
                                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                                 $errorMsg = Errors::filtroReturn(function ($err) {
                                     return [
-                                        "error" => [
                                             "status" => $err->getCode(),
-                                            "text" => $err->getMessage()
-                                        ]
+                                            "info" => $err->getMessage()
                                     ];
                                 }, function () {
                                     return [
-                                        "error" => 'Servico Indisponivel'
+                                        "status" => "503",
+                                        "info" => 'Servico Indisponivel'
                                     ];
                                 }, $err);
 
@@ -224,11 +225,11 @@ $app->post('/api/eventos/{id}/inscrito', function (Request $request, Response $r
                         } else {
                             $status = 404; // Unprocessable Entity
                             $errorMsg = [
-                                "error" => [
-                                    "status" => "$status",
-                                    "text" => 'Interesse já existe'
 
-                                ]
+                                    "status" => "$status",
+                                    "info" => 'Inscrição já existe'
+
+
                             ];
 
                             return $response
@@ -241,14 +242,15 @@ $app->post('/api/eventos/{id}/inscrito', function (Request $request, Response $r
                         // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                         $errorMsg = Errors::filtroReturn(function ($err) {
                             return [
-                                "error" => [
+
                                     "status" => $err->getCode(),
-                                    "text" => $err->getMessage()
-                                ]
+                                    "info" => $err->getMessage()
+
                             ];
                         }, function () {
                             return [
-                                "error" => 'Servico Indisponivel'
+                                "status" => 503,
+                                "info" => 'Servico Indisponivel'
                             ];
                         }, $err);
 
@@ -261,11 +263,11 @@ $app->post('/api/eventos/{id}/inscrito', function (Request $request, Response $r
                 } else {
                     $status = 404; // Unprocessable Entity
                     $errorMsg = [
-                        "error" => [
-                            "status" => "$status",
-                            "text" => 'Evento não se encontra disponivel'
 
-                        ]
+                            "status" => "$status",
+                            "info" => 'Evento não se encontra disponivel'
+
+
                     ];
 
                     return $response
@@ -278,14 +280,15 @@ $app->post('/api/eventos/{id}/inscrito', function (Request $request, Response $r
                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
+
                             "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+                            "info" => $err->getMessage()
+
                     ];
                 }, function () {
                     return [
-                        "error" => 'Servico Indisponivel'
+                        "status" => 503,
+                        "info" => 'Servico Indisponivel'
                     ];
                 }, $err);
 
@@ -296,11 +299,11 @@ $app->post('/api/eventos/{id}/inscrito', function (Request $request, Response $r
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Parametros invalidos'
 
-                ]
+                    "status" => "$status",
+                    "info" => 'Parametros invalidos'
+
+
             ];
 
             return $response
@@ -309,11 +312,9 @@ $app->post('/api/eventos/{id}/inscrito', function (Request $request, Response $r
     } else {
         $status = 401; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Acesso não autorizado'
 
-            ]
+                "status" => "$status",
+                "info" => 'Acesso não autorizado'
         ];
 
         return $response

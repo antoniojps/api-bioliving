@@ -42,7 +42,8 @@ $app->delete('/api/eventos/{idevento}/inscritos/{idutilizador}', function (Reque
                         $stmt->execute();
                         $db = null;
                         $responseData = [
-                            'Resposta' => "Inscrito anulado com sucesso!"
+                            "status" => 200,
+                            'info' => "Inscrito anulado com sucesso!"
                         ];
 
                         return $response
@@ -53,14 +54,15 @@ $app->delete('/api/eventos/{idevento}/inscritos/{idutilizador}', function (Reque
                         // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                         $errorMsg = Errors::filtroReturn(function ($err) {
                             return [
-                                "error" => [
+
                                     "status" => $err->getCode(),
-                                    "text" => $err->getMessage()
-                                ]
+                                    "info" => $err->getMessage()
+
                             ];
                         }, function () {
                             return [
-                                "error" => 'Servico Indisponivel'
+                                "status" => 503,
+                                "info" => 'Servico Indisponivel'
                             ];
                         }, $err);
 
@@ -72,11 +74,8 @@ $app->delete('/api/eventos/{idevento}/inscritos/{idutilizador}', function (Reque
                 } else {
                     $status = 404; // Unprocessable Entity
                     $errorMsg = [
-                        "error" => [
                             "status" => "$status",
-                            "text" => 'Inscrição já não existe'
-
-                        ]
+                            "info" => 'Inscrição já não existe'
                     ];
 
                     return $response
@@ -89,10 +88,10 @@ $app->delete('/api/eventos/{idevento}/inscritos/{idutilizador}', function (Reque
                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
+
                             "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+                            "info" => $err->getMessage()
+
                     ];
                 }, function () {
                     return [
@@ -107,11 +106,8 @@ $app->delete('/api/eventos/{idevento}/inscritos/{idutilizador}', function (Reque
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
-                "error" => [
                     "status" => "$status",
-                    "text" => 'Parametros invalidos'
-
-                ]
+                    "info" => 'Parametros invalidos'
             ];
 
             return $response
@@ -121,11 +117,8 @@ $app->delete('/api/eventos/{idevento}/inscritos/{idutilizador}', function (Reque
     } else {
         $status = 401;
         $errorMsg = [
-            "error" => [
                 "status" => "$status",
-                "text" => 'Acesso não autorizado'
-
-            ]
+                "info" => 'Acesso não autorizado'
         ];
 
         return $response
@@ -171,7 +164,8 @@ $app->delete('/api/eventos/{id}/inscrito', function (Request $request, Response 
                         $stmt->execute();
                         $db = null;
                         $responseData = [
-                            'Resposta' => "Inscrição anulada com sucesso!"
+                            "status" => 200,
+                            'info' => "Inscrição anulada com sucesso!"
                         ];
 
                         return $response
@@ -183,14 +177,15 @@ $app->delete('/api/eventos/{id}/inscrito', function (Request $request, Response 
                         // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                         $errorMsg = Errors::filtroReturn(function ($err) {
                             return [
-                                "error" => [
+
                                     "status" => $err->getCode(),
-                                    "text" => $err->getMessage()
-                                ]
+                                    "info" => $err->getMessage()
+
                             ];
                         }, function () {
                             return [
-                                "error" => 'Servico Indisponivel'
+                                "status"=> 503,
+                                "info" => 'Servico Indisponivel'
                             ];
                         }, $err);
 
@@ -203,11 +198,11 @@ $app->delete('/api/eventos/{id}/inscrito', function (Request $request, Response 
                 } else {
                     $status = 404; // Unprocessable Entity
                     $errorMsg = [
-                        "error" => [
-                            "status" => "$status",
-                            "text" => 'Interesse já existe'
 
-                        ]
+                            "status" => "$status",
+                            "info" => 'Interesse já não existe'
+
+
                     ];
 
                     return $response
@@ -220,14 +215,15 @@ $app->delete('/api/eventos/{id}/inscrito', function (Request $request, Response 
                 // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
-                        "error" => [
+
                             "status" => $err->getCode(),
-                            "text" => $err->getMessage()
-                        ]
+                            "info" => $err->getMessage()
+
                     ];
                 }, function () {
                     return [
-                        "error" => 'Servico Indisponivel'
+                        "status"=>503,
+                        "info" => 'Servico Indisponivel'
                     ];
                 }, $err);
 
@@ -240,11 +236,11 @@ $app->delete('/api/eventos/{id}/inscrito', function (Request $request, Response 
         } else {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Parametros invalidos'
 
-                ]
+                    "status" => "$status",
+                    "info" => 'Parametros invalidos'
+
+
             ];
 
             return $response
@@ -255,11 +251,11 @@ $app->delete('/api/eventos/{id}/inscrito', function (Request $request, Response 
     } else {
         $status = 401;
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Acesso não autorizado'
 
-            ]
+                "status" => "$status",
+                "info" => 'Acesso não autorizado'
+
+
         ];
 
         return $response
