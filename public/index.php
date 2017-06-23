@@ -59,4 +59,6 @@ require  "../src/routes/inscritos/routesInscritos.php";
 // Upload
 require  "../src/routes/upload/routes.php";
 
+// Terceiros (Facebook, etc)
+require  "../src/routes/terceiros/routes.php";
 $app->run();
