@@ -136,14 +136,15 @@ $app->get( '/api/utilizadores', function ( Request $request, Response $response 
 			// Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
 			$errorMsg = Errors::filtroReturn(function ($err) {
 				return [
-						"error" => [
+
 								"status" => $err->getCode(),
-								"text" => $err->getMessage()
-						]
+								"info" => $err->getMessage()
+
 				];
 			}, function () {
 				return [
-						"error" => 'Servico Indisponivel'
+				        "status"=>503,
+						"info" => 'Servico Indisponivel'
 				];
 			}, $err);
 
@@ -154,11 +155,11 @@ $app->get( '/api/utilizadores', function ( Request $request, Response $response 
 	} else {
 		$status   = 422; // Unprocessable Entity
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => 'Parametros invalidos'
 
-				]
+						"status" => "$status",
+						"info"   => 'Parametros invalidos'
+
+
 		];
 
 		return $response
@@ -167,11 +168,11 @@ $app->get( '/api/utilizadores', function ( Request $request, Response $response 
 
 		$status   = 401; // Unauthorized
 		$errorMsg = [
-				"error" => [
-						"status" => "$status",
-						"text"   => 'Unauthorized'
 
-				]
+						"status" => "$status",
+						"info"   => 'Unauthorized'
+
+
 		];
 		return $response
 				->withJson( $errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
