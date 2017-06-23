@@ -53,7 +53,7 @@ class Helper {
 	 */
 
  	static public function obterUrl($tipoImagem,$idImagem){
-		$pastaUpload = 'learning-SLIM/public/imagens/';
+		$pastaUpload = '/imagens/';
 
 		if($tipoImagem === 'avatar'){
 			$pastaUpload .= 'avatars/';

@@ -25,10 +25,6 @@ $app->get( '/api/me', function ( Request $request, Response $response ) {
 			];
 	}
 
-	$responseData = [
-			'user' => $data
-	];
-
 	return $response
 			->withJson( $data, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS );
 
