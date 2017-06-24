@@ -15,7 +15,13 @@ $app->add( new \Slim\Middleware\JwtAuthentication( [
 
 		"path" => "/api", // caminho onde irá ser feita autenticação
 
-		"passthrough" => [ "/api/login", "/api/create" , "/api//imagens/avatar", "/api/imagens/avatar" , "/api/eventos","/api/terceiros/facebook/evento"], // Routes onde nao é necessário autenticação
+		"passthrough" => [
+		"/api/login",
+		"/api/create" ,
+		"/api/imagens/avatar" ,
+		"/api/eventos",
+		"/api/pesquisa",
+		"/api/terceiros/facebook/evento"], // Routes onde nao é necessário autenticação
 
 		"secure" => true, // apenas funciona com https
 
