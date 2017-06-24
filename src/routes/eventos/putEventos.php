@@ -7,8 +7,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
-//////////////Alterar um evento///////////////////
-//Scopes: admin ou token do request é igual ao {id}(colaborador que criou )
+
+
 $app->put('/api/eventos/{id}', function (Request $request, Response $response) {
 
     $idCriador = (int)$request->getParam('idCriador');
@@ -261,7 +261,6 @@ $app->put('/api/eventos/{id}', function (Request $request, Response $response) {
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
 });
-
 
 /////////////////PUT para tornar evento ativo////////////////////
 $app->put('/api/eventos/ative/{id}', function (Request $request, Response $response) {

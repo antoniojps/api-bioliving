@@ -6,10 +6,12 @@ use Bioliving\Errors\Errors as Errors;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
+use Bioliving\Custom\Token as Token;
 
 
 //////////////// PUT local//////////////////
 $app->put('/api/locais/{id}', function (Request $request, Response $response) {
+    if (Token::validarScopes('normal', Token::getUtilizador())) {
     $id = $request->getAttribute('id');
     $localizacao = $request->getParam('nomeLocal');
     $lat = $request->getParam('lat');
@@ -151,5 +153,16 @@ $app->put('/api/locais/{id}', function (Request $request, Response $response) {
         return $response
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
+    } else {
+        $status = 401;
+        $errorMsg = [
 
+            "status" => "$status",
+            "info" => 'Acesso não autorizado'
+
+        ];
+
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+    }
 });
