@@ -40,7 +40,7 @@ $app->add(function ($req, $res, $next) {
 # /token - Verificar dados, gerar token e criar cookie com o mesmo
 require_once "../src/routes/autenticacao/routes.php";
 // Utilizadores
-require "../src/routes/utilizadores.php";
+require "../src/routes/utilizadores/routesUtilizadores.php";
 // Eventos
 require "../src/routes/eventos/routesEventos.php";
 // Locais
