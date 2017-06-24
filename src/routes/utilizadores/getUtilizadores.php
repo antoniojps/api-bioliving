@@ -7,7 +7,6 @@ use Bioliving\Custom\Token as Token;
 use Bioliving\Custom\Helper as Helper;
 
 
-
 ///////GET para receber eventos em que um utilizador está inscrito///////////
 $app->get('/api/utilizador/{id}/incrito', function (Request $request, Response $response) {
     $byArr = [
@@ -36,10 +35,9 @@ $app->get('/api/utilizador/{id}/incrito', function (Request $request, Response $
     $inscrito = isset($parametros['inscrito']) ? $parametros['inscrito'] : $inscricoesDefault;
 
 
-
     if (Token::validarScopes('admin', Token::getUtilizador())) {
         $idUtilizador = (int)$request->getAttribute('id'); // ir buscar id
-        if (is_int($idUtilizador) && $idUtilizador > 0 && ($inscrito=="true"|| $inscrito == "false")) {
+        if (is_int($idUtilizador) && $idUtilizador > 0 && ($inscrito == "true" || $inscrito == "false")) {
 
             //caso request tenha parametros superiores ao numero máximo permitido então repor com o valor maximo permitido e vice-versa
             $results = $results > $maxResults ? $maxResults : $results; //se o querystring results for maior que o valor maximo definido passa a ser esse valor maximo definido
@@ -52,21 +50,47 @@ $app->get('/api/utilizador/{id}/incrito', function (Request $request, Response $
             $limitNumber = ($page - 1) * $results;
             $passar = $byArr[$by];
 
-            if($inscrito=="true"){
-                $operador = "=";
-            }else{
-                $operador = "<>";
-            }
-
-            if ($order == $orderDefault) {
-                $sql = "SELECT eventos.id_eventos,eventos.nome_evento,eventos.data_registo_evento,eventos.data_evento,eventos.preco,eventos.desconto_socio,eventos.descricao_short,eventos.descricao,eventos.max_participantes,eventos.min_participantes,eventos.idade_minima,eventos.data_fim,eventos.ativo,eventos.utilizadores_id_utilizadores AS criador_evento,
-participantes.utilizadores_id_utilizadores,localizacao.nome,tipo_evento.nome_tipo_evento, icons.classe AS tipo_classe FROM participantes INNER JOIN eventos ON eventos.id_eventos = participantes.eventos_id_eventos  INNER JOIN localizacao ON eventos.localizacao_localizacao = localizacao.localizacao INNER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_id_tipo_evento INNER JOIN icons ON icons.id_icons = tipo_evento.icons_id WHERE participantes.`utilizadores_id_utilizadores` $operador :id ORDER BY $passar  LIMIT :limit , :results";
+            if ($inscrito == "false") {
+                if ($order == $orderDefault) {
+                    $sql = "SELECT  DISTINCT participantes.eventos_id_eventos,eventos.nome_evento,eventos.descricao_short,eventos.descricao,eventos.utilizadores_id_utilizadores AS criador,eventos.facebook_id,eventos.data_evento, tipo_evento.nome_tipo_evento,localizacao.nome,localizacao.lng,localizacao.lat,icons.classe AS tipo_classe 
+FROM `participantes`
+INNER  JOIN eventos ON eventos.id_eventos = participantes.eventos_id_eventos 
+LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_id_tipo_evento 
+LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao 
+LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id 
+LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos
+WHERE participantes.utilizadores_id_utilizadores <> :id AND participantes.eventos_id_eventos NOT IN (SELECT `eventos_id_eventos` FROM participantes WHERE participantes.`utilizadores_id_utilizadores` = :id ) ORDER BY $passar  LIMIT :limit , :results";
+                } else {
+                    $sql = "SELECT  DISTINCT participantes.eventos_id_eventos,eventos.nome_evento,eventos.descricao_short,eventos.descricao,eventos.utilizadores_id_utilizadores AS criador,eventos.facebook_id,eventos.data_evento, tipo_evento.nome_tipo_evento,localizacao.nome,localizacao.lng,localizacao.lat,icons.classe AS tipo_classe 
+FROM `participantes`
+INNER  JOIN eventos ON eventos.id_eventos = participantes.eventos_id_eventos 
+LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_id_tipo_evento 
+LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao 
+LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id 
+LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos
+WHERE participantes.utilizadores_id_utilizadores <> :id AND participantes.eventos_id_eventos NOT IN (SELECT `eventos_id_eventos` FROM participantes WHERE participantes.`utilizadores_id_utilizadores` = :id ) ORDER BY $passar DESC LIMIT :limit , :results";
+                }
             } else {
-                $sql = "SELECT eventos.id_eventos,eventos.nome_evento,eventos.data_registo_evento,eventos.data_evento,eventos.preco,eventos.desconto_socio,eventos.descricao_short,eventos.descricao,eventos.max_participantes,eventos.min_participantes,eventos.idade_minima,eventos.data_fim,eventos.ativo,eventos.utilizadores_id_utilizadores AS criador_evento,
-participantes.utilizadores_id_utilizadores,localizacao.nome,tipo_evento.nome_tipo_evento, icons.classe AS tipo_classe FROM participantes INNER JOIN eventos ON eventos.id_eventos = participantes.eventos_id_eventos  INNER JOIN localizacao ON eventos.localizacao_localizacao = localizacao.localizacao INNER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_id_tipo_evento INNER JOIN icons ON icons.id_icons = tipo_evento.icons_id WHERE participantes.`utilizadores_id_utilizadores` $operador :id ORDER BY $passar DESC LIMIT :limit , :results";
+                if ($order == $orderDefault) {
+                    $sql = "SELECT  DISTINCT participantes.eventos_id_eventos,eventos.nome_evento,eventos.descricao_short,eventos.descricao,eventos.utilizadores_id_utilizadores AS criador,eventos.facebook_id,eventos.data_evento, tipo_evento.nome_tipo_evento,localizacao.nome,localizacao.lng,localizacao.lat,icons.classe AS tipo_classe 
+FROM `participantes`
+INNER  JOIN eventos ON eventos.id_eventos = participantes.eventos_id_eventos 
+LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_id_tipo_evento 
+LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao 
+LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id 
+LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos
+WHERE participantes.utilizadores_id_utilizadores = :id ORDER BY $passar  LIMIT :limit , :results";
+                } else {
+                    $sql = "SELECT  DISTINCT participantes.eventos_id_eventos,eventos.nome_evento,eventos.descricao_short,eventos.descricao,eventos.utilizadores_id_utilizadores AS criador,eventos.facebook_id,eventos.data_evento, tipo_evento.nome_tipo_evento,localizacao.nome,localizacao.lng,localizacao.lat,icons.classe AS tipo_classe 
+FROM `participantes`
+INNER  JOIN eventos ON eventos.id_eventos = participantes.eventos_id_eventos 
+LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_id_tipo_evento 
+LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao 
+LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id 
+LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos
+WHERE participantes.utilizadores_id_utilizadores = :id ORDER BY $passar DESC LIMIT :limit , :results";
+                }
             }
-
-                echo $sql;
 
 
             try {
@@ -77,7 +101,7 @@ participantes.utilizadores_id_utilizadores,localizacao.nome,tipo_evento.nome_tip
                 $stmt = $db->prepare($sql);
                 $stmt->bindValue(':id', $idUtilizador, PDO::PARAM_INT);
                 $stmt->bindValue(':limit', (int)$limitNumber, PDO::PARAM_INT);
-                $stmt->bindValue(':results',(int)$results, PDO::PARAM_INT);
+                $stmt->bindValue(':results', (int)$results, PDO::PARAM_INT);
                 $stmt->execute();
                 $db = null;
                 $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
