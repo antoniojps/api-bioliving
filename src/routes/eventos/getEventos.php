@@ -81,28 +81,27 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
                 $dadosLength = (int)sizeof($dados);
                 if ($dadosLength === 0) {
                     $responseData = [
-                        "status"=>404,
+                        "status" => 404,
                         "info" => 'pagina inexistente'
                     ];
                     // Page not found
 
                 } else if ($dadosLength < $results) {
-                    $responseData=[
-                        "status"=>200,
-                        "data"=>$dados,
-                        "info"=>"final dos resultados"
+                    $responseData = [
+                        "status" => 200,
+                        "data" => $dados,
+                        "info" => "final dos resultados"
                     ];
 
 
                 } else {
                     $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-                    $responseData=[
-                        "status"=>200,
-                        "data"=>$dados,
-                        "proxPagina"=>"$nextPageUrl?page=" . ++$page . "&results=$results"
+                    $responseData = [
+                        "status" => 200,
+                        "data" => $dados,
+                        "proxPagina" => "$nextPageUrl?page=" . ++$page . "&results=$results"
                     ];
                 }
-
 
 
                 return $response
@@ -115,13 +114,13 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
                 $errorMsg = Errors::filtroReturn(function ($err) {
                     return [
 
-                            "status" => $err->getCode(),
-                            "info" => $err->getMessage()
+                        "status" => $err->getCode(),
+                        "info" => $err->getMessage()
 
                     ];
                 }, function () {
                     return [
-                        "status" =>503,
+                        "status" => 503,
                         "info" => 'Servico Indisponivel'
                     ];
                 }, $err);
@@ -134,8 +133,8 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
             $status = 422; // Unprocessable Entity
             $errorMsg = [
 
-                    "status" => "$status",
-                    "info" => 'Parametros invalidos'
+                "status" => "$status",
+                "info" => 'Parametros invalidos'
 
 
             ];
@@ -147,8 +146,8 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
         $status = 401;
         $errorMsg = [
 
-                "status" => "$status",
-                "info" => 'Acesso não autorizado'
+            "status" => "$status",
+            "info" => 'Acesso não autorizado'
 
 
         ];
@@ -199,14 +198,13 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
                     "status" => 404,
                     "info" => 'evento inexistente'
                 ];// Page not found
-            }else{
+            } else {
                 $responseData = [
                     'status' => "$status",
                     'data' =>
                         $dados
                 ];
             }
-
 
 
             return $response
@@ -223,7 +221,7 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
                 ];
             }, function () {
                 return [
-                    "status"=>503,
+                    "status" => 503,
                     "info" => 'Servico Indisponivel'
                 ];
             }, $err);
@@ -236,8 +234,8 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
 
-                "status" => "$status",
-                "info" => 'Parametros invalidos'
+            "status" => "$status",
+            "info" => 'Parametros invalidos'
 
         ];
 
@@ -322,23 +320,23 @@ $app->get('/api/eventos/{id}/colaboradores', function (Request $request, Respons
             if ($dadosLength === 0) {
                 $status = 404;
                 $responseData = [
-                    "status"=>404,
+                    "status" => 404,
                     "info" => 'página inexistentes'
                 ]; // Page not found
             } else if ($dadosLength < $results) {
 
                 $responseData = [
-                    "status"=>200,
-                    "data"=>$dados,
+                    "status" => 200,
+                    "data" => $dados,
                     'info' => 'final dos resultados'
                 ];
 
             } else {
                 $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-                $responseData=[
-                    "status"=>200,
-                    "data"=>$dados,
-                    "proxPagina"=>"$nextPageUrl?page=" . ++$page . "&results=$results"
+                $responseData = [
+                    "status" => 200,
+                    "data" => $dados,
+                    "proxPagina" => "$nextPageUrl?page=" . ++$page . "&results=$results"
                 ];
             }
 
@@ -353,13 +351,13 @@ $app->get('/api/eventos/{id}/colaboradores', function (Request $request, Respons
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
 
-                        "status" => $err->getCode(),
-                        "info" => $err->getMessage()
+                    "status" => $err->getCode(),
+                    "info" => $err->getMessage()
 
                 ];
             }, function ($err) {
                 return [
-                    "status"=>503,
+                    "status" => 503,
                     "info" => 'Servico Indisponivel'
                 ];
             }, $err);
@@ -372,8 +370,8 @@ $app->get('/api/eventos/{id}/colaboradores', function (Request $request, Respons
         $status = 422; // Unprocessable Entity
         $errorMsg = [
 
-                "status" => "$status",
-                "info" => 'Parametros invalidos'
+            "status" => "$status",
+            "info" => 'Parametros invalidos'
 
 
         ];
@@ -429,7 +427,7 @@ $app->get('/api/eventos/{id}/extras', function (Request $request, Response $resp
             $status = 503; // Service unavailable
             // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
             $info = Errors::filtroReturn(function ($err) {
-                return  $err->getCode();
+                return $err->getCode();
             }, function () {
                 return 'servico indisponivel';
             }, $err);
@@ -451,7 +449,7 @@ $app->get('/api/eventos/{id}/extras', function (Request $request, Response $resp
 
 //////////// Obter tags de um evento ////////////
 $app->get('/api/eventos/{id}/tags', function (Request $request, Response $response) {
-		$dados = null;
+    $dados = null;
     $id = $request->getAttribute('id'); // ir buscar id
 
     //valores default
@@ -488,8 +486,10 @@ $app->get('/api/eventos/{id}/tags', function (Request $request, Response $respon
             $dados = H::filtrarArrMulti($dados);
 
             // Converter array multi-dimensional em string seperada por ','
-            $dadosTags = implode(",", array_map(function($a) {return implode("~",$a);},$dados));
-						$dadosTags = explode(',',$dadosTags);
+            $dadosTags = implode(",", array_map(function ($a) {
+                return implode("~", $a);
+            }, $dados));
+            $dadosTags = explode(',', $dadosTags);
             $dadosLength = (int)sizeof($dados);
             $dados = [];
 
@@ -560,7 +560,12 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
     $dataMaxUnix = 2147403600; //correspondente a 2286-11-20 em formato Y-m-d UNIX
     $dataMinUnix = 1; // correspondente a 1970-01-01 em formato Y-m-d UNIX
     $msgDefault = '%%';
-
+    $latDefault = false;
+    $lngDefault = false;
+    //TODO :
+    // - lat
+    // - lng
+    //- facebook_Id
     $parametros = $request->getQueryParams(); // obter parametros do querystring
     $page = isset($parametros['page']) ? (int)$parametros['page'] : $paginaDefault;
     $results = isset($parametros['results']) ? (int)$parametros['results'] : $maxResults;
@@ -569,6 +574,19 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
     $dataMin = isset($parametros['dataMin']) ? (int)$parametros['dataMin'] : false;
     $dataMax = isset($parametros['dataMax']) ? (int)$parametros['dataMax'] : false;
     $msg = isset($parametros['msg']) ? $parametros['msg'] : $msgDefault;
+    $lat = isset($parametros['lat']) ? $parametros['lat'] : $latDefault;
+    $lng = isset($parametros['lng']) ? $parametros['lng'] : $lngDefault;
+
+    if ($lat != false && $lng != false) {
+        $extraWhere = " AND lat LIKE :lat AND lng LIKE :lng ";
+    } elseif ($lat != false && $lng == false) {
+        $extraWhere = " AND lat LIKE :lat ";
+    } elseif ($lat == false && $lng != false) {
+        $extraWhere = " AND lng LIKE :lng ";
+    } else {
+        $extraWhere = "";
+    }
+
 
     if ($page > 0 && $results > 0) {
 
@@ -590,23 +608,25 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
         $limitNumber = ($page - 1) * $results;
         $passar = $byArr[$by];
 
+
         $dataMinFormat = gmdate("Y-m-d", (int)$dataMin); //colocar a data minima no formato adquado á comparação
         $dataMaxFormat = gmdate("Y-m-d", (int)$dataMax);//colocar a data máxima no formato adquado á comparação
         if ($order == $orderDefault) {
-            if ($dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador ,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` BETWEEN :datamin AND :datamax GROUP BY eventos.data_registo_evento ORDER BY $passar  LIMIT :limit, :results";
-            elseif ($dataMin && !$dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin  GROUP BY eventos.data_registo_evento ORDER BY $passar  LIMIT :limit, :results";
-            elseif (!$dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` <= :datamax GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
+            if ($dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador ,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` BETWEEN :datamin AND :datamax $extraWhere GROUP BY eventos.data_registo_evento ORDER BY $passar  LIMIT :limit, :results";
+            elseif ($dataMin && !$dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin $extraWhere  GROUP BY eventos.data_registo_evento ORDER BY $passar  LIMIT :limit, :results";
+            elseif (!$dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` <= :datamax $extraWhere GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
             else {
-                $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
+                $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg)$extraWhere GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
             }
         } else {
-            if ($dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` BETWEEN :datamin AND :datamax GROUP BY eventos.id_eventos ORDER BY $passar DESC LIMIT :limit, :results";
-            elseif ($dataMin && !$dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin  GROUP BY eventos.id_eventos ORDER BY $passar DESC  LIMIT :limit, :results";
-            elseif (!$dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` <= :datamax GROUP BY eventos.id_eventos ORDER BY $passar DESC LIMIT :limit, :results";
+            if ($dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` BETWEEN :datamin AND :datamax $extraWhere GROUP BY eventos.id_eventos ORDER BY $passar DESC LIMIT :limit, :results";
+            elseif ($dataMin && !$dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin $extraWhere  GROUP BY eventos.id_eventos ORDER BY $passar DESC  LIMIT :limit, :results";
+            elseif (!$dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` <= :datamax $extraWhere GROUP BY eventos.id_eventos ORDER BY $passar DESC LIMIT :limit, :results";
             else {
-                $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
+                $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) $extraWhere GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
             }
         }
+
 
         try {
 
@@ -621,6 +641,14 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
             $stmt->bindValue(':limit', (int)$limitNumber, PDO::PARAM_INT);
             $stmt->bindValue(':results', (int)$results, PDO::PARAM_INT);
             $stmt->bindValue(':msg', $msgEnv, PDO::PARAM_INT);
+            if ($lat != false && $lng != false) {
+                $stmt->bindValue(':lat', $lat, PDO::PARAM_INT);
+                $stmt->bindValue(':lng', $lng, PDO::PARAM_INT);
+            } elseif ($lat != false && $lng == false) {
+                $stmt->bindValue(':lat', $lat, PDO::PARAM_INT);
+            } elseif ($lat == false && $lng != false) {
+                $stmt->bindValue(':lng', $lng, PDO::PARAM_INT);
+            }
             $stmt->bindValue(':datamin', $dataMinFormat, PDO::PARAM_INT);
             $stmt->bindValue(':datamax', $dataMaxFormat, PDO::PARAM_INT);
             $stmt->execute();
@@ -638,26 +666,25 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
             if ($dadosLength === 0) {
                 $status = 404;
                 $responseData = [
-                    "status"=>404,
+                    "status" => 404,
                     "info" => 'pagina inexistente'
                 ]; // Page not found
 
             } else if ($dadosLength < $results) {
-                $responseData=[
-                    "status"=>200,
-                    "data"=>$dados,
-                    "info"=>"final dos resultados"
+                $responseData = [
+                    "status" => 200,
+                    "data" => $dados,
+                    "info" => "final dos resultados"
                 ];
 
             } else {
                 $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
-                $responseData=[
-                    "status"=>200,
-                    "data"=>$dados,
-                    "proxPagina"=>"$nextPageUrl?page=" . ++$page . "&results=$results"
+                $responseData = [
+                    "status" => 200,
+                    "data" => $dados,
+                    "proxPagina" => "$nextPageUrl?page=" . ++$page . "&results=$results"
                 ];
             }
-
 
 
             return $response
@@ -670,13 +697,13 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
             $errorMsg = Errors::filtroReturn(function ($err) {
                 return [
 
-                        "status" => $err->getCode(),
-                        "info" => $err->getMessage()
+                    "status" => $err->getCode(),
+                    "info" => $err->getMessage()
 
                 ];
             }, function () {
                 return [
-                    "status"=>503,
+                    "status" => 503,
                     "info" => 'Servico Indisponivel'
                 ];
             }, $err);
@@ -690,8 +717,8 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
         $status = 422; // Unprocessable Entity
         $errorMsg = [
 
-                "status" => "$status",
-                "info" => 'Parametros invalidos'
+            "status" => "$status",
+            "info" => 'Parametros invalidos'
 
 
         ];
