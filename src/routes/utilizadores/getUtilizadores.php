@@ -6,6 +6,41 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Bioliving\Custom\Token as Token;
 use Bioliving\Custom\Helper as Helper;
 
+$app->get('/api/utilizadores/{id}', function (Request $request, Response $response) {
+    $idUtilizador = (int)$request->getAttribute('id'); // ir buscar id
+    if (Token::validarScopes('admin', $idUtilizador)) {
+        if (is_int($idUtilizador) && $idUtilizador > 0) {
+
+
+
+
+
+        } else {
+            $status = 401;
+            $errorMsg = [
+
+                "status" => "$status",
+                "info" => 'Acesso não autorizado'
+
+
+            ];
+
+            return $response
+                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+        }
+    } else {
+        $status = 422; // Unprocessable Entity
+        $errorMsg = [
+
+            "status" => "$status",
+            "info" => 'Parametros invalidos'
+
+        ];
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+    }
+});
+
 
 ///////GET para receber eventos em que um utilizador está interessado///////////
 $app->get('/api/utilizador/{id}/interesse', function (Request $request, Response $response) {
@@ -185,7 +220,6 @@ WHERE interesses.utilizadores_id_utilizadores = :id ORDER BY $passar DESC  LIMIT
     }
 
 });
-
 
 ///////GET para receber eventos em que um utilizador está inscrito///////////
 $app->get('/api/utilizador/{id}/incrito', function (Request $request, Response $response) {
