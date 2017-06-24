@@ -600,7 +600,7 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
         $by = array_key_exists($by, $byArr) ? $by : $byDefault;
         //verificar se UNIX é valido senão repor com valores válidos quer para o valor de data max, quer para a data minima
         if ($dataMin) $dataMin = $dataMin > $dataMinUnix ? $dataMin : $dataMinUnix;
-        if ($dataMax) $dataMax = $dataMax < $dataMaxUnix ? $dataMax : $dataMaxUnix;
+        if ($dataMax) $dataMax = $dataMax < $dataMaxUnix ? $dataMax + 86400*2 : $dataMaxUnix;
 
         //passar dataMin e dataMax para o formato yyyy-mm-dd
 
@@ -608,7 +608,7 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
         $limitNumber = ($page - 1) * $results;
         $passar = $byArr[$by];
 
-        $dataMax = $dataMax + 86400*2;
+
         $dataMinFormat = gmdate("Y-m-d", (int)$dataMin); //colocar a data minima no formato adquado á comparação
         $dataMaxFormat = gmdate("Y-m-d", (int)$dataMax);//colocar a data máxima no formato adquado á comparação
         if ($order == $orderDefault) {
