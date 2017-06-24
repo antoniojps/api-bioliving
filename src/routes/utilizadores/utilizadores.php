@@ -182,14 +182,14 @@ $app->get( '/api/utilizadores', function ( Request $request, Response $response 
 });
 
 //////////// Get Unico Utilizador ////////////
-$app->get( '/api/utilizadores/{id}', function ( Request $request, Response $response, $args ) {
-	$id = $args['id'];
-
-	$sql = "SELECT id_utilizadores,utilizadores.nome AS nome,apelido,genero,data_nascimento,data_registo_user,foto,sobre,sobre_mini,ativo,estatutos_id_estatutos,localizacao.nome AS morada FROM utilizadores LEFT OUTER JOIN estatutos ON utilizadores.estatutos_id_estatutos = estatutos.id_estatutos LEFT OUTER JOIN localizacao ON utilizadores.localizacao_id_localizacao = localizacao.localizacao WHERE id_utilizadores = :id";
-
-	// Todo verificação, sql e respostas
-
-} );
+//$app->get( '/api/utilizadores/{id}', function ( Request $request, Response $response, $args ) {
+//	$id = $args['id'];
+//
+//	$sql = "SELECT id_utilizadores,utilizadores.nome AS nome,apelido,genero,data_nascimento,data_registo_user,foto,sobre,sobre_mini,ativo,estatutos_id_estatutos,localizacao.nome AS morada FROM utilizadores LEFT OUTER JOIN estatutos ON utilizadores.estatutos_id_estatutos = estatutos.id_estatutos LEFT OUTER JOIN localizacao ON utilizadores.localizacao_id_localizacao = localizacao.localizacao WHERE id_utilizadores = :id";
+//
+//	// Todo verificação, sql e respostas
+//
+//} );
 
 /*
 //////////// Registrar utilizador ////////////

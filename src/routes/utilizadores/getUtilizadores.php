@@ -11,8 +11,71 @@ $app->get('/api/utilizadores/{id}', function (Request $request, Response $respon
     if (Token::validarScopes('admin', $idUtilizador)) {
         if (is_int($idUtilizador) && $idUtilizador > 0) {
 
+            $sql = "SELECT utilizadores.*,localizacao.nome,localizacao.lat,localizacao.lng,estatutos.nome_estatuto FROM `utilizadores` LEFT OUTER JOIN localizacao ON localizacao.localizacao = utilizadores.localizacao_id_localizacao LEFT OUTER JOIN estatutos ON estatutos.id_estatutos = utilizadores.estatutos_id_estatutos  WHERE id_utilizadores = :id ";
+
+            try {
+
+                $status = 200; // OK
+
+                // iniciar ligação à base de dados
+                $db = new Db();
+
+                // conectar
+                $db = $db->connect();
+                $stmt = $db->prepare($sql);
+                $stmt->bindValue(':id', $idUtilizador, PDO::PARAM_INT);
+                $stmt->execute();
+                $db = null;
+                $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                // remover nulls e strings vazias
+                $dados = array_filter(array_map(function ($evento) {
+                    return $evento = array_filter($evento, function ($coluna) {
+                        return $coluna !== null && $coluna !== '';
+                    });
+                }, $dados));
 
 
+                $dadosLength = (int)sizeof($dados);
+                $dadosDoArrayLength = (int)sizeof($dados[0]); // filtrar os participantes = 0
+                if ($dadosLength === 0 || $dadosDoArrayLength === 1 || $dadosDoArrayLength === 0) {
+                    $status = 404;
+                    $responseData = [
+                        "status" => 404,
+                        "info" => 'utilizador inexistente'
+                    ];// Page not found
+                } else {
+                    $responseData = [
+                        'status' => "$status",
+                        'data' =>
+                            $dados
+                    ];
+                }
+
+
+                return $response
+                    ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+            } catch (PDOException $err) {
+                $status = 503; // Service unavailable
+                // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                $errorMsg = Errors::filtroReturn(function ($err) {
+                    return [
+                        "status" => $err->getCode(),
+                        "info" => $err->getMessage()
+                    ];
+                }, function () {
+                    return [
+                        "status" => 503,
+                        "info" => 'Servico Indisponivel'
+                    ];
+                }, $err);
+
+                return $response
+                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+            }
 
 
         } else {
