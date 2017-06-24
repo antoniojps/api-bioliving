@@ -608,7 +608,7 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
         $limitNumber = ($page - 1) * $results;
         $passar = $byArr[$by];
 
-
+        $dataMin = $dataMin + 86400;
         $dataMinFormat = gmdate("Y-m-d", (int)$dataMin); //colocar a data minima no formato adquado á comparação
         $dataMaxFormat = gmdate("Y-m-d", (int)$dataMax);//colocar a data máxima no formato adquado á comparação
         if ($order == $orderDefault) {
@@ -650,6 +650,7 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
                 $stmt->bindValue(':lng', $lng, PDO::PARAM_INT);
             }
             $stmt->bindValue(':datamin', $dataMinFormat, PDO::PARAM_INT);
+
             $stmt->bindValue(':datamax', $dataMaxFormat, PDO::PARAM_INT);
             $stmt->execute();
             $db = null;
