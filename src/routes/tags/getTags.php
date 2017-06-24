@@ -89,6 +89,7 @@ $app->get('/api/tags', function (Request $request, Response $response) {
 
             $dadosLength = (int)sizeof($dados);
             if ($dadosLength === 0) {
+                $status = 404;
                 $responseData = [
                     "status" => 404,
                     "info" => 'pagina inexistente'
