@@ -61,4 +61,6 @@ require  "../../src/routes/upload/routes.php";
 
 // Terceiros (Facebook, etc)
 require  "../../src/routes/terceiros/routes.php";
+// Terceiros (Facebook, etc)
+require  "../../src/routes/certificados/routes.php";
 $app->run();
