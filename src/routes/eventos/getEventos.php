@@ -30,12 +30,22 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
         $byDefault = 'id'; // order by predefinido
         $paginaDefault = 1; // pagina predefenida
         $orderDefault = "ASC"; //ordenação predefenida
+        $dataMaxUnix = 2147403600; //correspondente a 2286-11-20 em formato Y-m-d UNIX
+        $dataMinUnix = 1; // correspondente a 1970-01-01 em formato Y-m-d UNIX
+        $msgDefault = '%';
+        $idDefault = '%';
+
 
         $parametros = $request->getQueryParams(); // obter parametros do querystring
         $page = isset($parametros['page']) ? (int)$parametros['page'] : $paginaDefault;
         $results = isset($parametros['results']) ? (int)$parametros['results'] : $maxResults;
         $by = isset($parametros['by']) ? $parametros['by'] : $byDefault;
         $order = isset($parametros['order']) ? $parametros['order'] : $orderDefault;
+        $dataMin = isset($parametros['dataMin']) ? (int)$parametros['dataMin'] : false;
+        $dataMax = isset($parametros['dataMax']) ? (int)$parametros['dataMax'] : false;
+        $msg = isset($parametros['msg']) ? $parametros['msg'] : $msgDefault;
+        $id = isset($parametros['id']) ? (int)$parametros['id'] : $idDefault;
+
 
         if ($page > 0 && $results > 0) {
             //definir numero de resultados
@@ -46,14 +56,29 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
             $order = $order == "ASC" || $order == "DESC" ? $order : $orderDefault;
             //order by se existe como key no array, caso nao repor com o predefenido
             $by = array_key_exists($by, $byArr) ? $by : $byDefault;
+            //verificar se UNIX é valido senão repor com valores válidos quer para o valor de data max, quer para a data minima
+            if ($dataMin) $dataMin = $dataMin > $dataMinUnix ? $dataMin : $dataMinUnix;
+            if ($dataMax) $dataMax = $dataMax < $dataMaxUnix ? $dataMax + 86400 * 2 : $dataMaxUnix;
+
 
             // A partir de quando seleciona resultados
             $limitNumber = ($page - 1) * $results;
             $passar = $byArr[$by];
+
+            //passar dataMin e dataMax para o formato yyyy-mm-dd
+            $dataMinFormat = gmdate("Y-m-d", (int)$dataMin); //colocar a data minima no formato adquado á comparação
+            $dataMaxFormat = gmdate("Y-m-d", (int)$dataMax);//colocar a data máxima no formato adquado á comparação
+
+
+            if ($dataMin && $dataMax) $extraWhere = " AND `data_evento` >= :datamin AND  `data_evento` <= :datamax  ";
+            elseif ($dataMin && !$dataMax) $extraWhere = " AND `data_evento` >= :datamin  ";
+            elseif (!$dataMin && $dataMax) $extraWhere = " AND `data_evento` <= :datamax ";
+
+
             if ($order == $orderDefault) {
-                $sql = "SELECT eventos.*,tipo_evento.*, COUNT(participantes.utilizadores_id_utilizadores) AS participantes , localizacao.*  FROM eventos LEFT OUTER JOIN localizacao ON eventos.localizacao_localizacao = localizacao.localizacao LEFT OUTER JOIN participantes ON eventos.id_eventos = participantes.eventos_id_eventos LEFT OUTER JOIN tipo_evento ON eventos.tipo_evento_id_tipo_evento = tipo_evento.id_tipo_evento GROUP BY id_eventos ORDER BY $passar  LIMIT :limit , :results";
+                $sql = "SELECT eventos.*,tipo_evento.nome_tipo_evento,icons.classe AS tipo_classe, COUNT(participantes.utilizadores_id_utilizadores) AS participantes ,localizacao.nome,localizacao.lat,localizacao.lng FROM eventos LEFT OUTER JOIN localizacao ON eventos.localizacao_localizacao = localizacao.localizacao LEFT OUTER JOIN participantes ON eventos.id_eventos = participantes.eventos_id_eventos LEFT OUTER JOIN tipo_evento ON eventos.tipo_evento_id_tipo_evento = tipo_evento.id_tipo_evento LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id WHERE (nome_evento LIKE :msg OR data_evento LIKE :msg OR descricao_short LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND id_eventos LIKE :id GROUP BY id_eventos ORDER BY $passar  LIMIT :limit , :results";
             } else {
-                $sql = "SELECT eventos.*,tipo_evento.*, COUNT(participantes.utilizadores_id_utilizadores) AS participantes , localizacao.*  FROM eventos LEFT OUTER JOIN localizacao ON eventos.localizacao_localizacao = localizacao.localizacao LEFT OUTER JOIN participantes ON eventos.id_eventos = participantes.eventos_id_eventos LEFT OUTER JOIN tipo_evento ON eventos.tipo_evento_id_tipo_evento = tipo_evento.id_tipo_evento GROUP BY id_eventos ORDER BY $passar DESC LIMIT :limit , :results";
+                $sql = "SELECT eventos.*,tipo_evento.nome_tipo_evento,icons.classe AS tipo_classe, COUNT(participantes.utilizadores_id_utilizadores) AS participantes ,localizacao.nome,localizacao.lat,localizacao.lng FROM eventos LEFT OUTER JOIN localizacao ON eventos.localizacao_localizacao = localizacao.localizacao LEFT OUTER JOIN participantes ON eventos.id_eventos = participantes.eventos_id_eventos LEFT OUTER JOIN tipo_evento ON eventos.tipo_evento_id_tipo_evento = tipo_evento.id_tipo_evento LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id WHERE (nome_evento LIKE :msg OR data_evento LIKE :msg OR descricao_short LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND id_eventos LIKE :id GROUP BY id_eventos ORDER BY $passar  LIMIT :limit , :results ORDER BY $passar DESC LIMIT :limit , :results";
             }
 
             try {
@@ -61,12 +86,19 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
                 $status = 200; // OK
                 // iniciar ligação à base de dados
                 $db = new Db();
-
+                $msgEnv = $msg != $msgDefault ? "%$msg%" : $msg;
                 // conectar
                 $db = $db->connect();
                 $stmt = $db->prepare($sql);
                 $stmt->bindValue(':limit', (int)$limitNumber, PDO::PARAM_INT);
                 $stmt->bindValue(':results', (int)$results, PDO::PARAM_INT);
+                $stmt->bindValue(':msg', $msgEnv, PDO::PARAM_INT);
+                $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+                if ($dataMin && $dataMax) {
+                    $stmt->bindValue(':datamin', $dataMinFormat, PDO::PARAM_INT);
+                    $stmt->bindValue(':datamax', $dataMaxFormat, PDO::PARAM_INT);
+                } elseif ($dataMin && !$dataMax) $stmt->bindValue(':datamin', $dataMinFormat, PDO::PARAM_INT);
+                elseif (!$dataMin && $dataMax) $stmt->bindValue(':datamax', $dataMaxFormat, PDO::PARAM_INT);
                 $stmt->execute();
                 $db = null;
                 $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);

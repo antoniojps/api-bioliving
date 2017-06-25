@@ -42,6 +42,8 @@ $app->post('/api/utilizadores', function (Request $request, Response $response) 
         if ($telemovel && !v::intVal()->length(9, 9)->validate($telemovel)) $error['telemovel'] = " Numero de telemovel inválido";
         if ($idLocal && !v::intVal()->validate($idLocal)) $error['idLocal'] = " Id do local inválido";
         if ($idEstatuto && !v::intVal()->validate($idEstatuto)) $error['idEstatuto'] = " Id do estatuto inválido";
+
+
 //        if(!validarPW($password,$nome,$apelido,$email))$error['password'] = " Password inválida";
 //
 //        function validarPW($pass, $nome, $apelido, $email)

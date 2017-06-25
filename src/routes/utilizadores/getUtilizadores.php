@@ -75,8 +75,12 @@ $app->get('/api/utilizadores', function (Request $request, Response $response) {
             elseif ($dataMin && !$dataMax) $extraWhere = " AND `data_registo_user` >= :datamin  ";
             elseif (!$dataMin && $dataMax) $extraWhere = " AND `data_registo_user` <= :datamax ";
 
-            $sql = "SELECT utilizadores.*,localizacao.nome,localizacao.lat,localizacao.lng,estatutos.nome_estatuto FROM `utilizadores` LEFT OUTER JOIN localizacao ON utilizadores.localizacao_id_localizacao = localizacao.localizacao LEFT OUTER JOIN estatutos ON utilizadores.estatutos_id_estatutos = estatutos.id_estatutos WHERE (utilizadores.`id_utilizadores` LIKE :msg OR utilizadores.`nome` LIKE :msg OR `apelido`LIKE :msg OR `data_nascimento`LIKE :msg OR `data_registo_user` LIKE :msg OR email LIKE :msg OR telemovel LIKE :msg AND localizacao.nome LIKE :msg OR estatutos.nome_estatuto LIKE :msg) AND id_utilizadores LIKE :id $extraWhere ORDER BY $passar  LIMIT :limit, :results";
+            if ($order == $orderDefault) {
+                $sql = "SELECT utilizadores.*,localizacao.nome,localizacao.lat,localizacao.lng,estatutos.nome_estatuto FROM `utilizadores` LEFT OUTER JOIN localizacao ON utilizadores.localizacao_id_localizacao = localizacao.localizacao LEFT OUTER JOIN estatutos ON utilizadores.estatutos_id_estatutos = estatutos.id_estatutos WHERE (utilizadores.`id_utilizadores` LIKE :msg OR utilizadores.`nome` LIKE :msg OR `apelido`LIKE :msg OR `data_nascimento`LIKE :msg OR `data_registo_user` LIKE :msg OR email LIKE :msg OR telemovel LIKE :msg AND localizacao.nome LIKE :msg OR estatutos.nome_estatuto LIKE :msg) AND id_utilizadores LIKE :id $extraWhere ORDER BY $passar  LIMIT :limit, :results";
+            } else {
+                $sql = "SELECT utilizadores.*,localizacao.nome,localizacao.lat,localizacao.lng,estatutos.nome_estatuto FROM `utilizadores` LEFT OUTER JOIN localizacao ON utilizadores.localizacao_id_localizacao = localizacao.localizacao LEFT OUTER JOIN estatutos ON utilizadores.estatutos_id_estatutos = estatutos.id_estatutos WHERE (utilizadores.`id_utilizadores` LIKE :msg OR utilizadores.`nome` LIKE :msg OR `apelido`LIKE :msg OR `data_nascimento`LIKE :msg OR `data_registo_user` LIKE :msg OR email LIKE :msg OR telemovel LIKE :msg AND localizacao.nome LIKE :msg OR estatutos.nome_estatuto LIKE :msg) AND id_utilizadores LIKE :id $extraWhere ORDER BY $passar DESC LIMIT :limit, :results";
 
+            }
 
             try {
 
