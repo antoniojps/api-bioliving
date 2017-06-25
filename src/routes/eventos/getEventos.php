@@ -752,7 +752,14 @@ $app->get('/pesquisa/eventos', function (Request $request, Response $response) {
 UNION ALL 
 SELECT * FROM(
 SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg)  AND eventos.ativo =1 AND data_evento < CAST(CURRENT_TIMESTAMP AS DATE) GROUP BY eventos.id_eventos  ORDER BY $passar DESC LIMIT :limit, :results
-) DUMMY_ALIAS2";
+) DUMMY_ALIAS2
+UNION ALL 
+SELECT * FROM(
+SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg)  AND eventos.ativo =1 AND data_evento IS NULL GROUP BY eventos.id_eventos  LIMIT :limit, :results
+) DUMMY_ALIAS3
+
+
+";
             } else {
                 " SELECT * FROM(
  SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg)  AND eventos.ativo =1 AND data_evento > CAST(CURRENT_TIMESTAMP AS DATE) GROUP BY eventos.id_eventos  ORDER BY $passar  DESC LIMIT :limit, :results
@@ -760,7 +767,11 @@ SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,ti
 UNION ALL 
 SELECT * FROM(
 SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg)  AND eventos.ativo =1 AND data_evento < CAST(CURRENT_TIMESTAMP AS DATE) GROUP BY eventos.id_eventos  ORDER BY $passar  LIMIT :limit, :results
-) DUMMY_ALIAS2";
+) DUMMY_ALIAS2
+UNION ALL 
+SELECT * FROM(
+SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg)  AND eventos.ativo =1 AND data_evento IS NULL GROUP BY eventos.id_eventos  LIMIT :limit, :results
+) DUMMY_ALIAS3";
             }
             try {
 
