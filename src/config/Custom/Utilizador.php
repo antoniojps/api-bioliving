@@ -49,6 +49,8 @@ class Utilizador {
 	private $password;
 	private $argumentos;
 
+
+
 	public function __construct( $arr ) {
 
 		if ( gettype( $arr ) !== 'array' ) {
@@ -56,11 +58,10 @@ class Utilizador {
 		}
 
 		$this->argumentos     = array_keys( $arr );
-		$this->nome           = isset( $arr['nome'] ) ? $arr['nome']: null;
-		$this->sobrenome      = isset( $arr['sobrenome'] ) ? $arr['sobrenome'] : null;
-		$this->email          = isset( $arr['email'] ) ? strtolower( $arr['email'] ) : null;
-		$this->password       = isset( $arr['password'] ) ? $arr['password'] : null;
-
+		$this->nome           = isset( $arr['nome'] ) ? $arr['nome']: NULL;
+		$this->sobrenome      = isset( $arr['sobrenome'] ) ? $arr['sobrenome'] : NULL;
+		$this->email          = isset( $arr['email'] ) ? strtolower( $arr['email'] ) : NULL;
+		$this->password       = isset( $arr['password'] ) ? $arr['password'] : NULL;
 	}
 
 // Permite verificar se foi instanciado com todos os argumentos necessarios para metodos que necessitem destes

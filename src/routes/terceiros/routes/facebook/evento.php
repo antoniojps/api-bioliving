@@ -14,7 +14,6 @@ $app->get( '/api/terceiros/facebook/evento/{id}', function ( Request $request, R
 	$info = 'parametros invalidos';
 	$status      = 400; // Bad request
 
-
 	if(v::numeric()->length(2,50)->validate($id)){
 	$fbToken = getenv('FACEBOOK_TOKEN');
 	$fbToken = urlencode($fbToken);
