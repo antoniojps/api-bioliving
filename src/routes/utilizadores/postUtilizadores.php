@@ -7,9 +7,9 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 
-$app->put('/api/utilizadores/{id}', function (Request $request, Response $response) {
-    $idUtilizador = (int)$request->getAttribute('id');
-    if (Token::validarScopes('admin', $idUtilizador)) {
+$app->post('/api/utilizadores', function (Request $request, Response $response) {
+
+    if (Token::validarScopes('admin')) {
 
 
         //buscar todos os parametros
@@ -17,6 +17,7 @@ $app->put('/api/utilizadores/{id}', function (Request $request, Response $respon
         $apelido = $request->getParam('apelido');
         $genero = $request->getParam('genero');
         $dataNasc = $request->getParam('dataNascimento');
+        $password = $request->getParam('password');
         $email = $request->getParam('email');
         //$foto = $request->getParam('foto');
         $sobre = $request->getParam('sobre');
@@ -24,6 +25,7 @@ $app->put('/api/utilizadores/{id}', function (Request $request, Response $respon
         $telemovel = $request->getParam('telemovel');
         $idLocal = $request->getParam('idLocal');
         $idEstatuto = $request->getParam('idEstatuto');
+
 
         $error = array();
 
@@ -40,10 +42,78 @@ $app->put('/api/utilizadores/{id}', function (Request $request, Response $respon
         if ($telemovel && !v::intVal()->length(9, 9)->validate($telemovel)) $error['telemovel'] = " Numero de telemovel inválido";
         if ($idLocal && !v::intVal()->validate($idLocal)) $error['idLocal'] = " Id do local inválido";
         if ($idEstatuto && !v::intVal()->validate($idEstatuto)) $error['idEstatuto'] = " Id do estatuto inválido";
+//        if(!validarPW($password,$nome,$apelido,$email))$error['password'] = " Password inválida";
+//
+//        function validarPW($pass, $nome, $apelido, $email)
+//        {
+//            $minCaracteres = 8;
+//            $passwordValida = false;
+//            if (strlen($pass) >= $minCaracteres && $pass !== strtolower($nome) && $pass !== strtolower($apelido) && $pass !== strtolower($email) && $pass !== $_SERVER['SERVER_NAME'] && validarPwCaracteres($pass)) {
+//                if (verificarPwListNegra($pass)) {
+//                    $passwordValida = false;
+//                } else {
+//                    $passwordValida = true;
+//                }
+//            } else {
+//                $passwordValida = false;
+//            }
+//
+//            return (bool)$passwordValida;
+//        }
+//
+//        function validarPwCaracteres($pass)
+//        {
+//            $maxRepeticoes = 6;
+//            $caracteresValidos = false;
+//            // Ver quantas vezes sao utilizados caracteres
+//            $charCount = array_count_values(str_split($pass));
+//            // Encontrar algum caracter que é repetido $maxRepetidos ou mais
+//            foreach ($charCount as $charRepetidos) {
+//                if ($charRepetidos >= $maxRepeticoes) {
+//                    $caracteresValidos = false;
+//                    break;
+//                } else {
+//                    $caracteresValidos = true;
+//                }
+//            }
+//            return $caracteresValidos;
+//        }
+//
+//        function verificarPwListNegra($pass)
+//        {
+//
+//            // Ver se password está na lista negra
+//            $naListaNegra = true;
+//            try {
+//
+//                $sql = "SELECT * FROM `passwords_blacklist` WHERE `passwords` = :password";
+//                $db = new Db();
+//
+//                // Conectar
+//                $db = $db->connect();
+//                $stmt = $db->prepare($sql);
+//                $stmt->bindParam(':password', $pass);
+//
+//                if ($stmt->execute()) {
+//                    $db = null;
+//                    $resultados = $stmt->fetch(PDO::FETCH_ASSOC)['passwords'];
+//                    if (empty($resultados)) {
+//                        $naListaNegra = false;
+//                    } else {
+//                        $naListaNegra = true;
+//                    }
+//                }
+//            } catch (\PDOException $e) {
+//                echo $e->getMessage();
+//                echo $e->getCode();
+//            }
+//
+//            return (bool)$naListaNegra;
+//
+//        }
 
 
         if (count($error) === 0) {
-
             $sql = "SELECT * FROM utilizadores WHERE email = :email";
             try {
 
@@ -154,6 +224,7 @@ $app->put('/api/utilizadores/{id}', function (Request $request, Response $respon
                     return $response
                         ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
                 }
+
             }
             if (count($error) === 0) {
                 if (!$genero) $genero = NULL;
@@ -165,21 +236,33 @@ $app->put('/api/utilizadores/{id}', function (Request $request, Response $respon
                 if (!$idEstatuto) $idEstatuto = 3;
 
 
-                $sql = "UPDATE `utilizadores` SET 
-                                      `nome` = :nome,
-                                      `apelido` = :apelido,
-                                      `genero` = :genero, 
-                                      `data_nascimento` = :dataNasc, 
-                                      `email` = :email,
-                                      `sobre` = :sobre, 
-                                      `sobre_mini` = :sobreMini, 
-                                      `telemovel` = :telemovel, 
-                                      `localizacao_id_localizacao` = :idLocal, 
-                                      `estatutos_id_estatutos` = :idEstatuto 
-                              WHERE `utilizadores`.`id_utilizadores` = :id";
+                $sql = "INSERT INTO `utilizadores` 
+                        (`nome`, 
+                        `apelido`, 
+                        `genero`, 
+                        `data_nascimento`, 
+                        `email`,
+                        password,
+                        `sobre`, 
+                        `sobre_mini`, 
+                        `telemovel`, 
+                        `localizacao_id_localizacao`,  
+                        `estatutos_id_estatutos`) 
+                        VALUES 
+                        (:nome,
+                        :apelido,
+                        :genero, 
+                        :dataNasc, 
+                        :email,
+                        :password,
+                        :sobre, 
+                        :sobreMini,
+                        :telemovel, 
+                        :idLocal, 
+                        :idEstatuto
+                        );";
                 try {
-
-
+                    $password = password_hash($password, PASSWORD_DEFAULT);
                     $status = 200;
                     // Get DB object
                     $db = new db();
@@ -192,17 +275,18 @@ $app->put('/api/utilizadores/{id}', function (Request $request, Response $respon
                     $stmt->bindParam(':genero', $genero);
                     $stmt->bindParam(':dataNasc', $dataNasc);
                     $stmt->bindParam(':email', $email);
+                    $stmt->bindParam(':password', $password);
                     $stmt->bindParam(':sobre', $sobre);
                     $stmt->bindParam(':sobreMini', $sobreMini);
                     $stmt->bindParam(':telemovel', $telemovel);
                     $stmt->bindParam(':idLocal', $idLocal);
                     $stmt->bindParam(':idEstatuto', $idEstatuto);
-                    $stmt->bindParam(':id', $idUtilizador);
+
                     $stmt->execute();
 
                     $responseData = [
                         "status" => 200,
-                        'info' => "Utilizador alterado com sucesso!"
+                        'info' => "Utilizador adicionado com sucesso!"
                     ];
 
                     return $response
@@ -251,201 +335,6 @@ $app->put('/api/utilizadores/{id}', function (Request $request, Response $respon
                 "status" => "$status",
                 "info" => "parametros inválidos",
                 "data" => $error
-            ];
-
-            return $response
-                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-        }
-    } else {
-        $status = 401;
-        $errorMsg = [
-
-            "status" => "$status",
-            "info" => 'Acesso não autorizado'
-
-
-        ];
-
-        return $response
-            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-    }
-
-});
-
-
-$app->put('/api/utilizadores/ative/{id}', function (Request $request, Response $response) {
-    $id = (int)$request->getAttribute('id');
-    if (Token::validarScopes('admin', $id)) {
-        $ativo = 1; //valor na bd que equivale a ativo
-        if (is_int($id) && $id > 0) {
-            //ver se id existe na bd antes de editar
-            $sql = "SELECT * FROM utilizadores WHERE id_utilizadores = :id";
-            $db = new Db();
-            // conectar
-            $db = $db->connect();
-            $stmt = $db->prepare($sql);
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-            $stmt->execute();
-            $db = null;
-            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if (count($dados) >= 1) {
-                $sql = "UPDATE utilizadores SET ativo = :ativo WHERE id_utilizadores = $id";
-
-                try {
-                    // Get DB object
-                    $db = new db();
-                    //connect
-                    $db = $db->connect();
-                    $stmt = $db->prepare($sql);
-                    $stmt->bindParam(':ativo', $ativo);
-                    $stmt->execute();
-                    $responseData = [
-                        'Resposta' => "Utilizador ativado com sucesso!"
-                    ];
-
-                    return $response
-                        ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
-
-                } catch (PDOException $err) {
-                    $status = 503; // Service unavailable
-                    // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
-                    $errorMsg = Errors::filtroReturn(function ($err) {
-                        return [
-                            "error" => [
-                                "status" => $err->getCode(),
-                                "text" => $err->getMessage()
-                            ]
-                        ];
-                    }, function () {
-                        return [
-                            "error" => 'Servico Indisponivel'
-                        ];
-                    }, $err);
-
-                    return $response
-                        ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
-                }
-            } else {
-                $status = 422; // Unprocessable Entity
-                $errorMsg = [
-                    "error" => [
-                        "status" => "$status",
-                        "text" => 'Utilizador não se encontra disponivel'
-
-                    ]
-                ];
-
-                return $response
-                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-            }
-
-        } else {
-            $status = 422; // Unprocessable Entity
-            $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Parametros inválidos'
-
-                ]
-            ];
-
-            return $response
-                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-        }
-    } else {
-        $status = 401;
-        $errorMsg = [
-
-            "status" => "$status",
-            "info" => 'Acesso não autorizado'
-
-
-        ];
-
-        return $response
-            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-    }
-});
-
-
-$app->put('/api/utilizadores/disable/{id}', function (Request $request, Response $response) {
-    $id = (int)$request->getAttribute('id');
-    if (Token::validarScopes('admin', $id)) {
-        $ativo = 0; //valor na bd que equivale a não ativo
-        if (is_int($id) && $id > 0) {
-            //ver se id existe na bd antes de editar
-            $sql = "SELECT * FROM utilizadores WHERE id_utilizadores = :id";
-            $db = new Db();
-            // conectar
-            $db = $db->connect();
-            $stmt = $db->prepare($sql);
-            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-            $stmt->execute();
-            $db = null;
-            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            if (count($dados) >= 1) {
-                $sql = "UPDATE utilizadores SET ativo = :ativo WHERE id_utilizadores = $id";
-
-                try {
-                    // Get DB object
-                    $db = new db();
-                    //connect
-                    $db = $db->connect();
-                    $stmt = $db->prepare($sql);
-                    $stmt->bindParam(':ativo', $ativo);
-                    $stmt->execute();
-                    $responseData = [
-                        'Resposta' => "Utilizador desativado com sucesso!"
-                    ];
-
-                    return $response
-                        ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
-
-                } catch (PDOException $err) {
-                    $status = 503; // Service unavailable
-                    // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
-                    $errorMsg = Errors::filtroReturn(function ($err) {
-                        return [
-                            "error" => [
-                                "status" => $err->getCode(),
-                                "text" => $err->getMessage()
-                            ]
-                        ];
-                    }, function () {
-                        return [
-                            "error" => 'Servico Indisponivel'
-                        ];
-                    }, $err);
-
-                    return $response
-                        ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
-                }
-            } else {
-                $status = 422; // Unprocessable Entity
-                $errorMsg = [
-                    "error" => [
-                        "status" => "$status",
-                        "text" => 'Utilizador não se encontra disponivel'
-
-                    ]
-                ];
-
-                return $response
-                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-            }
-
-        } else {
-            $status = 422; // Unprocessable Entity
-            $errorMsg = [
-                "error" => [
-                    "status" => "$status",
-                    "text" => 'Parametros inválidos'
-
-                ]
             ];
 
             return $response
