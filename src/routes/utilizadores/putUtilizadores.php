@@ -286,7 +286,7 @@ $app->put('/utilizadores/{id}', function (Request $request, Response $response) 
 });
 
 
-$app->put('/api/utilizadores/ative/{id}', function (Request $request, Response $response) {
+$app->put('/utilizadores/ative/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id');
     if (Token::validarScopes('admin', $id)) {
         $ativo = 1; //valor na bd que equivale a ativo
@@ -383,7 +383,7 @@ $app->put('/api/utilizadores/ative/{id}', function (Request $request, Response $
 });
 
 
-$app->put('/api/utilizadores/disable/{id}', function (Request $request, Response $response) {
+$app->put('/utilizadores/disable/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id');
     if (Token::validarScopes('admin', $id)) {
         $ativo = 0; //valor na bd que equivale a não ativo

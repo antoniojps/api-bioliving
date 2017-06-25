@@ -195,7 +195,7 @@ $app->get('/utilizadores', function (Request $request, Response $response) {
 
 
 ////////////////////////GET para receber evento em especifico////////////////
-$app->get('/api/utilizadores/{id}', function (Request $request, Response $response) {
+$app->get('/utilizadores/{id}', function (Request $request, Response $response) {
     $idUtilizador = (int)$request->getAttribute('id'); // ir buscar id
     if (Token::validarScopes('admin', $idUtilizador)) {
         if (is_int($idUtilizador) && $idUtilizador > 0) {
@@ -294,7 +294,7 @@ $app->get('/api/utilizadores/{id}', function (Request $request, Response $respon
 });
 
 ///////GET para receber eventos em que um utilizador está interessado///////////
-$app->get('/api/utilizador/{id}/interesse', function (Request $request, Response $response) {
+$app->get('/utilizador/{id}/interesse', function (Request $request, Response $response) {
     $byArr = [
         'id' => 'id_eventos',
         'nome' => 'nome_evento',
@@ -473,7 +473,7 @@ WHERE interesses.utilizadores_id_utilizadores = :id ORDER BY $passar DESC  LIMIT
 });
 
 ///////GET para receber eventos em que um utilizador está inscrito///////////
-$app->get('/api/utilizador/{id}/incrito', function (Request $request, Response $response) {
+$app->get('/utilizador/{id}/incrito', function (Request $request, Response $response) {
     $byArr = [
         'id' => 'id_eventos',
         'nome' => 'nome_evento',
