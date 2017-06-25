@@ -11,7 +11,6 @@ $app->post('/utilizadores', function (Request $request, Response $response) {
 
     if (Token::validarScopes('admin')) {
 
-
         //buscar todos os parametros
         $nome = $request->getParam('nome');
         $apelido = $request->getParam('apelido');

@@ -12,7 +12,6 @@ $app->put('/utilizadores/{id}', function (Request $request, Response $response) 
     if (is_int($idUtilizador) && $idUtilizador > 0) {
         if (Token::validarScopes('admin', $idUtilizador)) {
 
-
             //buscar todos os parametros
             $nome = $request->getParam('nome');
             $apelido = $request->getParam('apelido');
