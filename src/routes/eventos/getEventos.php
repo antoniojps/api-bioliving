@@ -630,122 +630,213 @@ $app->get('/pesquisa/eventos', function (Request $request, Response $response) {
         $order = $order == "ASC" || $order == "DESC" ? $order : $orderDefault;
         //order by se existe como key no array, caso nao repor com o predefenido
         $by = array_key_exists($by, $byArr) ? $by : $byDefault;
-        //verificar se UNIX é valido senão repor com valores válidos quer para o valor de data max, quer para a data minima
-        if ($dataMin) $dataMin = $dataMin > $dataMinUnix ? $dataMin : $dataMinUnix;
-        if ($dataMax) $dataMax = $dataMax < $dataMaxUnix ? $dataMax + 86400 * 2 : $dataMaxUnix;
-
-        //passar dataMin e dataMax para o formato yyyy-mm-dd
-
-        // A partir de quando seleciona resultados
         $limitNumber = ($page - 1) * $results;
         $passar = $byArr[$by];
+        //verificar se UNIX é valido senão repor com valores válidos quer para o valor de data max, quer para a data minima
+        if ($dataMin || $dataMax) {
+            if ($dataMin) $dataMin = $dataMin > $dataMinUnix ? $dataMin : $dataMinUnix;
+            if ($dataMax) $dataMax = $dataMax < $dataMaxUnix ? $dataMax + 86400 * 2 : $dataMaxUnix;
 
+            //passar dataMin e dataMax para o formato yyyy-mm-dd
 
-        $dataMinFormat = gmdate("Y-m-d", (int)$dataMin); //colocar a data minima no formato adquado á comparação
-        $dataMaxFormat = gmdate("Y-m-d", (int)$dataMax);//colocar a data máxima no formato adquado á comparação
-        if ($order == $orderDefault) {
-            if ($dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador ,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin AND`data_evento` <= :datamax $extraWhere AND eventos.ativo =1 GROUP BY eventos.data_registo_evento ORDER BY $passar  LIMIT :limit, :results";
-            elseif ($dataMin && !$dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin $extraWhere AND eventos.ativo =1 GROUP BY eventos.data_registo_evento ORDER BY $passar  LIMIT :limit, :results";
-            elseif (!$dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` <= :datamax $extraWhere AND eventos.ativo =1 GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
-            else {
-                $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg)$extraWhere  AND eventos.ativo =1 GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
-            }
-        } else {
-            if ($dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin AND`data_evento` <= :datamax $extraWhere AND eventos.ativo =1 GROUP BY eventos.id_eventos ORDER BY $passar DESC LIMIT :limit, :results";
-            elseif ($dataMin && !$dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin $extraWhere  AND eventos.ativo =1 GROUP BY eventos.id_eventos ORDER BY $passar DESC  LIMIT :limit, :results";
-            elseif (!$dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` <= :datamax $extraWhere AND eventos.ativo =1  GROUP BY eventos.id_eventos  ORDER BY $passar DESC LIMIT :limit, :results";
-            else {
-                $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) $extraWhere AND eventos.ativo =1  GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
-            }
-        }
-
-
-        try {
-
-            $status = 200; // OK
-            // iniciar ligação à base de dados
-            $db = new Db();
-            $msgEnv = $msg != $msgDefault ? "%$msg%" : $msg;
-            // colocar mensagem no formato correto
-            // conectar
-            $db = $db->connect();
-            $stmt = $db->prepare($sql);
-            $stmt->bindValue(':limit', (int)$limitNumber, PDO::PARAM_INT);
-            $stmt->bindValue(':results', (int)$results, PDO::PARAM_INT);
-            $stmt->bindValue(':msg', $msgEnv, PDO::PARAM_INT);
-            if ($lat != false && $lng != false) {
-                $stmt->bindValue(':lat', $lat, PDO::PARAM_INT);
-                $stmt->bindValue(':lng', $lng, PDO::PARAM_INT);
-            } elseif ($lat != false && $lng == false) {
-                $stmt->bindValue(':lat', $lat, PDO::PARAM_INT);
-            } elseif ($lat == false && $lng != false) {
-                $stmt->bindValue(':lng', $lng, PDO::PARAM_INT);
-            }
-            $stmt->bindValue(':datamin', $dataMinFormat, PDO::PARAM_INT);
-
-            $stmt->bindValue(':datamax', $dataMaxFormat, PDO::PARAM_INT);
-            $stmt->execute();
-            $db = null;
-            $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            // remover nulls e strings vazias
-            $dados = array_filter(array_map(function ($evento) {
-                return $evento = array_filter($evento, function ($coluna) {
-                    return $coluna !== null && $coluna !== '';
-                });
-            }, $dados));
-
-            $dadosLength = (int)sizeof($dados);
-            if ($dadosLength === 0) {
-                $status = 404;
-                $responseData = [
-                    "status" => 404,
-                    "info" => 'pagina inexistente'
-                ]; // Page not found
-
-            } else if ($dadosLength < $results) {
-                $responseData = [
-                    "status" => 200,
-                    "data" => $dados,
-                    "info" => "final dos resultados"
-                ];
-
+            // A partir de quando seleciona resultados
+            $dataMinFormat = gmdate("Y-m-d", (int)$dataMin); //colocar a data minima no formato adquado á comparação
+            $dataMaxFormat = gmdate("Y-m-d", (int)$dataMax);//colocar a data máxima no formato adquado á comparação
+            if ($order == $orderDefault) {
+                if ($dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador ,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin AND`data_evento` <= :datamax $extraWhere AND eventos.ativo =1 GROUP BY eventos.data_registo_evento ORDER BY $passar  LIMIT :limit, :results";
+                elseif ($dataMin && !$dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin $extraWhere AND eventos.ativo =1 GROUP BY eventos.data_registo_evento ORDER BY $passar  LIMIT :limit, :results";
+                elseif (!$dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` <= :datamax $extraWhere AND eventos.ativo =1 GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
+                else {
+                    $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg)$extraWhere  AND eventos.ativo =1 GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
+                }
             } else {
-                $nextPageUrl = H::nextPageUrl();
-                $responseData = [
-                    "status" => 200,
-                    "data" => $dados,
-                    "proxPagina" => "$nextPageUrl?page=" . ++$page . "&results=$results"
-                ];
+                if ($dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin AND`data_evento` <= :datamax $extraWhere AND eventos.ativo =1 GROUP BY eventos.id_eventos ORDER BY $passar DESC LIMIT :limit, :results";
+                elseif ($dataMin && !$dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` >= :datamin $extraWhere  AND eventos.ativo =1 GROUP BY eventos.id_eventos ORDER BY $passar DESC  LIMIT :limit, :results";
+                elseif (!$dataMin && $dataMax) $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) AND `data_evento` <= :datamax $extraWhere AND eventos.ativo =1  GROUP BY eventos.id_eventos  ORDER BY $passar DESC LIMIT :limit, :results";
+                else {
+                    $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg) $extraWhere AND eventos.ativo =1  GROUP BY eventos.id_eventos ORDER BY $passar  LIMIT :limit, :results";
+                }
             }
 
 
-            return $response
-                ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+            try {
+
+                $status = 200; // OK
+                // iniciar ligação à base de dados
+                $db = new Db();
+                $msgEnv = $msg != $msgDefault ? "%$msg%" : $msg;
+                // colocar mensagem no formato correto
+                // conectar
+                $db = $db->connect();
+                $stmt = $db->prepare($sql);
+                $stmt->bindValue(':limit', (int)$limitNumber, PDO::PARAM_INT);
+                $stmt->bindValue(':results', (int)$results, PDO::PARAM_INT);
+                $stmt->bindValue(':msg', $msgEnv, PDO::PARAM_INT);
+                if ($lat != false && $lng != false) {
+                    $stmt->bindValue(':lat', $lat, PDO::PARAM_INT);
+                    $stmt->bindValue(':lng', $lng, PDO::PARAM_INT);
+                } elseif ($lat != false && $lng == false) {
+                    $stmt->bindValue(':lat', $lat, PDO::PARAM_INT);
+                } elseif ($lat == false && $lng != false) {
+                    $stmt->bindValue(':lng', $lng, PDO::PARAM_INT);
+                }
+                $stmt->bindValue(':datamin', $dataMinFormat, PDO::PARAM_INT);
+
+                $stmt->bindValue(':datamax', $dataMaxFormat, PDO::PARAM_INT);
+                $stmt->execute();
+                $db = null;
+                $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                // remover nulls e strings vazias
+                $dados = array_filter(array_map(function ($evento) {
+                    return $evento = array_filter($evento, function ($coluna) {
+                        return $coluna !== null && $coluna !== '';
+                    });
+                }, $dados));
+
+                $dadosLength = (int)sizeof($dados);
+                if ($dadosLength === 0) {
+                    $status = 404;
+                    $responseData = [
+                        "status" => 404,
+                        "info" => 'pagina inexistente'
+                    ]; // Page not found
+
+                } else if ($dadosLength < $results) {
+                    $responseData = [
+                        "status" => 200,
+                        "data" => $dados,
+                        "info" => "final dos resultados"
+                    ];
+
+                } else {
+                    $nextPageUrl = H::nextPageUrl();
+                    $responseData = [
+                        "status" => 200,
+                        "data" => $dados,
+                        "proxPagina" => "$nextPageUrl?page=" . ++$page . "&results=$results"
+                    ];
+                }
 
 
-        } catch (PDOException $err) {
-            $status = 503; // Service unavailable
-            // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
-            $errorMsg = Errors::filtroReturn(function ($err) {
-                return [
+                return $response
+                    ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
-                    "status" => $err->getCode(),
-                    "info" => $err->getMessage()
 
-                ];
-            }, function () {
-                return [
-                    "status" => 503,
-                    "info" => 'Servico Indisponivel'
-                ];
-            }, $err);
+            } catch (PDOException $err) {
+                $status = 503; // Service unavailable
+                // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                $errorMsg = Errors::filtroReturn(function ($err) {
+                    return [
 
-            return $response
-                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                        "status" => $err->getCode(),
+                        "info" => $err->getMessage()
+
+                    ];
+                }, function () {
+                    return [
+                        "status" => 503,
+                        "info" => 'Servico Indisponivel'
+                    ];
+                }, $err);
+
+                return $response
+                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+            }
+
+        } else {
+            if ($order == $orderDefault) {
+                $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg)  AND eventos.ativo =1 AND data_evento > CAST(CURRENT_TIMESTAMP AS DATE) GROUP BY eventos.id_eventos  
+UNION
+SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg)  AND eventos.ativo =1 AND data_evento < CAST(CURRENT_TIMESTAMP AS DATE) GROUP BY eventos.id_eventos  ORDER BY $passar  LIMIT :limit, :results";
+            } else {
+                $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg)  AND eventos.ativo =1 AND data_evento > CAST(CURRENT_TIMESTAMP AS DATE) GROUP BY eventos.id_eventos  
+UNION
+SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE (nome_evento LIKE :msg OR tipo_evento.nome_tipo_evento LIKE :msg OR localizacao.nome LIKE :msg)  AND eventos.ativo =1 AND data_evento < CAST(CURRENT_TIMESTAMP AS DATE) GROUP BY eventos.id_eventos  ORDER BY $passar  DESC LIMIT :limit, :results";
+            }
+            try {
+
+                $status = 200; // OK
+                // iniciar ligação à base de dados
+                $db = new Db();
+                $msgEnv = $msg != $msgDefault ? "%$msg%" : $msg;
+                // colocar mensagem no formato correto
+                // conectar
+                $db = $db->connect();
+                $stmt = $db->prepare($sql);
+                $stmt->bindValue(':limit', (int)$limitNumber, PDO::PARAM_INT);
+                $stmt->bindValue(':results', (int)$results, PDO::PARAM_INT);
+                $stmt->bindValue(':msg', $msgEnv, PDO::PARAM_INT);
+                if ($lat != false && $lng != false) {
+                    $stmt->bindValue(':lat', $lat, PDO::PARAM_INT);
+                    $stmt->bindValue(':lng', $lng, PDO::PARAM_INT);
+                } elseif ($lat != false && $lng == false) {
+                    $stmt->bindValue(':lat', $lat, PDO::PARAM_INT);
+                } elseif ($lat == false && $lng != false) {
+                    $stmt->bindValue(':lng', $lng, PDO::PARAM_INT);
+                }
+                $stmt->execute();
+                $db = null;
+                $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                // remover nulls e strings vazias
+                $dados = array_filter(array_map(function ($evento) {
+                    return $evento = array_filter($evento, function ($coluna) {
+                        return $coluna !== null && $coluna !== '';
+                    });
+                }, $dados));
+
+                $dadosLength = (int)sizeof($dados);
+                if ($dadosLength === 0) {
+                    $status = 404;
+                    $responseData = [
+                        "status" => 404,
+                        "info" => 'pagina inexistente'
+                    ]; // Page not found
+
+                } else if ($dadosLength < $results) {
+                    $responseData = [
+                        "status" => 200,
+                        "data" => $dados,
+                        "info" => "final dos resultados"
+                    ];
+
+                } else {
+                    $nextPageUrl = H::nextPageUrl();
+                    $responseData = [
+                        "status" => 200,
+                        "data" => $dados,
+                        "proxPagina" => "$nextPageUrl?page=" . ++$page . "&results=$results"
+                    ];
+                }
+
+
+                return $response
+                    ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+            } catch (PDOException $err) {
+                $status = 503; // Service unavailable
+                // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                $errorMsg = Errors::filtroReturn(function ($err) {
+                    return [
+
+                        "status" => $err->getCode(),
+                        "info" => $err->getMessage()
+
+                    ];
+                }, function () {
+                    return [
+                        "status" => 503,
+                        "info" => 'Servico Indisponivel'
+                    ];
+                }, $err);
+
+                return $response
+                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+            }
+
         }
-
-
     } else {
         $status = 422; // Unprocessable Entity
         $errorMsg = [
