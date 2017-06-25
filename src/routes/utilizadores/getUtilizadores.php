@@ -294,7 +294,7 @@ $app->get('/utilizadores/{id}', function (Request $request, Response $response) 
 });
 
 ///////GET para receber eventos em que um utilizador está interessado///////////
-$app->get('/utilizador/{id}/interesse', function (Request $request, Response $response) {
+$app->get('/utilizadores/{id}/interesses', function (Request $request, Response $response) {
     $byArr = [
         'id' => 'id_eventos',
         'nome' => 'nome_evento',
@@ -473,7 +473,7 @@ WHERE interesses.utilizadores_id_utilizadores = :id ORDER BY $passar DESC  LIMIT
 });
 
 ///////GET para receber eventos em que um utilizador está inscrito///////////
-$app->get('/utilizador/{id}/incrito', function (Request $request, Response $response) {
+$app->get('/utilizadores/{id}/inscricoes', function (Request $request, Response $response) {
     $byArr = [
         'id' => 'id_eventos',
         'nome' => 'nome_evento',
