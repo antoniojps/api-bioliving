@@ -15,11 +15,11 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  *
  * Nao tendo refresh token ativo, valida password e cria tokens.
  */
-$app->post( '/api/login', function ( Request $request, Response $response ) {
+$app->post( '/login', function ( Request $request, Response $response ) {
 // Valores default de resposta
-	$status = 400; // Bad request
-	$info   = 'Bad request';
-	$email = '';
+	$status   = 400; // Bad request
+	$info     = 'Bad request';
+	$email    = '';
 	$password = '';
 
 // Obter dados
@@ -31,53 +31,45 @@ $app->post( '/api/login', function ( Request $request, Response $response ) {
 
 	if ( H::obrigatorio( $email ) && H::obrigatorio( $password ) ) {
 // Verificar se nao esta logged in
-		if ( ! Token::verificarRefresh() ) {
-			try {
+		try {
 // Verificar informações
-				$user = new Utilizador( [
-						'email'    => $email,
-						'password' => $password
-				] );
+			$user = new Utilizador( [
+					'email'    => $email,
+					'password' => $password
+			] );
 
 // Metodo login retorna id do utilizador ou false (se nao fez login)
-				$idUtilizador = $user->login();
+			$idUtilizador = $user->login();
 
 // Criar tokens
-				if ( $idUtilizador ) {
-					Token::gerarAccessToken( Token::gerarRefreshToken( $idUtilizador ) );
-					$status = 200; // Ok
-					$info   = 'Sucesso';
-				}
-			} catch ( \Bioliving\Errors\TokenException $e ) {
-				$status = 401;
+			if ( $idUtilizador ) {
+				Token::gerarAccessToken( Token::gerarRefreshToken( $idUtilizador ) );
+				$status = 200; // Ok
+				$info   = 'Sucesso';
+			}
+		} catch ( \Bioliving\Errors\TokenException $e ) {
+			$status = 401;
 
 // Em ambiente de desenvolvimento mostra info sobre o erro, caso contrario apenas Unauthorized
-				$info = Errors::filtroReturn( function ( $e ) {
-					return $e->getMessage();
-				}, function () {
-					return 'Ocorreu um erro';
-				}, $e );
-
-			} catch ( \Bioliving\Errors\UtilizadorException $e ) {
-				$status = 401;
-				$info   = Errors::filtroReturn( function ( $e ) {
-					return $e->getMessage();
-				}, function () {
-					return 'Ocorreu um erro';
-				}, $e );
-			} catch (\Bioliving\Errors\UtilizadorVisivelException $e){
-				// erros visiveis para o utilizador
-				$status = 401;
-				$info = $e->getMessage();
-			}
-		} else {
-			$status = 401;
-			$info   = Errors::filtroReturn( function () {
-				return 'Refresh token ativo';
+			$info = Errors::filtroReturn( function ( $e ) {
+				return $e->getMessage();
 			}, function () {
-				return 'Unauthorized';
-			} );
+				return 'Ocorreu um erro';
+			}, $e );
+
+		} catch ( \Bioliving\Errors\UtilizadorException $e ) {
+			$status = 401;
+			$info   = Errors::filtroReturn( function ( $e ) {
+				return $e->getMessage();
+			}, function () {
+				return 'Ocorreu um erro';
+			}, $e );
+		} catch ( \Bioliving\Errors\UtilizadorVisivelException $e ) {
+			// erros visiveis para o utilizador
+			$status = 401;
+			$info   = $e->getMessage();
 		}
+
 	} else {
 		$info = Errors::filtroReturn( function () {
 			return 'Parametros em falta';
@@ -100,7 +92,7 @@ $app->post( '/api/login', function ( Request $request, Response $response ) {
 /*
  * Apaga tokens caso exista pelo menos um.
  */
-$app->delete( '/api/login', function ( Request $request, Response $response ) {
+$app->delete( '/login', function ( Request $request, Response $response ) {
 
 	$status = 503; // Service unavailable
 	$info   = 'Serviço Indisponivel';

@@ -7,10 +7,9 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 
 /////////////////// Pesquisa global //////////////////////////////////
-//exemplo: /api/global/pesquisa?msg=henr&id=12&order=DESC&results=2&page=1&tipoeventos=false&locais=false&by=nome
+//exemplo: /api/global?msg=henr&id=12&order=DESC&results=2&page=1&tipoeventos=false&locais=false&by=nome
 
-$app->get('/api/global', function (Request $request, Response $response) {
-
+$app->get('/global', function (Request $request, Response $response) {
     //predefinições
     $defaults = array(
         "eventos" => "true",

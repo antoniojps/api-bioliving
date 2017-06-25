@@ -9,7 +9,7 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 /////////////////PUT tags//////////////////////////
-$app->put('/api/tags/{id}', function (Request $request, Response $response) {
+$app->put('/tags/{id}', function (Request $request, Response $response) {
     if (Token::validarScopes('admin')) {
 
         $id = $request->getAttribute('id');

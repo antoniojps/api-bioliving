@@ -1,11 +1,11 @@
 <?php
 // composer autoload
-require_once '../vendor/autoload.php';
+require_once '../../vendor/autoload.php';
 // Configuração de erros
-require_once '../src/config/Errors/Errors.php';
+require_once '../../src/config/Errors/Errors.php';
 // Para utilizar variaveis de environment dentro do .env
 // https://github.com/vlucas/phpdotenv
-$dotenv = new Dotenv\Dotenv(dirname(__DIR__));
+$dotenv = new Dotenv\Dotenv(dirname(dirname(__DIR__)));
 $dotenv->load();
 
 /* SLIM APP */
@@ -19,7 +19,7 @@ $container["jwt"] = function ($container) {
 };
 // Middleware
 // JWT Autenticaçao
-require_once "../src/middleware/JwtAuthentication.php";
+require_once "../../src/middleware/JwtAuthentication.php";
 // Todo CSRF Token Middleware
 
 // CORS para localhost
@@ -38,27 +38,27 @@ $app->add(function ($req, $res, $next) {
 
 // Routes:
 # /token - Verificar dados, gerar token e criar cookie com o mesmo
-require_once "../src/routes/autenticacao/routes.php";
+require_once "../../src/routes/autenticacao/routes.php";
 // Utilizadores
-require "../src/routes/utilizadores/routesUtilizadores.php";
+require "../../src/routes/utilizadores/routesUtilizadores.php";
 // Eventos
-require "../src/routes/eventos/routesEventos.php";
+require "../../src/routes/eventos/routesEventos.php";
 // Locais
-require "../src/routes/locais/routesLocais.php";
+require "../../src/routes/locais/routesLocais.php";
 // Tipos
-require "../src/routes/tipos/routesTipos.php";
+require "../../src/routes/tipos/routesTipos.php";
 // Global
-require "../src/routes/global/routesGlobal.php";
+require "../../src/routes/global/routesGlobal.php";
 // Tags
-require "../src/routes/tags/routesTags.php";
+require "../../src/routes/tags/routesTags.php";
 // Interesses
-require  "../src/routes/interesses/routesInteresses.php";
+require  "../../src/routes/interesses/routesInteresses.php";
 // inscritos
-require  "../src/routes/inscritos/routesInscritos.php";
+require  "../../src/routes/inscritos/routesInscritos.php";
 
 // Upload
-require  "../src/routes/upload/routes.php";
+require  "../../src/routes/upload/routes.php";
 
 // Terceiros (Facebook, etc)
-require  "../src/routes/terceiros/routes.php";
+require  "../../src/routes/terceiros/routes.php";
 $app->run();

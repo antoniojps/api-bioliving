@@ -7,7 +7,7 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 
-$app->post('/api/eventos/interesses', function (Request $request, Response $response) {
+$app->post('/eventos/interesses', function (Request $request, Response $response) {
     $idEventos = (int)$request->getParam('idevento');
     $idUtilizadores = (int)$request->getParam('idutilizador');
 
@@ -130,7 +130,7 @@ $app->post('/api/eventos/interesses', function (Request $request, Response $resp
 });
 
 
-$app->post('/api/eventos/{id}/interesse', function (Request $request, Response $response) {
+$app->post('/eventos/{id}/interesse', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('id'); // ir buscar id do evento
     //verificar se Evento está disponivel
 

@@ -9,7 +9,7 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 //////////////// POST localização//////////////////
-$app->post('/api/locais', function (Request $request, Response $response) {
+$app->post('/locais', function (Request $request, Response $response) {
     if (Token::validarScopes('normal', Token::getUtilizador())) {
         $localizacao = $request->getParam('nomeLocal');
         $lat = $request->getParam('lat');

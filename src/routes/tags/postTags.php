@@ -9,7 +9,7 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 /////////////////POST tags//////////////////////////
-$app->post('/api/tags', function (Request $request, Response $response) {
+$app->post('/tags', function (Request $request, Response $response) {
     if (Token::validarScopes('colaborador')) {
         $tag = $request->getParam('nomeTag');
         $error = "";

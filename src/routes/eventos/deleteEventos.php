@@ -9,7 +9,7 @@ use Bioliving\Custom\Token as Token;
 
 
 /////////////Apagar um evento////////////////////
-$app->delete('/api/eventos/{id}', function (Request $request, Response $response) {
+$app->delete('/eventos/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
     if (is_int($id) && $id > 0) {
         try {

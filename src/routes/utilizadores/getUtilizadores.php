@@ -7,7 +7,7 @@ use Bioliving\Custom\Token as Token;
 use Bioliving\Custom\Helper as Helper;
 
 
-$app->get('/api/utilizadores', function (Request $request, Response $response) {
+$app->get('/utilizadores', function (Request $request, Response $response) {
     if (Token::validarScopes('admin')) {
 
         $byArr = [

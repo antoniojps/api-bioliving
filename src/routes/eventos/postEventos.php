@@ -16,7 +16,7 @@ use Bioliving\Custom\Token as Token;
 #   ativo (default = 1 ) :
 #       quanto ativo = 1 quer dizer que o evento está ativo
 #       quando ativo = 0 quer dizer que evento já não se encontra ativo
-$app->post('/api/eventos', function (Request $request, Response $response) {
+$app->post('/eventos', function (Request $request, Response $response) {
     //PARA POSTAR A SCOPE TEM QUE SER DE ADMIN OU COLABORADOR
     if (Token::validarScopes('admin') || Token::validarScopes('colaborador')) {
 

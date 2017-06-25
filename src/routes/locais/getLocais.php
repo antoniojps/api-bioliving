@@ -5,12 +5,14 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 
+// Todo atualizar comentarios
 
 //////////Receber todos os locais/Pesquisar em todos os locais/////////////
+// Necessita de latitude e longitude para pesquisar
 # Variaveis alteráveis:
 #   min: 1, max: 10
-# Exemplo: /api/eventos?page=1&results=2&by=nome&order=DESC&msg=henrique&id=9
-$app->get('/api/locais', function (Request $request, Response $response) {
+# Exemplo: /api/locais?page=1&results=2&by=nome&order=DESC&msg=henrique&id=9
+$app->get('/locais', function (Request $request, Response $response) {
 
     $byArr = [
         'id' => 'localizacao',

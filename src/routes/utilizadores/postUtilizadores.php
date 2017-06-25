@@ -7,7 +7,7 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 
-$app->post('/api/utilizadores', function (Request $request, Response $response) {
+$app->post('/utilizadores', function (Request $request, Response $response) {
 
     if (Token::validarScopes('admin')) {
 

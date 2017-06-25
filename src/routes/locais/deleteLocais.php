@@ -7,7 +7,7 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 /////////////Apagar um local////////////////////
-$app->delete('/api/locais/{id}', function (Request $request, Response $response) {
+$app->delete('/locais/{id}', function (Request $request, Response $response) {
     if (Token::validarScopes('admin')) {
         $id = (int)$request->getAttribute('id'); // ir buscar id
         if (v::intVal()->validate($id) && $id > 0) {

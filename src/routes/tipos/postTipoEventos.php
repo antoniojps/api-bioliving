@@ -7,7 +7,7 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 /////////////////////POST tipo eventos///////////////
-$app->post('/api/tiposEventos', function (Request $request, Response $response) {
+$app->post('/tiposEventos', function (Request $request, Response $response) {
     if (Token::validarScopes('colaborador')) {
 
         $tipoNome = $request->getParam('nomeTipoEvento');

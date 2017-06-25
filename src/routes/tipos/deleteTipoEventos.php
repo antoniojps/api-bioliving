@@ -8,7 +8,7 @@ use Bioliving\Custom\Token as Token;
 
 
 /////////////Apagar um local////////////////////
-$app->delete('/api/tiposEventos/{id}', function (Request $request, Response $response) {
+$app->delete('/tiposEventos/{id}', function (Request $request, Response $response) {
     if (Token::validarScopes('colaborador')) {
         $id = (int)$request->getAttribute('id'); // ir buscar id
         if (v::intVal()->validate($id) && $id > 0) {

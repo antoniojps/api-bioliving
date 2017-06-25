@@ -10,7 +10,7 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 
-$app->get('/api/eventos/{id}/interesse', function (Request $request, Response $response) {
+$app->get('/eventos/{id}/interesse', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('id'); // ir buscar id
 
     if (Token::validarScopes('admin', Token::getUtilizador())) {
@@ -114,7 +114,7 @@ $app->get('/api/eventos/{id}/interesse', function (Request $request, Response $r
 #   results = número de resultados por página
 #   min: 1, max: 10
 # Exemplo: /api/eventos/2/interesses?page=1&results=2&by=id&order=ASC
-$app->get('/api/eventos/{id}/interesses', function (Request $request, Response $response) {
+$app->get('/eventos/{id}/interesses', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
 
     $byArr = [

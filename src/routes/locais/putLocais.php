@@ -10,7 +10,7 @@ use Bioliving\Custom\Token as Token;
 
 
 //////////////// PUT local//////////////////
-$app->put('/api/locais/{id}', function (Request $request, Response $response) {
+$app->put('/locais/{id}', function (Request $request, Response $response) {
     if (Token::validarScopes('normal', Token::getUtilizador())) {
     $id = $request->getAttribute('id');
     $localizacao = $request->getParam('nomeLocal');

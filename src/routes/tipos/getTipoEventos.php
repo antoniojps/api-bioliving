@@ -9,8 +9,8 @@ use Respect\Validation\Validator as v;
 //////////Receber todos os locais/Pesquisar em todos os locais/////////////
 # Variaveis alteráveis:
 #   min: 1, max: 10
-# Exemplo: /api/eventostipos?page=1&results=2&by=nome&order=DESC&msg=desporto&id=4
-$app->get('/api/tiposEventos', function (Request $request, Response $response) {
+# Exemplo: /eventostipos?page=1&results=2&by=nome&order=DESC&msg=desporto&id=4
+$app->get('/tiposEventos', function (Request $request, Response $response) {
 
     $byArr = [
         'id' => 'id_tipo_evento',

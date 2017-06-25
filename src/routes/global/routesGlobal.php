@@ -1,2 +1,2 @@
 <?php
-require "../src/routes/global/getGlobal.php";
+require "getGlobal.php";

@@ -1,4 +1,4 @@
 <?php
-require "../src/routes/interesses/getInteresses.php";
-require "../src/routes/interesses/postInteresses.php";
-require "../src/routes/interesses/deleteInteresses.php";
+require "getInteresses.php";
+require "postInteresses.php";
+require "deleteInteresses.php";

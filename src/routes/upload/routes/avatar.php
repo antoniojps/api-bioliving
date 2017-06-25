@@ -16,7 +16,7 @@ use Respect\Validation\Validator as v;
  * Faz upload para public/imagens/avatars
  *
  */
-$app->post( '/api/imagens/avatar', function ( Request $request, Response $response ) {
+$app->post( '/imagens/avatar', function ( Request $request, Response $response ) {
 
 	$status     = 403; // Bad request
 	$info       = 'Bad request';
@@ -88,7 +88,7 @@ $app->post( '/api/imagens/avatar', function ( Request $request, Response $respon
  *
  */
 
-$app->get( '/api/imagens/avatar/{ficheiro}', function ( Request $request, Response $response ) {
+$app->get( '/imagens/avatar/{ficheiro}', function ( Request $request, Response $response ) {
 
 	// Valores default
 	$path    = '/imagens/avatars/';

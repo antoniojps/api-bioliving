@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
-$app->put('/api/eventos/{id}', function (Request $request, Response $response) {
+$app->put('/eventos/{id}', function (Request $request, Response $response) {
     $idCriador = (int)$request->getParam('idCriador');
 
     if (Token::validarScopes('admin', $idCriador)) {
@@ -534,7 +534,7 @@ $app->put('/api/eventos/{id}', function (Request $request, Response $response) {
 //});
 
 /////////////////PUT para tornar evento ativo////////////////////
-$app->put('/api/eventos/ative/{id}', function (Request $request, Response $response) {
+$app->put('/eventos/ative/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id');
     $ativo = 1; //valor na bd que equivale a ativo
     if (is_int($id) && $id > 0) {
@@ -635,7 +635,7 @@ $app->put('/api/eventos/ative/{id}', function (Request $request, Response $respo
 });
 
 ////////////////PUT para tornar evento inativo/////////////////
-$app->put('/api/eventos/disable/{id}', function (Request $request, Response $response) {
+$app->put('/eventos/disable/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id');
     $ativo = 0; //valor na bd que equivale a ativo
     if (is_int($id) && $id > 0) {

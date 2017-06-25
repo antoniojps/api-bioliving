@@ -16,7 +16,7 @@ use Bioliving\Custom\Token as Token;
 #   results = número de resultados por página
 #   min: 1, max: 10
 # Exemplo: /api/eventos/2/inscritos?page=1&results=2&by=id&order=ASC
-$app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $response) {
+$app->get('/eventos/{id}/inscritos', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
 
     $byArr = [
@@ -153,9 +153,8 @@ $app->get('/api/eventos/{id}/inscritos', function (Request $request, Response $r
 
 });
 
-
 ////////////GET de para saber se um utilizador está inscrito////////////////////
-$app->get('/api/eventos/{id}/inscrito', function (Request $request, Response $response) {
+$app->get('/eventos/{id}/inscrito', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('id'); // ir buscar id
 
     if (Token::validarScopes('admin', Token::getUtilizador())) {

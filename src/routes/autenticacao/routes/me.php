@@ -11,7 +11,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  * Sem login: 401
  */
 
-$app->get( '/api/me', function ( Request $request, Response $response ) {
+$app->get( '/me', function ( Request $request, Response $response ) {
 
 	// Default
 	$status      = 401; // Unauthorized

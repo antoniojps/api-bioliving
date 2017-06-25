@@ -11,7 +11,7 @@ use Bioliving\Custom\Helper as H;
 
 //////////// Obter todos os eventos ////////////
 
-$app->get('/api/eventos', function (Request $request, Response $response) {
+$app->get('/eventos', function (Request $request, Response $response) {
     if (Token::validarScopes('admin')) {
         $byArr = [
             'id' => 'id_eventos',
@@ -191,7 +191,7 @@ $app->get('/api/eventos', function (Request $request, Response $response) {
 
 
 //////////// Obter dados de um evento através do ID ////////////
-$app->get('/api/eventos/{id}', function (Request $request, Response $response) {
+$app->get('/eventos/{id}', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
     //verificar se é um id válido
 
@@ -278,7 +278,7 @@ $app->get('/api/eventos/{id}', function (Request $request, Response $response) {
 
 
 //////////// Obter colaboradores de um evento ////////////
-$app->get('/api/eventos/{id}/colaboradores', function (Request $request, Response $response) {
+$app->get('/eventos/{id}/colaboradores', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id
 
     $byArr = [
@@ -416,7 +416,7 @@ $app->get('/api/eventos/{id}/colaboradores', function (Request $request, Respons
 });
 
 //////////// Obter extras de um evento + icons ////////////
-$app->get('/api/eventos/{id}/extras', function (Request $request, Response $response) {
+$app->get('/eventos/{id}/extras', function (Request $request, Response $response) {
     $id = $request->getAttribute('id'); // ir buscar id
     // Valores para ordernar por, fizemos uma array para simplificar queries
     $orderDefault = "ASC"; //ordenação predefenida
@@ -480,7 +480,7 @@ $app->get('/api/eventos/{id}/extras', function (Request $request, Response $resp
 
 
 //////////// Obter tags de um evento ////////////
-$app->get('/api/eventos/{id}/tags', function (Request $request, Response $response) {
+$app->get('/eventos/{id}/tags', function (Request $request, Response $response) {
     $dados = null;
     $id = $request->getAttribute('id'); // ir buscar id
 
@@ -572,7 +572,7 @@ $app->get('/api/eventos/{id}/tags', function (Request $request, Response $respon
  * @param string by -> coluna a ordenar (id,nome,dataRegisto,dataEvento,dataFim,ativo,tipoEvento,local) default: data do evento
  *
  */
-$app->get('/api/pesquisa/eventos', function (Request $request, Response $response) {
+$app->get('/pesquisa/eventos', function (Request $request, Response $response) {
     $byArr = [
         'id' => 'id_eventos',
         'nome' => 'nome_evento',
@@ -711,7 +711,7 @@ $app->get('/api/pesquisa/eventos', function (Request $request, Response $respons
                 ];
 
             } else {
-                $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+                $nextPageUrl = H::nextPageUrl();
                 $responseData = [
                     "status" => 200,
                     "data" => $dados,

@@ -6,7 +6,7 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Helper as H;
 
 
-$app->get( '/api/terceiros/facebook/evento/{id}', function ( Request $request, Response $response ) {
+$app->get( '/terceiros/facebook/evento/{id}', function ( Request $request, Response $response ) {
 
 	$id = $request->getAttribute('id'); // ir buscar id
 	// Default

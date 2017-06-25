@@ -87,6 +87,27 @@ class Helper {
 		return $arr;
 	}
 
+	/*
+	 * Obter url atual para enviar na resposta a proxima pagina
+	 * Ex: Converte slimapp/api/pesquisa/eventos em pesquisa/eventos
+	 *
+	 */
+
+	 static public function nextPageUrl(){
+		 // Obter url e apenas obter a query
+		 $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+
+		 // Divir por /
+		 $nextPageUrl = explode('/',$nextPageUrl);
+
+		 // Remover dois primeiros (Remover o /api/"
+		 unset($nextPageUrl[0]); unset($nextPageUrl[1]);
+
+		 // Juntar de novo
+		 $nextPageUrl = implode('/',$nextPageUrl);
+
+		 return $nextPageUrl;
+	 }
 
 
 

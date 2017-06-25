@@ -17,7 +17,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
  *
  * Nao tendo refresh token ativo, faz insert das informaçoes na base de dados com password encriptada.
  */
-$app->post( '/api/create', function ( Request $request, Response $response ) {
+$app->post( '/create', function ( Request $request, Response $response ) {
 	$status = 401; // Unauthorized
 	$info   = 'Unauthorized';
 	// Obter dados

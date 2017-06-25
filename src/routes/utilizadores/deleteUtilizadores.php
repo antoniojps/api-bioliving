@@ -6,7 +6,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
-$app->delete('/api/utilizadores/{id}', function (Request $request, Response $response) {
+$app->delete('/utilizadores/{id}', function (Request $request, Response $response) {
     if (Token::validarScopes('admin')) {
         $id = (int)$request->getAttribute('id'); // ir buscar id
         if (is_int($id) && $id > 0) {

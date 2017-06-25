@@ -7,7 +7,7 @@ use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
 
 
-$app->delete('/api/eventos/{idevento}/inscritos/{idutilizador}', function (Request $request, Response $response) {
+$app->delete('/eventos/{idevento}/inscritos/{idutilizador}', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('idevento'); // ir buscar id do evento
     $idUtilizadores = (int)$request->getAttribute('idutilizador'); // ir buscar id do evento
 
@@ -126,9 +126,8 @@ $app->delete('/api/eventos/{idevento}/inscritos/{idutilizador}', function (Reque
     }
 });
 
-
 /////////////Apagar um inscrito a partir do id que está logado////////////////////
-$app->delete('/api/eventos/{id}/inscrito', function (Request $request, Response $response) {
+$app->delete('/eventos/{id}/inscrito', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('id'); // ir buscar id
     if (Token::validarScopes('admin', Token::getUtilizador())) {
         $idUtilizador = (int)Token::getUtilizador();

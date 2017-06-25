@@ -9,8 +9,8 @@ use Respect\Validation\Validator as v;
 //////////Receber todos os locais/Pesquisar em todos os locais/////////////
 # Variaveis alteráveis:
 #   min: 1, max: 10
-# Exemplo: /api/tags?page=1&results=2&by=nome&order=DESC&msg=henrique&id=8
-$app->get('/api/tags', function (Request $request, Response $response) {
+# Exemplo: /tags?page=1&results=2&by=nome&order=DESC&msg=henrique&id=8
+$app->get('/tags', function (Request $request, Response $response) {
 
     $byArr = [
         'id' => 'id_tags',
