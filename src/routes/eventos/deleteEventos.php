@@ -13,7 +13,7 @@ $app->delete('/api/eventos/{id}', function (Request $request, Response $response
     $id = (int)$request->getAttribute('id'); // ir buscar id
     if (is_int($id) && $id > 0) {
         try {
-            $sql = "SELECT utilizadores_id_utilizadores FROM eventos WHERE id_eventos = :id";
+            $sql = "SELECT utilizadores_id_utilizadores,id_eventos FROM eventos WHERE id_eventos = :id";
             $db = new Db();
             // conectar
             $db = $db->connect();
