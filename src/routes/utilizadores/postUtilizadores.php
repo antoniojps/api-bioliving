@@ -30,19 +30,21 @@ $app->post('/api/utilizadores', function (Request $request, Response $response) 
         $error = array();
 
         //verificações
+        $dataMinUnix = 1;
+        $dataMaxUnix = 2147403600;
 
 
         if (!v::stringType()->noWhitespace()->alpha()->length(1, 50)->validate($nome)) $error['nome'] = " Nome inválido."; //obrigatório
         if (!v::stringType()->noWhitespace()->alpha()->length(1, 50)->validate($apelido)) $error['apelido'] = " Apelido inválido.";//obrigatório
         if ($genero && !v::intVal()->between(0, 1)->validate($genero)) $error['genero'] = " Genero inválido.";
-        if ($dataNasc && !v::date('Y-m-d')->validate($dataNasc)) $error['dataNasc'] = " Data de nascimento inválida.";
+        if ($dataNasc && !v::intVal()->between($dataMinUnix, $dataMaxUnix)->validate($dataNasc)) $error['dataNasc'] = " Data de nascimento inválida.";
         if (!v::filterVar(FILTER_VALIDATE_EMAIL)->length(1, 180)->validate($email)) $error['email'] = " Email inválido."; //obrigatório
         if ($sobre && !v::stringType()->length(1, 65535)->validate($sobre)) $error['sobre'] = " Sobre inválido.";
         if ($sobreMini && !v::stringType()->length(1, 30)->validate($sobreMini)) $error['sobreMini'] = " Sobre mini inválido";
         if ($telemovel && !v::intVal()->length(9, 9)->validate($telemovel)) $error['telemovel'] = " Numero de telemovel inválido";
         if ($idLocal && !v::intVal()->validate($idLocal)) $error['idLocal'] = " Id do local inválido";
         if ($idEstatuto && !v::intVal()->validate($idEstatuto)) $error['idEstatuto'] = " Id do estatuto inválido";
-
+        if($dataNasc)$dataNasc = gmdate("Y-m-d", $dataNasc);
 
 //        if(!validarPW($password,$nome,$apelido,$email))$error['password'] = " Password inválida";
 //
