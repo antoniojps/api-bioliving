@@ -209,7 +209,6 @@ $app->get('/eventos/{id}/interesses', function (Request $request, Response $resp
             }
 
 
-
             return $response
                 ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 

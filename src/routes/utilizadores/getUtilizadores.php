@@ -193,7 +193,6 @@ $app->get('/utilizadores', function (Request $request, Response $response) {
     }
 });
 
-
 ////////////////////////GET para receber evento em especifico////////////////
 $app->get('/utilizadores/{id}', function (Request $request, Response $response) {
     $idUtilizador = (int)$request->getAttribute('id'); // ir buscar id

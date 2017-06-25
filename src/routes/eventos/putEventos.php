@@ -6,6 +6,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
+use \Firebase\JWT\JWT;
 
 $app->put('/eventos/{id}', function (Request $request, Response $response) {
     $idCriador = (int)$request->getParam('idCriador');
@@ -51,7 +52,7 @@ $app->put('/eventos/{id}', function (Request $request, Response $response) {
             if ($idTipo && !v::intVal()->validate($idTipo)) $error['idTipo'] = "Id do tipo de evento inválido";
             if ($preco && !v::floatVal()->length(0, 7)->validate($preco)) $error['preco'] = "Preço inválido";
             if ($descontoSocio && !v::intVal()->between(1, 100)->validate($descontoSocio)) $error['descontoSocio'] = "Desconto socio inválido";
-
+            $dataReg = $data;
             if ($data) $data = gmdate("Y-m-d H:i:s", $data); //
             if ($dataFim) $dataFim = gmdate("Y-m-d H:i:s", $dataFim); //
 
@@ -190,16 +191,72 @@ $app->put('/eventos/{id}', function (Request $request, Response $response) {
                         $stmt->bindParam(':idFace', $fb);
                         $stmt->bindParam(':idEvento', $idEvento);
                         $stmt->execute();
+                        if (!$data) {
+                            $responseData = [
+                                "status" => 200,
+                                'info' => "Evento alterado com sucesso!"
+                            ];
 
-                        $responseData = [
-                            "status" => 200,
-                            'info' => "Evento alterado com sucesso!"
-                        ];
-
-                        return $response
-                            ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                            return $response
+                                ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
 
+                        } else {
+
+                            $secret = getenv('SECRET_KEY_CERTIFICADO');
+                            $payload = array(
+                                "iat" => $dataReg,
+                                "exp" => $dataReg + 48 * 3600,
+                                "idEvento" => $idEvento
+
+                            );
+
+                            $tokenGerado = JWT::encode($payload, $secret);
+
+                            $sql = "UPDATE `eventos` SET `token_certificado` = :token WHERE `eventos`.`id_eventos` = :idEvento";
+                            try {
+                                // Get DB object
+                                $db = new db();
+                                //connect
+                                $db = $db->connect();
+                                $stmt = $db->prepare($sql);
+                                $stmt->bindParam(':token', $tokenGerado);
+                                $stmt->bindParam(':idEvento', $idEvento);
+                                $stmt->execute();
+                                $db = null;
+
+                                $responseData = [
+                                    "status" => 200,
+                                    'info' => "Evento inserido com sucesso!"
+                                ];
+
+                                return $response
+                                    ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+                            } catch (PDOException $err) {
+                                $status = 503; // Service unavailable
+                                // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                                $errorMsg = Errors::filtroReturn(function ($err) {
+                                    return [
+
+                                        "status" => $err->getCode(),
+                                        "info" => $err->getMessage()
+
+                                    ];
+                                }, function () {
+                                    return [
+                                        "status" => 503,
+                                        "info" => 'Servico Indisponivel'
+                                    ];
+                                }, $err);
+
+                                return $response
+                                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+                            }
+
+                        }
                     } catch (PDOException $err) {
                         $status = 503; // Service unavailable
                         // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
