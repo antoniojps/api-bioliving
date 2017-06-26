@@ -49,7 +49,7 @@ $app->put('/tags/{id}', function (Request $request, Response $response) {
 
                     //verificar se tag já existe
                     $sql = "SELECT * FROM `tags` WHERE `tag_nome`=:nome";
-
+                    $status=200;
                     // Get DB object
                     $db = new db();
                     //connect
@@ -66,7 +66,7 @@ $app->put('/tags/{id}', function (Request $request, Response $response) {
                             'info' => "Tag já existe!"
                         ];
                         return $response
-                            ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                            ->withJson($responseData,$status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
                     } else {
 

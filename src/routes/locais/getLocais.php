@@ -5,7 +5,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 
-// Todo atualizar comentarios
+
 
 //////////Receber todos os locais/Pesquisar em todos os locais/////////////
 // Necessita de latitude e longitude para pesquisar

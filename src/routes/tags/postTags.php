@@ -34,12 +34,13 @@ $app->post('/tags', function (Request $request, Response $response) {
                 $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
                 if (count($dados)) {
+                    $status =422;
                     $responseData = [
                         "status" => "422",
                         'info' => "Tag já existe!"
                     ];
                     return $response
-                        ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                        ->withJson($responseData,$status,JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
                 } else {
 

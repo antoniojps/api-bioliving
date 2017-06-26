@@ -44,18 +44,20 @@ $app->post('/tiposEventos', function (Request $request, Response $response) {
                 $db = null;
                 $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 if (count($dados)) {
+                    $status = 422;
                     $responseData = [
                         "status" => 422,
                         'info' => "Tipo de evento já existe!"
                     ];
                     return $response
-                        ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                        ->withJson($responseData,$status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
                 } else {
 
 
                     $sql = "INSERT INTO tipo_evento (nome_tipo_evento,icons_id) VALUES  (:nome,:idIcone)";
                     try {
+                        $status=200;
                         // Get DB object
                         $db = new db();
                         //connect
@@ -73,7 +75,7 @@ $app->post('/tiposEventos', function (Request $request, Response $response) {
                         ];
 
                         return $response
-                            ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                            ->withJson($responseData,$status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
 
                     } catch (PDOException $err) {
