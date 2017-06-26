@@ -5,6 +5,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
+use Bioliving\Custom\Helper as H;
 
 
 $app->put('/utilizadores/{id}', function (Request $request, Response $response) {
@@ -31,8 +32,8 @@ $app->put('/utilizadores/{id}', function (Request $request, Response $response) 
             $dataMinUnix = 1;
             $dataMaxUnix = 2147403600;
 
-            if (!v::stringType()->noWhitespace()->alpha()->length(1, 50)->validate($nome)) $error['nome'] = "Nome inválido."; //obrigatório
-            if (!v::stringType()->noWhitespace()->alpha()->length(1, 50)->validate($apelido)) $error['apelido'] = "Apelido inválido.";//obrigatório
+            if (!v::stringType()->length(1, 50)->validate($nome) && !H::validarNomes($nome)) $error['nome'] = "Nome inválido."; //obrigatório
+            if (!v::stringType()->length(1, 50)->validate($apelido) && !H::validarNomes($apelido)) $error['apelido'] = "Apelido inválido.";//obrigatório
             if ($genero && !v::intVal()->between(0, 1)->validate($genero)) $error['genero'] = "Genero inválido.";
             if ($dataNasc && !v::intVal()->between($dataMinUnix, $dataMaxUnix)->validate($dataNasc)) $error['dataNasc'] = "Data de nascimento inválida.";
             if (!v::filterVar(FILTER_VALIDATE_EMAIL)->length(1, 180)->validate($email)) $error['email'] = "Email inválido."; //obrigatório
@@ -45,42 +46,6 @@ $app->put('/utilizadores/{id}', function (Request $request, Response $response) 
 
 
             if (count($error) === 0) {
-
-                $sql = "SELECT * FROM utilizadores WHERE email = :email";
-                try {
-
-                    // iniciar ligação à base de dados
-                    $db = new Db();
-                    // colocar mensagem no formato correto
-                    // conectar
-                    $db = $db->connect();
-                    $stmt = $db->prepare($sql);
-                    $stmt->bindValue(':email', $email, PDO::PARAM_INT);
-                    $stmt->execute();
-                    $db = null;
-                    $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                    if ($dados) $error ['email'] = "Email já existe.";
-                } catch (PDOException $err) {
-                    $status = 503; // Service unavailable
-                    // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
-                    $errorMsg = Errors::filtroReturn(function ($err) {
-                        return [
-
-                            "status" => $err->getCode(),
-                            "info" => $err->getMessage()
-
-                        ];
-                    }, function () {
-                        return [
-                            "status" => 503,
-                            "info" => 'Servico Indisponivel'
-                        ];
-                    }, $err);
-
-                    return $response
-                        ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-                }
-
 
                 if ($idLocal) {
                     $sql = "SELECT * FROM localizacao WHERE localizacao=:id";
@@ -167,7 +132,7 @@ $app->put('/utilizadores/{id}', function (Request $request, Response $response) 
                     if (!$idEstatuto) $idEstatuto = 3;
 
 
-                    $sql = "UPDATE `utilizadores` SET 
+                    $sql = "UPDATE `utilizadores` SET
                                       `nome` = :nome,
                                       `apelido` = :apelido,
                                       `genero` = :genero, 

@@ -109,6 +109,27 @@ class Helper {
 		 return $nextPageUrl;
 	 }
 
+	 /*
+	  * Validação de nomes com espaços e caracteres latins
+	  */
+
+	// Validar nome,sobrenome
+	static public function validarNomes($nome){
+
+		$nomesValidos = false;
+
+
+		// RegEx para todos os caracteres inclusive latins e outros com minimo de uma letra e maximo de 50 (50 é o que o Facebook utiliza e é limite da base de dados)
+		// https://stackoverflow.com/a/5429984/7663060
+
+		$matches  = preg_match ('/^[\p{L}\s]{1,50}$/u', $nome);
+		if($matches){
+			$nomesValidos = true;
+		}
+
+		return (bool) $nomesValidos;
+	}
+
 
 
 }
