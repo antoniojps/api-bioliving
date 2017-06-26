@@ -5,6 +5,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
+use Bioliving\Custom\Helper as H;
 
 
 $app->post('/utilizadores', function (Request $request, Response $response) {
@@ -33,8 +34,8 @@ $app->post('/utilizadores', function (Request $request, Response $response) {
         $dataMaxUnix = 2147403600;
 
 
-        if (!v::stringType()->noWhitespace()->alpha()->length(1, 50)->validate($nome)) $error['nome'] = " Nome inválido."; //obrigatório
-        if (!v::stringType()->noWhitespace()->alpha()->length(1, 50)->validate($apelido)) $error['apelido'] = " Apelido inválido.";//obrigatório
+        if (!v::stringType()->length(1, 50)->validate($nome) && !H::validarNomes($nome)) $error['nome'] = " Nome inválido."; //obrigatório
+        if (!v::stringType()->length(1, 50)->validate($apelido) && !H::validarNomes($nome)) $error['apelido'] = " Apelido inválido.";//obrigatório
         if ($genero && !v::intVal()->between(0, 1)->validate($genero)) $error['genero'] = " Genero inválido.";
         if ($dataNasc && !v::intVal()->between($dataMinUnix, $dataMaxUnix)->validate($dataNasc)) $error['dataNasc'] = " Data de nascimento inválida.";
         if (!v::filterVar(FILTER_VALIDATE_EMAIL)->length(1, 180)->validate($email)) $error['email'] = " Email inválido."; //obrigatório
