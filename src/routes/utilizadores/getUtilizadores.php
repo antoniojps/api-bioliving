@@ -472,7 +472,7 @@ WHERE interesses.utilizadores_id_utilizadores = :id ORDER BY $passar DESC  LIMIT
 });
 
 ///////GET para receber eventos em que um utilizador está inscrito///////////
-$app->get('/utilizadores/{id}/inscricoes', function (Request $request, Response $response) {
+$app->get('/utilizadores/{id}/inscritos', function (Request $request, Response $response) {
     $byArr = [
         'id' => 'id_eventos',
         'nome' => 'nome_evento',
