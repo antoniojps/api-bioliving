@@ -24,7 +24,7 @@ $app->put('/utilizadores/{id}', function (Request $request, Response $response) 
             $sobreMini = $request->getParam('sobreMini');
             $telemovel = $request->getParam('telemovel');
             $idLocal = $request->getParam('idLocal');
-            $idEstatuto = $request->getParam('idEstatuto');
+
 
             $error = array();
 
@@ -41,7 +41,6 @@ $app->put('/utilizadores/{id}', function (Request $request, Response $response) 
             if ($sobreMini && !v::stringType()->length(1, 30)->validate($sobreMini)) $error['sobreMini'] = "Sobre mini inválido";
             if ($telemovel && !v::intVal()->length(9, 9)->validate($telemovel)) $error['telemovel'] = "Numero de telemovel inválido";
             if ($idLocal && !v::intVal()->validate($idLocal)) $error['idLocal'] = "Id do local inválido";
-            if ($idEstatuto && !v::intVal()->validate($idEstatuto)) $error['idEstatuto'] = "Id do estatuto inválido";
             if ($dataNasc) $dataNasc = gmdate("Y-m-d", $dataNasc); //
 
 
@@ -85,43 +84,7 @@ $app->put('/utilizadores/{id}', function (Request $request, Response $response) 
 
 
                 }
-                if ($idEstatuto) {
 
-                    $sql = "SELECT * FROM estatutos WHERE id_estatutos=:id";
-                    try {
-
-                        // iniciar ligação à base de dados
-                        $db = new Db();
-                        // colocar mensagem no formato correto
-                        // conectar
-                        $db = $db->connect();
-                        $stmt = $db->prepare($sql);
-                        $stmt->bindValue(':id', $idEstatuto, PDO::PARAM_INT);
-                        $stmt->execute();
-                        $db = null;
-                        $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                        if (!$dados) $error ['idEstatuto'] = "Id do estatuto não se encontra disponivel.";
-                    } catch (PDOException $err) {
-                        $status = 503; // Service unavailable
-                        // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
-                        $errorMsg = Errors::filtroReturn(function ($err) {
-                            return [
-
-                                "status" => $err->getCode(),
-                                "info" => $err->getMessage()
-
-                            ];
-                        }, function () {
-                            return [
-                                "status" => 503,
-                                "info" => 'Servico Indisponivel'
-                            ];
-                        }, $err);
-
-                        return $response
-                            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-                    }
-                }
                 if (count($error) === 0) {
                     if (!$genero) $genero = NULL;
                     if (!$dataNasc) $dataNasc = NULL;
@@ -129,7 +92,6 @@ $app->put('/utilizadores/{id}', function (Request $request, Response $response) 
                     if (!$sobreMini) $sobreMini = NULL;
                     if (!$telemovel) $telemovel = NULL;
                     if (!$idLocal) $idLocal = NULL;
-                    if (!$idEstatuto) $idEstatuto = 3;
 
 
                     $sql = "UPDATE `utilizadores` SET
@@ -141,8 +103,8 @@ $app->put('/utilizadores/{id}', function (Request $request, Response $response) 
                                       `sobre` = :sobre, 
                                       `sobre_mini` = :sobreMini, 
                                       `telemovel` = :telemovel, 
-                                      `localizacao_id_localizacao` = :idLocal, 
-                                      `estatutos_id_estatutos` = :idEstatuto 
+                                      `localizacao_id_localizacao` = :idLocal
+                                  
                               WHERE `utilizadores`.`id_utilizadores` = :id";
                     try {
 
@@ -163,7 +125,6 @@ $app->put('/utilizadores/{id}', function (Request $request, Response $response) 
                         $stmt->bindParam(':sobreMini', $sobreMini);
                         $stmt->bindParam(':telemovel', $telemovel);
                         $stmt->bindParam(':idLocal', $idLocal);
-                        $stmt->bindParam(':idEstatuto', $idEstatuto);
                         $stmt->bindParam(':id', $idUtilizador);
                         $stmt->execute();
 
