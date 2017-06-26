@@ -35,7 +35,7 @@ $app->post('/utilizadores', function (Request $request, Response $response) {
 
 
         if (!v::stringType()->length(1, 50)->validate($nome) && !H::validarNomes($nome)) $error['nome'] = " Nome inválido."; //obrigatório
-        if (!v::stringType()->length(1, 50)->validate($apelido) && !H::validarNomes($nome)) $error['apelido'] = " Apelido inválido.";//obrigatório
+        if (!v::stringType()->length(1, 50)->validate($apelido) && !H::validarNomes($apelido)) $error['apelido'] = " Apelido inválido.";//obrigatório
         if ($genero && !v::intVal()->between(0, 1)->validate($genero)) $error['genero'] = " Genero inválido.";
         if ($dataNasc && !v::intVal()->between($dataMinUnix, $dataMaxUnix)->validate($dataNasc)) $error['dataNasc'] = " Data de nascimento inválida.";
         if (!v::filterVar(FILTER_VALIDATE_EMAIL)->length(1, 180)->validate($email)) $error['email'] = " Email inválido."; //obrigatório

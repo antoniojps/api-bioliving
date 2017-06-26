@@ -249,114 +249,8 @@ $app->get('/certificados/{token}', function (Request $request, Response $respons
 });
 
 
-$app->get('/certificados/utilizador/{idUtilizador}/evento/{idEvento}', function (Request $request, Response $response) {
-    $idUtilizador = (int)$request->getAttribute('idUtilizador'); // ir buscar id
-    $idEventos = (int)$request->getAttribute('idEvento'); // ir buscar id
-    if ($idUtilizador > 0 && $idEventos > 0) {
-        if (Token::validarScopes('admin', $idUtilizador)) {
 
 
-            //verificar se é um id válido
-            if (is_int($idUtilizador) && $idUtilizador > 0 && is_int($idEventos) && $idEventos) {
-
-                $sql = "SELECT COUNT(`eventos_id_eventos`) AS certificado FROM `validaparticipantes` WHERE`eventos_id_eventos`= :idEventos AND `utilizadores_id_utilizadores`= :idUtilizadores";
-
-                try {
-
-                    $status = 200; // OK
-
-                    // iniciar ligação à base de dados
-                    $db = new Db();
-
-                    // conectar
-                    $db = $db->connect();
-                    $stmt = $db->prepare($sql);
-                    $stmt->bindValue(':idEventos', $idEventos, PDO::PARAM_INT);
-                    $stmt->bindValue(':idUtilizadores', $idUtilizador, PDO::PARAM_INT);
-                    $stmt->execute();
-                    $db = null;
-                    $dados = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                    if ($dados['certificado'] === '1') {
-
-                        $dados = [
-                            "status" => 200,
-                            "info" => 'true'
-                        ];
-                    } else {
-                        $dados = [
-                            "status" => 200,
-                            "info" => 'false'
-                        ];
-                    }
-
-                    $responseData = $dados;
-
-                    return $response
-                        ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
-
-                } catch (PDOException $err) {
-                    $status = 503; // Service unavailable
-                    // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
-                    $errorMsg = Errors::filtroReturn(function ($err) {
-                        return [
-
-                            "status" => $err->getCode(),
-                            "info" => $err->getMessage()
-
-                        ];
-                    }, function () {
-                        return [
-                            "status" => 503,
-                            "info" => 'Servico Indisponivel'
-                        ];
-                    }, $err);
-
-                    return $response
-                        ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
-                }
-            } else {
-                $status = 422; // Unprocessable Entity
-                $errorMsg = [
-
-                    "status" => "$status",
-                    "info" => 'Parametros invalidos'
-
-
-                ];
-
-                return $response
-                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-            }
-        } else {
-            $status = 401; // Unprocessable Entity
-            $errorMsg = [
-
-                "status" => $status,
-                "info" => "Acesso não autorizado"
-
-            ];
-            return $response
-                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
-        }
-    } else {
-        $status = 422; // Unprocessable Entity
-        $errorMsg = [
-
-            "status" => $status,
-            "info" => "Parametros invalidos"
-
-        ];
-        return $response
-            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
-    }
-
-
-});
 
 $app->get('/utilizador/{idUtilizador}/certificado', function (Request $request, Response $response) {
     $byArr = [
@@ -533,6 +427,115 @@ WHERE valida.utilizadores_id_utilizadores = :id ORDER BY $passar DESC LIMIT :lim
 });
 
 
+$app->get('/certificados/utilizador/{idUtilizador}/evento/{idEvento}', function (Request $request, Response $response) {
+    $idUtilizador = (int)$request->getAttribute('idUtilizador'); // ir buscar id
+    $idEventos = (int)$request->getAttribute('idEvento'); // ir buscar id
+    if ($idUtilizador > 0 && $idEventos > 0) {
+        if (Token::validarScopes('admin', $idUtilizador)) {
+
+
+            //verificar se é um id válido
+            if (is_int($idUtilizador) && $idUtilizador > 0 && is_int($idEventos) && $idEventos) {
+
+                $sql = "SELECT COUNT(`eventos_id_eventos`) AS certificado FROM `validaparticipantes` WHERE`eventos_id_eventos`= :idEventos AND `utilizadores_id_utilizadores`= :idUtilizadores";
+
+                try {
+
+                    $status = 200; // OK
+
+                    // iniciar ligação à base de dados
+                    $db = new Db();
+
+                    // conectar
+                    $db = $db->connect();
+                    $stmt = $db->prepare($sql);
+                    $stmt->bindValue(':idEventos', $idEventos, PDO::PARAM_INT);
+                    $stmt->bindValue(':idUtilizadores', $idUtilizador, PDO::PARAM_INT);
+                    $stmt->execute();
+                    $db = null;
+                    $dados = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($dados['certificado'] === '1') {
+
+                        $dados = [
+                            "status" => 200,
+                            "info" => 'true'
+                        ];
+                    } else {
+                        $dados = [
+                            "status" => 200,
+                            "info" => 'false'
+                        ];
+                    }
+
+                    $responseData = $dados;
+
+                    return $response
+                        ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+                } catch (PDOException $err) {
+                    $status = 503; // Service unavailable
+                    // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                    $errorMsg = Errors::filtroReturn(function ($err) {
+                        return [
+
+                            "status" => $err->getCode(),
+                            "info" => $err->getMessage()
+
+                        ];
+                    }, function () {
+                        return [
+                            "status" => 503,
+                            "info" => 'Servico Indisponivel'
+                        ];
+                    }, $err);
+
+                    return $response
+                        ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+                }
+            } else {
+                $status = 422; // Unprocessable Entity
+                $errorMsg = [
+
+                    "status" => "$status",
+                    "info" => 'Parametros invalidos'
+
+
+                ];
+
+                return $response
+                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+            }
+        } else {
+            $status = 401; // Unprocessable Entity
+            $errorMsg = [
+
+                "status" => $status,
+                "info" => "Acesso não autorizado"
+
+            ];
+            return $response
+                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+        }
+    } else {
+        $status = 422; // Unprocessable Entity
+        $errorMsg = [
+
+            "status" => $status,
+            "info" => "Parametros invalidos"
+
+        ];
+        return $response
+            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+    }
+
+
+});
+
 $app->post('/certificados/utilizador/{idUtilizador}/evento/{idEvento}', function (Request $request, Response $response) {
     $idUtilizador = (int)$request->getAttribute('idUtilizador'); // ir buscar id
     $idEventos = (int)$request->getAttribute('idEvento'); // ir buscar id
@@ -697,7 +700,6 @@ $app->post('/certificados/utilizador/{idUtilizador}/evento/{idEvento}', function
     }
 });
 
-
 $app->delete('/certificados/utilizador/{idUtilizador}/evento/{idEvento}', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('idEvento'); // ir buscar id do evento
     $idUtilizadores = (int)$request->getAttribute('idUtilizador'); // ir buscar id do evento
@@ -819,7 +821,6 @@ $app->delete('/certificados/utilizador/{idUtilizador}/evento/{idEvento}', functi
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
 });
-
 
 $app->get('/eventos/{id}/certificados', function (Request $request, Response $response) {
     $id = (int)$request->getAttribute('id'); // ir buscar id

@@ -483,6 +483,7 @@ $app->get('/utilizadores/{id}/inscritos', function (Request $request, Response $
         'tipoEvento' => 'nome_tipo_evento',
         'local' => 'nome'
     ];
+
     $maxResults = 10; // maximo de resultados por pagina
     $minResults = 1; // minimo de resultados por pagina
     $byDefault = 'id'; // order by predefinido
@@ -514,6 +515,8 @@ $app->get('/utilizadores/{id}/inscritos', function (Request $request, Response $
             $limitNumber = ($page - 1) * $results;
             $passar = $byArr[$by];
 
+            $now = date();
+
             if ($inscrito == "false") {
                 if ($order == $orderDefault) {
                     $sql = "SELECT  DISTINCT participantes.eventos_id_eventos,eventos.nome_evento,eventos.descricao_short,eventos.descricao,eventos.utilizadores_id_utilizadores AS criador,eventos.facebook_id,eventos.data_evento, tipo_evento.nome_tipo_evento,localizacao.nome,localizacao.lng,localizacao.lat,icons.classe AS tipo_classe 
@@ -523,7 +526,7 @@ LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_
 LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao 
 LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id 
 LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos
-WHERE participantes.utilizadores_id_utilizadores <> :id AND participantes.eventos_id_eventos NOT IN (SELECT `eventos_id_eventos` FROM participantes WHERE participantes.`utilizadores_id_utilizadores` = :id ) ORDER BY $passar  LIMIT :limit , :results";
+WHERE participantes.utilizadores_id_utilizadores <> :id AND participantes.eventos_id_eventos NOT IN (SELECT `eventos_id_eventos` FROM participantes WHERE participantes.`utilizadores_id_utilizadores` = :id ) AND >= current_timestamp  ORDER BY $passar  LIMIT :limit , :results";
                 } else {
                     $sql = "SELECT  DISTINCT participantes.eventos_id_eventos,eventos.nome_evento,eventos.descricao_short,eventos.descricao,eventos.utilizadores_id_utilizadores AS criador,eventos.facebook_id,eventos.data_evento, tipo_evento.nome_tipo_evento,localizacao.nome,localizacao.lng,localizacao.lat,icons.classe AS tipo_classe 
 FROM `participantes`
@@ -532,7 +535,7 @@ LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_
 LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao 
 LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id 
 LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos
-WHERE participantes.utilizadores_id_utilizadores <> :id AND participantes.eventos_id_eventos NOT IN (SELECT `eventos_id_eventos` FROM participantes WHERE participantes.`utilizadores_id_utilizadores` = :id ) ORDER BY $passar DESC LIMIT :limit , :results";
+WHERE participantes.utilizadores_id_utilizadores <> :id AND participantes.eventos_id_eventos NOT IN (SELECT `eventos_id_eventos` FROM participantes WHERE participantes.`utilizadores_id_utilizadores` = :id ) AND >= current_timestamp ORDER BY $passar DESC LIMIT :limit , :results";
                 }
             } else {
                 if ($order == $orderDefault) {
@@ -543,7 +546,7 @@ LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_
 LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao 
 LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id 
 LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos
-WHERE participantes.utilizadores_id_utilizadores = :id ORDER BY $passar  LIMIT :limit , :results";
+WHERE participantes.utilizadores_id_utilizadores = :id AND data_evento >= current_timestamp  ORDER BY $passar  LIMIT :limit , :results";
                 } else {
                     $sql = "SELECT  DISTINCT participantes.eventos_id_eventos,eventos.nome_evento,eventos.descricao_short,eventos.descricao,eventos.utilizadores_id_utilizadores AS criador,eventos.facebook_id,eventos.data_evento, tipo_evento.nome_tipo_evento,localizacao.nome,localizacao.lng,localizacao.lat,icons.classe AS tipo_classe 
 FROM `participantes`
@@ -552,7 +555,7 @@ LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_
 LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao 
 LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id 
 LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos
-WHERE participantes.utilizadores_id_utilizadores = :id ORDER BY $passar DESC LIMIT :limit , :results";
+WHERE participantes.utilizadores_id_utilizadores = :id AND  data_evento >= current_timestamp ORDER BY $passar DESC LIMIT :limit , :results";
                 }
             }
 
