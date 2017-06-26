@@ -276,7 +276,7 @@ $app->get('/utilizador/{idUtilizador}/certificado', function (Request $request, 
     $results = isset($parametros['results']) ? (int)$parametros['results'] : $maxResults;
     $by = isset($parametros['by']) ? $parametros['by'] : $byDefault;
     $order = isset($parametros['order']) ? $parametros['order'] : $orderDefault;
-    $inscrito = isset($parametros['inscrito']) ? $parametros['inscrito'] : $certificadoDefault;
+    $inscrito = isset($parametros['participou']) ? $parametros['inscrito'] : $certificadoDefault;
     $idUtilizador = (int)$request->getAttribute('idUtilizador'); // ir buscar id
     if (Token::validarScopes('admin', $idUtilizador)) {
         if (is_int($idUtilizador) && $idUtilizador > 0 && ($inscrito == "true" || $inscrito == "false")) {

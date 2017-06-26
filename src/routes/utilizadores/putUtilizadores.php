@@ -24,6 +24,18 @@ $app->put('/utilizadores/{id}', function (Request $request, Response $response) 
             $sobreMini = $request->getParam('sobreMini');
             $telemovel = $request->getParam('telemovel');
             $idLocal = $request->getParam('idLocal');
+            $scope = Token::getScopes();
+
+            $arrScopes = [
+                3 => ['publico', 'normal'],
+                2 => ['publico', 'normal', 'socio'],
+                4 => ['publico', 'normal', 'socio', 'colaborador'],
+                1 => ['publico', 'normal', 'socio', 'colaborador', 'admin']
+            ];
+
+            foreach ($arrScopes as $key => $value) {
+                if ($scope == $value) $scope = $key;
+            }
 
 
             $error = array();
@@ -103,7 +115,8 @@ $app->put('/utilizadores/{id}', function (Request $request, Response $response) 
                                       `sobre` = :sobre, 
                                       `sobre_mini` = :sobreMini, 
                                       `telemovel` = :telemovel, 
-                                      `localizacao_id_localizacao` = :idLocal
+                                      `localizacao_id_localizacao` = :idLocal,
+                                      estatutos_id_estatutos = $scope
                                   
                               WHERE `utilizadores`.`id_utilizadores` = :id";
                     try {
