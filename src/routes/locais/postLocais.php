@@ -76,6 +76,7 @@ $app->post('/locais', function (Request $request, Response $response) {
                 try {
                     // Get DB object
                     $db = new db();
+                    $status =200;
                     //connect
                     $db = $db->connect();
                     $stmt = $db->prepare($sql);
@@ -92,7 +93,7 @@ $app->post('/locais', function (Request $request, Response $response) {
                     ];
 
                     return $response
-                        ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                        ->withJson($responseData, $status,JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
 
                 } catch (PDOException $err) {

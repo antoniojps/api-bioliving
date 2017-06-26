@@ -157,6 +157,7 @@ $app->delete('/eventos/{id}/interesse', function (Request $request, Response $re
                     $sql = "DELETE FROM interesses WHERE eventos_id_eventos = :idEvento && utilizadores_id_utilizadores=:idUtilizador";
 
                     try {
+                        $status = 200;
                         // Get DB object
                         $db = new db();
                         //connect
@@ -168,11 +169,11 @@ $app->delete('/eventos/{id}/interesse', function (Request $request, Response $re
                         $db = null;
                         $responseData = [
                             "status" => 200,
-                            'info' => "Interesse anulada com sucesso!"
+                            'info' => "Interesse anulado com sucesso!"
                         ];
 
                         return $response
-                            ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                            ->withJson($responseData,$status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
 
                     } catch (PDOException $err) {

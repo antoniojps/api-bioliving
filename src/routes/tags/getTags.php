@@ -35,6 +35,7 @@ $app->get('/tags', function (Request $request, Response $response) {
     $id = isset($parametros['id']) ? (int)$parametros['id'] : $idDefault;
     $msg = isset($parametros['msg']) ? $parametros['msg'] : $msgDefault;
 
+
     if ($page > 0 && $results > 0) {
         //definir numero de resultados
         //caso request tenha parametros superiores ao numero máximo permitido então repor com o valor maximo permitido e vice-versa

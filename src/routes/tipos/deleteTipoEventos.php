@@ -27,6 +27,7 @@ $app->delete('/tiposEventos/{id}', function (Request $request, Response $respons
                 $sql = "DELETE FROM tipo_evento WHERE id_tipo_evento = :id";
 
                 try {
+                    $status = 200;
                     // Get DB object
                     $db = new db();
                     //connect
@@ -41,7 +42,7 @@ $app->delete('/tiposEventos/{id}', function (Request $request, Response $respons
                     ];
 
                     return $response
-                        ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                        ->withJson($responseData,$status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
 
                 } catch (PDOException $err) {

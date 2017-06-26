@@ -32,6 +32,7 @@ $app->post('/eventos/interesses', function (Request $request, Response $response
                     $sql = "INSERT INTO `interesses` (`eventos_id_eventos`, `utilizadores_id_utilizadores`) VALUES (:idEvento, :idUtilizador);";
 
                     try {
+                        $status = 200;
                         // Get DB object
                         $db = new db();
                         //connect
@@ -47,7 +48,7 @@ $app->post('/eventos/interesses', function (Request $request, Response $response
                         ];
 
                         return $response
-                            ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                            ->withJson($responseData,$status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
                     } catch (PDOException $err) {
                         $status = 503; // Service unavailable
@@ -158,6 +159,7 @@ $app->post('/eventos/{id}/interesse', function (Request $request, Response $resp
 
                     try {
                         // Get DB object
+                        $status = 200;
                         $db = new db();
                         //connect
                         $db = $db->connect();
