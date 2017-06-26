@@ -12,7 +12,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 /*
  * @param string | email
  * @param string | nome
- * @param string | sobrenome
+ * @param string | apelido
  * @param string | password
  *
  * Nao tendo refresh token ativo, faz insert das informaçoes na base de dados com password encriptada.
@@ -24,10 +24,10 @@ $app->post( '/create', function ( Request $request, Response $response ) {
 	$parsedBody = $request->getParsedBody();
 	$email      = array_key_exists('email',$parsedBody) ? $parsedBody['email'] : null;
 	$nome       = array_key_exists('nome',$parsedBody) ? $parsedBody['nome'] : null;
-	$sobrenome  = array_key_exists('sobrenome',$parsedBody) ? $parsedBody['sobrenome'] : null;
+	$apelido  = array_key_exists('apelido',$parsedBody) ? $parsedBody['apelido'] : null;
 	$password   = array_key_exists( 'password', $parsedBody ) ? $parsedBody['password'] : null;
 
-	if ( H::obrigatorio( $email ) && H::obrigatorio( $password ) && H::obrigatorio( $nome ) && H::obrigatorio( $sobrenome ) ) {
+	if ( H::obrigatorio( $email ) && H::obrigatorio( $password ) && H::obrigatorio( $nome ) && H::obrigatorio( $apelido ) ) {
 // So pode registar se nao tiver sessao iniciada
 		if ( ! Token::verificarRefresh() ) {
 			try {
@@ -35,7 +35,7 @@ $app->post( '/create', function ( Request $request, Response $response ) {
 				$user = new Utilizador( [
 						'email'     => $email,
 						'nome'      => $nome,
-						'sobrenome' => $sobrenome,
+						'sobrenome' => $apelido,
 						'password'  => $password
 				] );
 // Registrar

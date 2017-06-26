@@ -91,7 +91,7 @@ $app->post( '/imagens/avatar', function ( Request $request, Response $response )
 $app->get( '/imagens/avatar/{ficheiro}', function ( Request $request, Response $response ) {
 
 	// Valores default
-	$path    = '/imagens/avatars/';
+	$path    = '/IIS_tmp/imagens/avatars/';
 	$largura = '250';
 	$altura  = '250';
 	$min     = 44;
@@ -106,6 +106,7 @@ $app->get( '/imagens/avatar/{ficheiro}', function ( Request $request, Response $
 	// Abrir imagem utilizando os metodos de livraria Intervention/Image
 	// Ver: http://image.intervention.io/getting_started/introduction
 	$img = Image::make( H::obterUrl( 'avatar', $ficheiro ) );
+	var_dump($img);
 
 	// Validaçoes
 	// Resize para o tamanho pedido mantendo o aspect ratio

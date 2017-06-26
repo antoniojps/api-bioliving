@@ -17,7 +17,7 @@ class Helper {
 
 	// Utilizada para verificar se um parametro obrigatorio foi enviado no request
 	static public function obrigatorio($param){
-		return (! is_null( $param ) && ! empty( $param ));
+		return ! is_null( $param ) && ! empty( $param );
 	}
 
 	/*
@@ -58,7 +58,6 @@ class Helper {
 		if($tipoImagem === 'avatar'){
 			$pastaUpload .= 'avatars/';
 		}
-
 		$url = 'http://' . $_SERVER['SERVER_NAME'] .'/'. $pastaUpload . $idImagem;
 
 		return $url;
