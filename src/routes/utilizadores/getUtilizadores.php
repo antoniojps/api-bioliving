@@ -515,8 +515,6 @@ $app->get('/utilizadores/{id}/inscritos', function (Request $request, Response $
             $limitNumber = ($page - 1) * $results;
             $passar = $byArr[$by];
 
-            $now = date();
-
             if ($inscrito == "false") {
                 if ($order == $orderDefault) {
                     $sql = "SELECT  DISTINCT participantes.eventos_id_eventos,eventos.nome_evento,eventos.descricao_short,eventos.descricao,eventos.utilizadores_id_utilizadores AS criador,eventos.facebook_id,eventos.data_evento, tipo_evento.nome_tipo_evento,localizacao.nome,localizacao.lng,localizacao.lat,icons.classe AS tipo_classe 
