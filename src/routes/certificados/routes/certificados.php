@@ -249,9 +249,6 @@ $app->get('/certificados/{token}', function (Request $request, Response $respons
 });
 
 
-
-
-
 $app->get('/utilizador/{idUtilizador}/certificado', function (Request $request, Response $response) {
     $byArr = [
         'id' => 'id_eventos',
@@ -457,22 +454,109 @@ $app->get('/certificados/utilizador/{idUtilizador}/evento/{idEvento}', function 
 
                     if ($dados['certificado'] === '1') {
 
-                        $dados = [
-                            "status" => 200,
-                            "info" => 'true'
-                        ];
+                        $sql = "SELECT id_eventos,eventos.utilizadores_id_utilizadores AS criador ,nome_evento,tipo_evento.nome_tipo_evento,localizacao.nome,data_evento,descricao_short, COUNT(DISTINCT participantes.utilizadores_id_utilizadores) AS inscritos, COUNT(DISTINCT interesses.utilizadores_id_utilizadores) AS interessados,lat,lng,facebook_id,icons.classe AS tipo_classe FROM eventos LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento=eventos.tipo_evento_id_tipo_evento LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao LEFT OUTER JOIN participantes ON participantes.eventos_id_eventos = eventos.id_eventos LEFT OUTER JOIN interesses ON interesses.eventos_id_eventos = eventos.id_eventos  LEFT OUTER JOIN icons ON tipo_evento.icons_id = icons.id_icons WHERE id_eventos=:idEvento ";
+                        try {
+
+                            $status = 200; // OK
+
+                            // iniciar ligação à base de dados
+                            $db = new Db();
+
+                            // conectar
+                            $db = $db->connect();
+                            $stmt = $db->prepare($sql);
+                            $stmt->bindValue(':idEvento', $idEventos, PDO::PARAM_INT);
+
+                            $stmt->execute();
+                            $db = null;
+                            $dados = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                            $sql = "SELECT utilizadores.nome,utilizadores.apelido,utilizadores.foto FROM utilizadores WHERE utilizadores.id_utilizadores = :idUtilizador";
+                            try {
+
+                                $status = 200; // OK
+
+                                // iniciar ligação à base de dados
+                                $db = new Db();
+
+                                // conectar
+                                $db = $db->connect();
+                                $stmt = $db->prepare($sql);
+                                $stmt->bindValue(':idUtilizador', $idUtilizador, PDO::PARAM_INT);
+
+                                $stmt->execute();
+                                $db = null;
+                                $dados2 = $stmt->fetch(PDO::FETCH_ASSOC);
+
+
+
+
+                               $dados = Helper::filtrarArr($dados);
+                               $dados2 = Helper::filtrarArr($dados2);
+                                $result = array_merge($dados, $dados2);
+
+                                $dadosFinal = [
+                                    "status" => 200,
+                                    "info" => 'true',
+                                    "dados" => $result
+                                ];
+
+
+                                $responseData = $dadosFinal;
+
+                                return $response
+                                    ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+                            } catch (PDOException $err) {
+                                $status = 503; // Service unavailable
+                                // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                                $errorMsg = Errors::filtroReturn(function ($err) {
+                                    return [
+
+                                        "status" => $err->getCode(),
+                                        "info" => $err->getMessage()
+
+                                    ];
+                                }, function () {
+                                    return [
+                                        "status" => 503,
+                                        "info" => 'Servico Indisponivel'
+                                    ];
+                                }, $err);
+
+                                return $response
+                                    ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+                            }
+                        } catch (PDOException $err) {
+                            $status = 503; // Service unavailable
+                            // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                            $errorMsg = Errors::filtroReturn(function ($err) {
+                                return [
+
+                                    "status" => $err->getCode(),
+                                    "info" => $err->getMessage()
+
+                                ];
+                            }, function () {
+                                return [
+                                    "status" => 503,
+                                    "info" => 'Servico Indisponivel'
+                                ];
+                            }, $err);
+
+                            return $response
+                                ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+                        }
+
+
                     } else {
                         $dados = [
                             "status" => 200,
                             "info" => 'false'
                         ];
                     }
-
-                    $responseData = $dados;
-
-                    return $response
-                        ->withJson($responseData, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
 
                 } catch (PDOException $err) {
                     $status = 503; // Service unavailable
