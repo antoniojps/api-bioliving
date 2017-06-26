@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
 use Bioliving\Custom\Token as Token;
+use Bioliving\Custom\Helper as Helper;
 
 
 //////////// Obter utilizadores que inscreveram num evento ////////////
@@ -102,7 +103,7 @@ $app->get('/eventos/{id}/inscritos', function (Request $request, Response $respo
                     "info" => "final dos resultados"
                 ];
             } else {
-                $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+                $nextPageUrl = Helper::nextPageUrl();
                 $responseData = [
                     "status" => 200,
                     "data" => $dados,

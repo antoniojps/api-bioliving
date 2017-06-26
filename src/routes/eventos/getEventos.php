@@ -127,7 +127,7 @@ $app->get('/eventos', function (Request $request, Response $response) {
 
 
                 } else {
-                    $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+                    $nextPageUrl = H::nextPageUrl();
                     $responseData = [
                         "status" => 200,
                         "data" => $dados,
@@ -365,7 +365,7 @@ $app->get('/eventos/{id}/colaboradores', function (Request $request, Response $r
                 ];
 
             } else {
-                $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+                $nextPageUrl = H::nextPageUrl();
                 $responseData = [
                     "status" => 200,
                     "data" => $dados,

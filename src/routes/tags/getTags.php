@@ -1,5 +1,6 @@
 <?php
 use Bioliving\Database\Db as Db;
+use Bioliving\Custom\Helper as Helper;
 use Bioliving\Errors\Errors as Errors;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -103,7 +104,7 @@ $app->get('/tags', function (Request $request, Response $response) {
                     "info" => "final dos resultados"
                 ];
             } else {
-                $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+                $nextPageUrl = Helper::nextPageUrl();
                 $responseData = [
                     "status" => 200,
                     "data" => $dados,

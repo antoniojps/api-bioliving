@@ -16,13 +16,14 @@ $app->add( new \Slim\Middleware\JwtAuthentication( [
 		"path" => "/api", // caminho onde irá ser feita autenticação
 
 		"passthrough" => [
-		"/login",
-		"/create" ,
-		"/imagens/avatar" ,
-		"/eventos",
-		"/pesquisa",
-		"/terceiros/facebook/evento", // Routes onde nao é necessário autenticação
-		"/terceiros/google/local"], // Routes onde nao é necessário autenticação
+				"/login",
+				"/create",
+				"/imagens/avatar",
+				"/eventos",
+				"/pesquisa",
+				"/terceiros/facebook/evento", // Routes onde nao é necessário autenticação
+				"/terceiros/google/local"
+		], // Routes onde nao é necessário autenticação
 
 		"secure" => true, // apenas funciona com https
 
@@ -40,14 +41,14 @@ $app->add( new \Slim\Middleware\JwtAuthentication( [
 			$uri               = $request->getUri();
 			$info              = 'Unauthorized';
 			$accessTokenGerado = false;
-			$status = 401; // Unauthorized
+			$status            = 401; // Unauthorized
 
 			// Verificar se refresh token é valido
 			try {
 				// Válido entao gerar access token e redireccionar
 				// Caso o refresh token nao seja valido automaticamente torna-o desativo na BD e apaga cookies
 				if ( Token::gerarAccessToken( Token::getRefreshToken() ) ) {
-					$status = 200; // ok
+					$status            = 200; // ok
 					$accessTokenGerado = true;
 				}
 

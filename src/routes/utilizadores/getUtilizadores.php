@@ -130,7 +130,7 @@ $app->get('/utilizadores', function (Request $request, Response $response) {
                     ];
 
                 } else {
-                    $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+                    $nextPageUrl = Helper::nextPageUrl();
                     $responseData = [
                         "status" => 200,
                         "data" => $dados,
@@ -408,7 +408,7 @@ WHERE interesses.utilizadores_id_utilizadores = :id ORDER BY $passar DESC  LIMIT
                         "info" => "final dos resultados"
                     ];
                 } else {
-                    $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+                    $nextPageUrl = Helper::nextPageUrl();
                     $responseData = [
                         "status" => 200,
                         "data" => $dados,
@@ -590,7 +590,7 @@ WHERE participantes.utilizadores_id_utilizadores = :id AND  data_evento >= curre
                         "info" => "final dos resultados"
                     ];
                 } else {
-                    $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+                    $nextPageUrl = Helper::nextPageUrl();
                     $responseData = [
                         "status" => 200,
                         "data" => $dados,

@@ -103,7 +103,7 @@ $app->get('/tiposEventos', function (Request $request, Response $response) {
                     "info"=>"final dos resultados"
                 ];
             } else {
-                $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+                $nextPageUrl = Helper::nextPageUrl();
                 $responseData=[
                     "status"=>200,
                     "data"=>$dados,

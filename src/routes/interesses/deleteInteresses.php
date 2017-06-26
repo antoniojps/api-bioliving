@@ -11,7 +11,7 @@ $app->delete('/eventos/{idevento}/interesses/{idutilizador}', function (Request 
     $idEventos = (int)$request->getAttribute('idevento'); // ir buscar id do evento
     $idUtilizadores = (int)$request->getAttribute('idutilizador'); // ir buscar id do evento
 
-    if (Token::validarScopes('admin')) {
+    if (Token::validarScopes('admin',Token::getUtilizador())) {
         //verificar se id's são validos
         if (is_int($idEventos) && $idEventos > 0 && is_int($idUtilizadores) && $idUtilizadores) {
             $sql = "SELECT * from interesses WHERE`eventos_id_eventos`=:ideventos AND `utilizadores_id_utilizadores`=:idutilizadores";
