@@ -404,7 +404,6 @@ INNER  JOIN eventos ON eventos.id_eventos = validaparticipantes.eventos_id_event
 LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_id_tipo_evento 
 LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao 
 LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id 
-LEFT OUTER JOIN validaparticipantes ON validaparticipantes.eventos_id_eventos = eventos.id_eventos
 WHERE validaparticipantes.utilizadores_id_utilizadores <> :id AND validaparticipantes.eventos_id_eventos NOT IN (SELECT `eventos_id_eventos` FROM validaparticipantes WHERE validaparticipantes.`utilizadores_id_utilizadores` = :id ) ORDER BY $passar  LIMIT :limit , :results";
                 } else {
                     $sql = "SELECT  DISTINCT validaparticipantes.eventos_id_eventos,eventos.nome_evento,eventos.descricao_short,eventos.descricao,eventos.utilizadores_id_utilizadores AS criador,eventos.facebook_id,eventos.data_evento, tipo_evento.nome_tipo_evento,localizacao.nome,localizacao.lng,localizacao.lat,icons.classe AS tipo_classe 
@@ -413,7 +412,6 @@ INNER  JOIN eventos ON eventos.id_eventos = validaparticipantes.eventos_id_event
 LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_id_tipo_evento 
 LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao 
 LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id 
-LEFT OUTER JOIN validaparticipantes ON validaparticipantes.eventos_id_eventos = eventos.id_eventos
 WHERE validaparticipantes.utilizadores_id_utilizadores <> :id AND validaparticipantes.eventos_id_eventos NOT IN (SELECT `eventos_id_eventos` FROM validaparticipantes WHERE validaparticipantes.`utilizadores_id_utilizadores` = :id ) ORDER BY $passar DESC LIMIT :limit , :results";
                 }
             } else {
@@ -424,7 +422,7 @@ INNER  JOIN eventos ON eventos.id_eventos = validaparticipantes.eventos_id_event
 LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_id_tipo_evento 
 LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao 
 LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id 
-LEFT OUTER JOIN validaparticipantes ON validaparticipantes.eventos_id_eventos = eventos.id_eventos
+
 WHERE validaparticipantes.utilizadores_id_utilizadores = :id ORDER BY $passar  LIMIT :limit , :results";
                 } else {
                     $sql = "SELECT  DISTINCT validaparticipantes.eventos_id_eventos,eventos.nome_evento,eventos.descricao_short,eventos.descricao,eventos.utilizadores_id_utilizadores AS criador,eventos.facebook_id,eventos.data_evento, tipo_evento.nome_tipo_evento,localizacao.nome,localizacao.lng,localizacao.lat,icons.classe AS tipo_classe 
@@ -433,7 +431,7 @@ INNER  JOIN eventos ON eventos.id_eventos = validaparticipantes.eventos_id_event
 LEFT OUTER JOIN tipo_evento ON tipo_evento.id_tipo_evento = eventos.tipo_evento_id_tipo_evento 
 LEFT OUTER JOIN localizacao ON localizacao.localizacao = eventos.localizacao_localizacao 
 LEFT OUTER JOIN icons ON icons.id_icons = tipo_evento.icons_id 
-LEFT OUTER JOIN validaparticipantes ON validaparticipantes.eventos_id_eventos = eventos.id_eventos
+
 WHERE valida.utilizadores_id_utilizadores = :id ORDER BY $passar DESC LIMIT :limit , :results";
                 }
             }
