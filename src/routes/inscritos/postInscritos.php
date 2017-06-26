@@ -33,6 +33,7 @@ $app->post('/eventos/inscritos', function (Request $request, Response $response)
 
                     try {
                         // Get DB object
+                        $status = 200;
                         $db = new db();
                         //connect
                         $db = $db->connect();
@@ -47,7 +48,7 @@ $app->post('/eventos/inscritos', function (Request $request, Response $response)
                         ];
 
                         return $response
-                            ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                            ->withJson($responseData,$status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
                     } catch (PDOException $err) {
                         $status = 503; // Service unavailable
@@ -221,7 +222,7 @@ $app->post('/eventos/{id}/inscrito', function (Request $request, Response $respo
 
 
                         } else {
-                            $status = 404; // Unprocessable Entity
+                            $status = 422; // Unprocessable Entity
                             $errorMsg = [
 
                                     "status" => "$status",

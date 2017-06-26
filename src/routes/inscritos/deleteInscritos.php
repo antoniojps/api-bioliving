@@ -33,6 +33,7 @@ $app->delete('/eventos/{idevento}/inscritos/{idutilizador}', function (Request $
 
                     try {
                         // Get DB object
+                        $status=200;
                         $db = new db();
                         //connect
                         $db = $db->connect();
@@ -47,7 +48,7 @@ $app->delete('/eventos/{idevento}/inscritos/{idutilizador}', function (Request $
                         ];
 
                         return $response
-                            ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+                            ->withJson($responseData, $status,JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
 
                     } catch (PDOException $err) {
                         $status = 503; // Service unavailable

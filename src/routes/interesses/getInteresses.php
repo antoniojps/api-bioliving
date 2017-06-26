@@ -12,7 +12,6 @@ use Bioliving\Custom\Token as Token;
 
 $app->get('/eventos/{id}/interesse', function (Request $request, Response $response) {
     $idEventos = (int)$request->getAttribute('id'); // ir buscar id
-
     if (Token::validarScopes('admin', Token::getUtilizador())) {
         $idUtilizador = (int)Token::getUtilizador();
 
@@ -28,7 +27,7 @@ $app->get('/eventos/{id}/interesse', function (Request $request, Response $respo
 
                 // iniciar ligação à base de dados
                 $db = new Db();
-
+                $status= 200;
                 // conectar
                 $db = $db->connect();
                 $stmt = $db->prepare($sql);

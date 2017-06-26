@@ -592,69 +592,88 @@ $app->put('/eventos/{id}', function (Request $request, Response $response) {
 
 /////////////////PUT para tornar evento ativo////////////////////
 $app->put('/eventos/ative/{id}', function (Request $request, Response $response) {
-    $id = (int)$request->getAttribute('id');
-    $ativo = 1; //valor na bd que equivale a ativo
-    if (is_int($id) && $id > 0) {
-        //ver se id existe na bd antes de editar
-        $sql = "SELECT utilizadores_id_utilizadores,id_eventos FROM eventos WHERE id_eventos = :id";
-        $db = new Db();
-        // conectar
-        $db = $db->connect();
-        $stmt = $db->prepare($sql);
-        $stmt->bindValue(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-        $db = null;
-        $dados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $idCriador = (int)$request->getParam('idCriador');
 
-        if ($dados["utilizadores_id_utilizadores"]) {
-            $idCriador = (int)$dados["utilizadores_id_utilizadores"];
-            if (Token::validarScopes('admin', $idCriador)) {
-                $sql = "UPDATE eventos SET ativo = :ativo WHERE id_eventos = $id";
+    if (Token::validarScopes('admin', $idCriador)) {
+        $id = (int)$request->getAttribute('id');
+        $ativo = 1; //valor na bd que equivale a ativo
+        if (is_int($id) && $id > 0) {
+            //ver se id existe na bd antes de editar
+            $sql = "SELECT utilizadores_id_utilizadores,id_eventos FROM eventos WHERE id_eventos = :id";
+            $db = new Db();
+            // conectar
+            $db = $db->connect();
+            $stmt = $db->prepare($sql);
+            $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            $db = null;
+            $dados = $stmt->fetch(PDO::FETCH_ASSOC);
 
-                try {
-                    // Get DB object
-                    $db = new db();
-                    //connect
-                    $db = $db->connect();
-                    $stmt = $db->prepare($sql);
-                    $stmt->bindParam(':ativo', $ativo);
-                    $stmt->execute();
-                    $responseData = [
-                        'Resposta' => "Evento ativado com sucesso!"
+            if ($dados) {
+                $idCriador = (int)$dados["utilizadores_id_utilizadores"];
+                if (Token::validarScopes('admin', $idCriador)) {
+                    $sql = "UPDATE eventos SET ativo = :ativo WHERE id_eventos = $id";
+
+                    try {
+                        // Get DB object
+                        $status = 200;
+                        $db = new db();
+                        //connect
+                        $db = $db->connect();
+                        $stmt = $db->prepare($sql);
+                        $stmt->bindParam(':ativo', $ativo);
+                        $stmt->execute();
+                        $responseData = [
+                            "status" => 200,
+                            'Resposta' => "Evento ativado com sucesso!"
+                        ];
+
+                        return $response
+                            ->withJson($responseData,$status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+
+                    } catch (PDOException $err) {
+                        $status = 503; // Service unavailable
+                        // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
+                        $errorMsg = Errors::filtroReturn(function ($err) {
+                            return [
+                                "error" => [
+                                    "status" => $err->getCode(),
+                                    "text" => $err->getMessage()
+                                ]
+                            ];
+                        }, function () {
+                            return [
+                                "error" => 'Servico Indisponivel'
+                            ];
+                        }, $err);
+
+                        return $response
+                            ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
+
+                    }
+                } else {
+                    $status = 401;
+                    $errorMsg = [
+
+                        "status" => "$status",
+                        "info" => 'Acesso não autorizado'
+
+
                     ];
 
                     return $response
-                        ->withJson($responseData, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
-
-                } catch (PDOException $err) {
-                    $status = 503; // Service unavailable
-                    // Primeiro callback chamado em ambiente de desenvolvimento, segundo em producao
-                    $errorMsg = Errors::filtroReturn(function ($err) {
-                        return [
-                            "error" => [
-                                "status" => $err->getCode(),
-                                "text" => $err->getMessage()
-                            ]
-                        ];
-                    }, function () {
-                        return [
-                            "error" => 'Servico Indisponivel'
-                        ];
-                    }, $err);
-
-                    return $response
                         ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
-
                 }
+
             } else {
-                $status = 401;
+                $status = 422; // Unprocessable Entity
                 $errorMsg = [
+                    "error" => [
+                        "status" => "$status",
+                        "text" => 'Evento não se encontra disponivel'
 
-                    "status" => "$status",
-                    "info" => 'Acesso não autorizado'
-
-
+                    ]
                 ];
 
                 return $response
@@ -666,7 +685,7 @@ $app->put('/eventos/ative/{id}', function (Request $request, Response $response)
             $errorMsg = [
                 "error" => [
                     "status" => "$status",
-                    "text" => 'Evento não se encontra disponivel'
+                    "text" => 'Parametros inválidos'
 
                 ]
             ];
@@ -674,20 +693,20 @@ $app->put('/eventos/ative/{id}', function (Request $request, Response $response)
             return $response
                 ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
         }
-
     } else {
-        $status = 422; // Unprocessable Entity
+        $status = 401; // Unprocessable Entity
         $errorMsg = [
-            "error" => [
-                "status" => "$status",
-                "text" => 'Parametros inválidos'
 
-            ]
+            "status" => "$status",
+            "info" => 'Acesso não autorizado'
+
+
         ];
 
         return $response
             ->withJson($errorMsg, $status, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS);
     }
+
 
 });
 
