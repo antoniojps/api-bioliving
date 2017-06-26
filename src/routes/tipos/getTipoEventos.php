@@ -4,6 +4,7 @@ use Bioliving\Errors\Errors as Errors;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Respect\Validation\Validator as v;
+use Bioliving\Custom\Helper as Helper;
 
 
 //////////Receber todos os locais/Pesquisar em todos os locais/////////////
