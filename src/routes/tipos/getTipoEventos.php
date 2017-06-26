@@ -172,7 +172,7 @@ $app->get('/icones', function (Request $request, Response $response) {
         // A partir de quando seleciona resultados
         $limitNumber = ($page - 1) * $results;
 
-        $sql = "SELECT * FROM tags WHERE tag_nome LIKE :msg  LIMIT :limit , :results";
+        $sql = "SELECT * FROM icons WHERE classe LIKE :msg  LIMIT :limit , :results";
 
         try {
             $responseData = "";
