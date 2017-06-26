@@ -466,7 +466,7 @@ WHERE valida.utilizadores_id_utilizadores = :id ORDER BY $passar DESC LIMIT :lim
                         "info" => "final dos resultados"
                     ];
                 } else {
-                    $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+                    $nextPageUrl = Helper::nextPageUrl();
                     $responseData = [
                         "status" => 200,
                         "data" => $dados,
@@ -906,7 +906,7 @@ $app->get('/eventos/{id}/certificados', function (Request $request, Response $re
                     "info" => "final dos resultados"
                 ];
             } else {
-                $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+                $nextPageUrl = Helper::nextPageUrl();
                 $responseData = [
                     "status" => 200,
                     "data" => $dados,
