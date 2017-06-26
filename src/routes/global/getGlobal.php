@@ -4,6 +4,7 @@ use Bioliving\Database\Db as Db;
 use Bioliving\Errors\Errors as Errors;
 use Psr\Http\Message\ResponseInterface as Response;
 use Bioliving\Custom\Token as Token;
+use Bioliving\Custom\Helper as Helper;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
 
@@ -169,7 +170,7 @@ $app->get('/global', function (Request $request, Response $response) {
                         $dadosExtra = ['info' => 'final dos resultados'];
                         array_push($dados, $dadosExtra);
                     } else {
-                        $nextPageUrl = explode('?', $_SERVER['REQUEST_URI'], 2)[0];
+                        $nextPageUrl = Helper::nextPageUrl();
                         $dadosExtra = ['proxPagina' => "$nextPageUrl?page=" . ++$page . "&results=$results" . "&msg=$msg" . "&id=$id"];
                         array_push($dados, $dadosExtra);
                     }
